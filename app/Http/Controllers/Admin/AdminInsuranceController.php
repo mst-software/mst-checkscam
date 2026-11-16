@@ -2,16 +2,42 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ChannelType;
+use App\Enums\LedgerEntryType;
+use App\Exceptions\InsuranceLedgerException;
 use App\Helpers\FileHelper;
+use App\Helpers\StringHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\InsuranceRequest;
 use App\Models\Insurance;
+use App\Services\InsuranceChannelService;
+use App\Services\InsuranceLedgerService;
+use App\Services\InsuranceSuspensionService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 
 class AdminInsuranceController extends Controller
 {
-    public function index(Request $request)
+    /** Ledger entry types an admin may record by hand; payouts only come from paying a claim. */
+    public const MANUAL_LEDGER_TYPES = [LedgerEntryType::Deposit, LedgerEntryType::Refund, LedgerEntryType::Adjustment];
+
+    public function __construct(
+        private InsuranceChannelService $channels,
+        private InsuranceLedgerService $ledger,
+    ) {}
+
+    public function index(Request $request): View
     {
-        $query = Insurance::latest();
+        Gate::authorize('viewAny', Insurance::class);
+
+        $query = Insurance::query()
+            ->withExists(['ledgerEntries', 'claims', 'statusEvents'])
+            ->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->integer('status'));
@@ -43,147 +69,309 @@ class AdminInsuranceController extends Controller
         return view('admin.insurances.index', compact('insurances'));
     }
 
-    public function create()
+    public function create(): View
     {
-        return view('admin.insurances.create');
+        Gate::authorize('create', Insurance::class);
+
+        return view('admin.insurances.create', [
+            'channelRows' => [],
+            'channelTypes' => ChannelType::cases(),
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(InsuranceRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'insurance_date' => 'required|date',
-            'expired_at' => 'required|date|after_or_equal:insurance_date',
-            'status' => 'required|in:0,1',
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'contact_info' => 'required|array|min:1',
-            'contact_info.*.platform' => 'required|string|max:100',
-            'contact_info.*.link' => 'required|string|max:500',
-            'payment_accounts' => 'required|array|min:1',
-            'payment_accounts.*.bank' => 'required|string|max:100',
-            'payment_accounts.*.number' => 'required|string|max:100',
-            'payment_accounts.*.name' => 'required|string|max:255',
-            'services' => 'required|array|min:1',
-            'services.*.title' => 'required|string|max:255',
-        ]);
+        Gate::authorize('create', Insurance::class);
 
-        $contactInfo = $this->filterEmptyArrayItems($validated['contact_info'] ?? [], ['platform', 'link']);
-        $paymentAccounts = $this->filterEmptyArrayItems($validated['payment_accounts'] ?? [], ['bank', 'number']);
-        $services = $this->filterEmptyArrayItems($validated['services'] ?? [], ['title']);
+        $validated = $request->validated();
 
-        $globalSlug = $this->generateInsuranceSlug($validated['full_name']);
+        try {
+            $insurance = DB::transaction(function () use ($validated, $request) {
+                $insurance = Insurance::create([
+                    'full_name' => $validated['full_name'],
+                    'slug' => StringHelper::generateGlobalUniqueSlug($validated['full_name']),
+                    'amount' => 0,
+                    'insurance_date' => $validated['insurance_date'],
+                    'expired_at' => $validated['expired_at'],
+                    'verified_at' => $validated['insurance_date'],
+                    'status' => $validated['status'],
+                    'services' => $this->filterEmptyArrayItems($validated['services'], ['title']) ?: null,
+                ]);
 
-        $insurance = Insurance::create([
-            'full_name' => $validated['full_name'],
-            'slug' => $globalSlug,
-            'amount' => $validated['amount'],
-            'insurance_date' => $validated['insurance_date'],
-            'expired_at' => $validated['expired_at'],
-            'status' => $validated['status'],
-            'contact_info' => $contactInfo ?: null,
-            'payment_accounts' => $paymentAccounts ?: null,
-            'services' => $services ?: null,
-        ]);
+                $this->channels->sync($insurance, $validated['channels']);
 
-        if ($request->hasFile('avatar')) {
-            $path = FileHelper::uploadImage($request->file('avatar'), 'insurances');
-            $insurance->update(['avatar' => $path]);
+                if ((int) $validated['opening_deposit'] > 0) {
+                    $this->ledger->record(
+                        $insurance,
+                        LedgerEntryType::Deposit,
+                        (string) $validated['opening_deposit'],
+                        $request->user(),
+                        null,
+                        'Ký quỹ ban đầu',
+                    );
+                }
+
+                return $insurance;
+            });
+        } catch (InsuranceLedgerException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
         }
 
-        return redirect()->route('admin.insurances.index')
+        if ($request->hasFile('avatar')) {
+            $insurance->update(['avatar' => FileHelper::uploadImage($request->file('avatar'), 'insurances')]);
+        }
+
+        return redirect()->route('admin.insurances.show', $insurance)
             ->with('success', 'Đã thêm thành viên bảo hiểm thành công.');
     }
 
-    public function edit(int $id)
+    public function show(Insurance $insurance): View
     {
-        $insurance = Insurance::findOrFail($id);
+        Gate::authorize('view', $insurance);
 
-        return view('admin.insurances.create', compact('insurance'));
+        $ledgerEntries = $insurance->ledgerEntries()
+            ->reorder('id', 'desc')
+            ->with(['recorder', 'claim'])
+            ->paginate(15, ['*'], 'ledger_page')
+            ->withQueryString();
+
+        $ledgerBalance = $this->ledger->balanceFromLedger($insurance);
+        $isReconciled = InsuranceLedgerService::toCents($ledgerBalance) === InsuranceLedgerService::toCents((string) $insurance->amount);
+
+        $claims = $insurance->claims()->latest()->limit(20)->get();
+        $claimsCount = $insurance->claims()->count();
+        $statusEvents = $insurance->statusEvents()->reorder('id', 'desc')->with('actor')->get();
+        $channels = $insurance->channels()->orderBy('id')->get();
+        $hasHistory = $this->hasHistory($insurance);
+        $manualLedgerTypes = self::MANUAL_LEDGER_TYPES;
+
+        return view('admin.insurances.show', compact(
+            'insurance',
+            'ledgerEntries',
+            'ledgerBalance',
+            'isReconciled',
+            'claims',
+            'claimsCount',
+            'statusEvents',
+            'channels',
+            'hasHistory',
+            'manualLedgerTypes',
+        ));
     }
 
-    public function update(Request $request, int $id)
+    public function edit(Insurance $insurance): View
     {
-        $insurance = Insurance::findOrFail($id);
+        Gate::authorize('update', $insurance);
 
-        $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'insurance_date' => 'required|date',
-            'expired_at' => 'required|date|after_or_equal:insurance_date',
-            'status' => 'required|in:0,1',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'contact_info' => 'required|array|min:1',
-            'contact_info.*.platform' => 'required|string|max:100',
-            'contact_info.*.link' => 'required|string|max:500',
-            'payment_accounts' => 'required|array|min:1',
-            'payment_accounts.*.bank' => 'required|string|max:100',
-            'payment_accounts.*.number' => 'required|string|max:100',
-            'payment_accounts.*.name' => 'required|string|max:255',
-            'services' => 'required|array|min:1',
-            'services.*.title' => 'required|string|max:255',
+        return view('admin.insurances.create', [
+            'insurance' => $insurance,
+            'channelRows' => $this->channels->formRows($insurance),
+            'channelTypes' => ChannelType::cases(),
         ]);
+    }
 
-        $contactInfo = $this->filterEmptyArrayItems($validated['contact_info'] ?? [], ['platform', 'link']);
-        $paymentAccounts = $this->filterEmptyArrayItems($validated['payment_accounts'] ?? [], ['bank', 'number']);
-        $services = $this->filterEmptyArrayItems($validated['services'] ?? [], ['title']);
+    /**
+     * The balance (`amount`) is not editable here: it only changes through the ledger.
+     */
+    public function update(InsuranceRequest $request, Insurance $insurance): RedirectResponse
+    {
+        Gate::authorize('update', $insurance);
 
-        $globalSlug = $insurance->slug;
+        $validated = $request->validated();
+
+        $slug = $insurance->slug;
         if ($insurance->full_name !== $validated['full_name']) {
-            $globalSlug = $this->generateInsuranceSlug($validated['full_name'], $insurance->id);
+            $slug = StringHelper::generateGlobalUniqueSlug($validated['full_name'], $insurance->id);
         }
 
         $data = [
             'full_name' => $validated['full_name'],
-            'slug' => $globalSlug,
-            'amount' => $validated['amount'],
+            'slug' => $slug,
             'insurance_date' => $validated['insurance_date'],
             'expired_at' => $validated['expired_at'],
             'status' => $validated['status'],
-            'contact_info' => $contactInfo ?: null,
-            'payment_accounts' => $paymentAccounts ?: null,
-            'services' => $services ?: null,
+            'services' => $this->filterEmptyArrayItems($validated['services'], ['title']) ?: null,
         ];
 
+        DB::transaction(function () use ($insurance, $data, $validated) {
+            $insurance->update($data);
+            $this->channels->sync($insurance, $validated['channels']);
+        });
+
         if ($request->hasFile('avatar')) {
-            if ($insurance->avatar) {
+            if ($insurance->avatar && ! filter_var($insurance->avatar, FILTER_VALIDATE_URL)) {
                 FileHelper::deleteImage($insurance->avatar);
             }
-            $data['avatar'] = FileHelper::uploadImage($request->file('avatar'), 'insurances');
+            $insurance->update(['avatar' => FileHelper::uploadImage($request->file('avatar'), 'insurances')]);
         }
 
-        $insurance->update($data);
-
-        return redirect()->route('admin.insurances.index')
+        return redirect()->route('admin.insurances.show', $insurance)
             ->with('success', 'Đã cập nhật thông tin bảo hiểm thành công.');
     }
 
-    private function generateInsuranceSlug(string $name, ?int $excludeId = null): string
+    /**
+     * Partners with ledger, claims or status history cannot be deleted (suspend them instead).
+     */
+    public function destroy(Request $request, Insurance $insurance): RedirectResponse|JsonResponse
     {
-        $baseSlug = \Illuminate\Support\Str::slug($name);
-        $slug = $baseSlug;
-        $counter = 2;
+        Gate::authorize('delete', $insurance);
 
-        while (Insurance::where('slug', $slug)->where('id', '!=', $excludeId)->exists()) {
-            $slug = $baseSlug.'-'.$counter;
-            $counter++;
+        if ($this->hasHistory($insurance)) {
+            $message = 'Không thể xóa "'.$insurance->full_name.'" vì đã có sổ quỹ, yêu cầu bồi thường hoặc lịch sử trạng thái. Hãy tạm đình chỉ thành viên thay vì xóa.';
+
+            return $request->expectsJson()
+                ? response()->json(['success' => false, 'message' => $message], 422)
+                : back()->with('error', $message);
         }
 
-        return $slug;
+        $this->deletePartner($insurance);
+
+        return $request->expectsJson()
+            ? response()->json(['success' => true, 'message' => 'Đã xóa thành viên bảo hiểm.'])
+            : redirect()->route('admin.insurances.index')->with('success', 'Đã xóa thành viên bảo hiểm.');
     }
 
-    public function destroy(int $id)
+    public function bulkDestroy(Request $request): JsonResponse
     {
-        $insurance = Insurance::findOrFail($id);
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'Không có mục nào được chọn.']);
+        }
 
-        if ($insurance->avatar) {
+        $deleted = 0;
+        $skipped = 0;
+
+        foreach (Insurance::whereIn('id', $ids)->get() as $insurance) {
+            Gate::authorize('delete', $insurance);
+
+            if ($this->hasHistory($insurance)) {
+                $skipped++;
+
+                continue;
+            }
+
+            $this->deletePartner($insurance);
+            $deleted++;
+        }
+
+        $message = 'Đã xóa '.$deleted.' mục thành công.';
+        if ($skipped > 0) {
+            $message .= ' Bỏ qua '.$skipped.' thành viên đã có sổ quỹ hoặc lịch sử (hãy tạm đình chỉ thay vì xóa).';
+        }
+
+        return response()->json(['success' => true, 'message' => $message]);
+    }
+
+    /**
+     * Record a deposit, refund or adjustment that an admin confirmed outside the system.
+     * Entries are append-only: there is no edit or delete action.
+     */
+    public function storeLedgerEntry(Request $request, Insurance $insurance): RedirectResponse
+    {
+        Gate::authorize('manageFunds', $insurance);
+
+        $validated = $request->validateWithBag('ledger', [
+            'type' => ['required', 'in:'.implode(',', array_map(fn (LedgerEntryType $type) => $type->value, self::MANUAL_LEDGER_TYPES))],
+            'direction' => ['required_if:type,adjustment', 'nullable', 'in:increase,decrease'],
+            'amount' => ['required', 'integer', 'min:1', 'max:'.InsuranceRequest::MAX_AMOUNT],
+            'reference' => ['required_unless:type,adjustment', 'nullable', 'string', 'max:255'],
+            'note' => ['required_if:type,adjustment', 'nullable', 'string', 'max:1000'],
+            'submission_token' => ['required', 'string', 'max:64'],
+        ], [
+            'type.required' => 'Vui lòng chọn loại bút toán.',
+            'type.in' => 'Loại bút toán không hợp lệ. Chi trả bồi thường chỉ ghi nhận từ yêu cầu bồi thường.',
+            'direction.required_if' => 'Vui lòng chọn điều chỉnh tăng hay giảm quỹ.',
+            'direction.in' => 'Chiều điều chỉnh không hợp lệ.',
+            'amount.required' => 'Vui lòng nhập số tiền.',
+            'amount.integer' => 'Số tiền phải là số nguyên (VND).',
+            'amount.min' => 'Số tiền phải lớn hơn 0.',
+            'amount.max' => 'Số tiền quá lớn.',
+            'reference.required_unless' => 'Vui lòng nhập mã giao dịch ngân hàng.',
+            'reference.max' => 'Mã giao dịch tối đa :max ký tự.',
+            'note.required_if' => 'Vui lòng ghi lý do điều chỉnh.',
+            'note.max' => 'Ghi chú tối đa :max ký tự.',
+            'submission_token.required' => 'Phiên biểu mẫu không hợp lệ, vui lòng tải lại trang.',
+        ]);
+
+        $type = LedgerEntryType::from($validated['type']);
+        $negative = $type === LedgerEntryType::Refund
+            || ($type === LedgerEntryType::Adjustment && $validated['direction'] === 'decrease');
+        $amount = ($negative ? '-' : '').$validated['amount'];
+
+        // A double click or resubmitted form must not write the same entry twice.
+        $tokenKey = 'admin-ledger-submission:'.$validated['submission_token'];
+        if (! Cache::add($tokenKey, true, now()->addHour())) {
+            return back()->with('error', 'Bút toán này đã được gửi trước đó, không ghi nhận lại.');
+        }
+
+        try {
+            $entry = $this->ledger->record(
+                $insurance,
+                $type,
+                $amount,
+                $request->user(),
+                $validated['reference'] ?? null,
+                $validated['note'] ?? null,
+            );
+        } catch (InsuranceLedgerException $e) {
+            Cache::forget($tokenKey);
+
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('admin.insurances.show', $insurance)
+            ->with('success', 'Đã ghi nhận bút toán "'.$type->label().'". Số dư mới: '.number_format((float) $entry->balance_after, 0, ',', '.').' đ.');
+    }
+
+    public function suspend(Request $request, Insurance $insurance, InsuranceSuspensionService $suspensions): RedirectResponse
+    {
+        Gate::authorize('changeStanding', $insurance);
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:255'],
+        ], [
+            'reason.required' => 'Vui lòng nhập lý do tạm đình chỉ.',
+            'reason.max' => 'Lý do tối đa :max ký tự.',
+        ]);
+
+        if (! $suspensions->suspend($insurance, $validated['reason'], $request->user())) {
+            return back()->with('error', 'Thành viên này đang bị tạm đình chỉ rồi.');
+        }
+
+        return back()->with('success', 'Đã tạm đình chỉ thành viên "'.$insurance->full_name.'".');
+    }
+
+    public function reinstate(Request $request, Insurance $insurance, InsuranceSuspensionService $suspensions): RedirectResponse
+    {
+        Gate::authorize('changeStanding', $insurance);
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:255'],
+        ], [
+            'reason.max' => 'Ghi chú tối đa :max ký tự.',
+        ]);
+
+        if (! $suspensions->reinstate($insurance, $request->user(), $validated['reason'] ?? null)) {
+            return back()->with('error', 'Thành viên này không bị tạm đình chỉ.');
+        }
+
+        return back()->with('success', 'Đã khôi phục hoạt động cho thành viên "'.$insurance->full_name.'".');
+    }
+
+    private function hasHistory(Insurance $insurance): bool
+    {
+        return $insurance->ledgerEntries()->exists()
+            || $insurance->claims()->exists()
+            || $insurance->statusEvents()->exists();
+    }
+
+    private function deletePartner(Insurance $insurance): void
+    {
+        if ($insurance->avatar && ! filter_var($insurance->avatar, FILTER_VALIDATE_URL)) {
             FileHelper::deleteImage($insurance->avatar);
         }
 
         $insurance->delete();
-
-        return redirect()->route('admin.insurances.index')
-            ->with('success', 'Đã xóa thành viên bảo hiểm.');
     }
 
     private function filterEmptyArrayItems(array $items, array $requiredKeys): array
@@ -197,23 +385,5 @@ class AdminInsuranceController extends Controller
 
             return false;
         }));
-    }
-
-    public function bulkDestroy(Request $request)
-    {
-        $ids = $request->input('ids', []);
-        if (empty($ids)) {
-            return response()->json(['success' => false, 'message' => 'Không có mục nào được chọn.']);
-        }
-
-        $insurances = Insurance::whereIn('id', $ids)->get();
-        foreach ($insurances as $insurance) {
-            if ($insurance->avatar) {
-                FileHelper::deleteImage($insurance->avatar);
-            }
-            $insurance->delete();
-        }
-
-        return response()->json(['success' => true, 'message' => 'Đã xóa '.count($insurances).' mục thành công.']);
     }
 }
