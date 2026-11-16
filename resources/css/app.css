@@ -1,103 +1,112 @@
 @import 'tailwindcss';
 
-    @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Design tokens.
+ * Light values live in @theme; dark overrides live on `.dark` (set on <html>).
+ * One accent (ink navy). Red = danger/scam only. Green = verified/trusted only.
+ */
+@theme static {
+  --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
 
-@theme {
-  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
-  --color-cs_red: #ff0000;
-  --color-cs_blue: #3399ff;
-  --color-cs_green: #2eb85c;
-  --color-cs_orange: #fdb813;
-  --color-dark_bg: #0f172a;
-  --color-dark_card: #1e293b;
+  /* Surfaces and text */
+  --color-page: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
+  --color-ink: #0f172a;
+  --color-ink-muted: #475569;
+  --color-ink-subtle: #64748b;
+
+  /* Accent (ink navy) */
+  --color-accent: #1e3a6e;
+  --color-accent-hover: #172e58;
+  --color-accent-soft: #e8eef8;
+  --color-on-accent: #ffffff;
+
+  /* Semantic */
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+  --color-success: #15803d;
+  --color-success-soft: #e8f5ec;
+  --color-warning: #8a6a1f;
+  --color-warning-soft: #f7f1e3;
+
+  /* Legacy names kept for existing views, remapped to the new palette */
+  --color-cs_blue: var(--color-accent);
+  --color-cs_red: var(--color-danger);
+  --color-cs_green: var(--color-success);
+  --color-cs_orange: var(--color-warning);
+  --color-dark_bg: #0b1220;
+  --color-dark_card: #111a2b;
+
+  /* Radius */
+  --radius-control: 0.5rem;
+  --radius-card: 0.75rem;
 }
 
+@layer base {
+  .dark {
+    --color-page: #0b1220;
+    --color-surface: #111a2b;
+    --color-surface-muted: #172236;
+    --color-line: #1f2a3d;
+    --color-line-strong: #2c3a52;
+    --color-ink: #e2e8f0;
+    --color-ink-muted: #a8b3c4;
+    --color-ink-subtle: #8593a8;
 
- * {
-      transition:
-        background-color 0.3s ease,
-        border-color 0.3s ease,
-        color 0.1s ease;
-    }
+    --color-accent: #5a83c2;
+    --color-accent-hover: #6f93cc;
+    --color-accent-soft: #16243c;
+    --color-on-accent: #ffffff;
 
-    :root {
-      --text-color: #ff0000;
-      --light-color: #f3eded;
-      --speed: 3s;
-    }
+    --color-danger: #e5534b;
+    --color-danger-soft: #2a1618;
+    --color-success: #3fa66b;
+    --color-success-soft: #13261c;
+    --color-warning: #c9a35a;
+    --color-warning-soft: #262013;
+  }
 
-    body {
-      color: #333;
-      overflow-x: hidden;
-    }
+  html {
+    color-scheme: light;
+  }
 
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
+  html.dark {
+    color-scheme: dark;
+  }
 
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
+  body {
+    background-color: var(--color-page);
+    color: var(--color-ink);
+    overflow-x: hidden;
+  }
 
-    ::-webkit-scrollbar-thumb {
-      background: #ccc;
-      border-radius: 4px;
-    }
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: #999;
-    }
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface-muted);
+  }
 
-    /* Mobile fixes */
-    @media (max-width: 640px) {
-      .hero-title {
-        font-size: 1.5rem;
-        line-height: 2rem;
-      }
-    }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: 4px;
+  }
 
-    .scanner-title {
-      position: relative;
-      display: inline-block;
-      background: linear-gradient(to bottom, #ff0000 0%, #cc0000 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      padding: 15px 0;
-      margin: -15px 0;
-      overflow: hidden;
-    }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ink-subtle);
+  }
+}
 
-    /* Thanh Laser quét kiểu QR */
-    .scanner-title::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: #ff0000;
-      box-shadow: 0 0 15px 2px rgba(255, 0, 0, 0.7);
-      z-index: 10;
-      animation: qr-scan 2.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes qr-scan {
-      0% {
-        top: 5%;
-        opacity: 0;
-      }
-
-      20% {
-        opacity: 1;
-      }
-
-      80% {
-        opacity: 1;
-      }
-
-      100% {
-        top: 90%;
-        opacity: 0;
-      }
-    }
+/* Hero heading size on small screens (hero markup is owned by the home page) */
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
