@@ -42,3 +42,24 @@ test('the footer links to the moderation policy and carries the data disclaimer'
     expect($footer)->toContain('href="'.route('moderation.policy').'"', 'Quy trình kiểm duyệt')
         ->toContain('Kết quả chỉ phản ánh dữ liệu tố cáo đã được kiểm duyệt trên Scamproof, không phải bảo đảm an toàn.');
 });
+
+test('terms describe reporter privacy accurately and make reporters responsible for the truth', function () {
+    $this->get('/dieu-khoan')
+        ->assertOk()
+        ->assertSee('Chỉ quản trị viên xem được các thông tin này để xác minh tố cáo và xử lý tố cáo sai sự thật.')
+        ->assertSee('Người gửi tố cáo chịu trách nhiệm về tính trung thực của nội dung đã cung cấp.')
+        ->assertDontSee('bảo mật danh tính người tố cáo một cách tuyệt đối');
+});
+
+test('the review time is stated the same way everywhere', function (string $url) {
+    $html = $this->get($url)->assertOk()->getContent();
+
+    expect($html)->toContain('thường được xem xét trong vòng 24 giờ')
+        ->not->toContain('30 phút đến 12 giờ')
+        ->not->toContain('sẽ duyệt trong 24 giờ');
+})->with([
+    'home faq' => ['/'],
+    'report form' => ['/to-cao-lua-dao'],
+    'moderation policy' => ['/moderation-policy'],
+    'terms' => ['/dieu-khoan'],
+]);
