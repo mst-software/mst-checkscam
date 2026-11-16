@@ -29,16 +29,18 @@ test('home renders hero, real stats and sections', function () {
     Comment::factory()->count(2)->create(['report_id' => $report->id]);
     Insurance::factory()->create(['full_name' => 'Trần Bảo Hiểm', 'status' => 1, 'expired_at' => now()->addMonth()]);
 
-    $this->get('/')
+    $html = $this->get('/')
         ->assertOk()
-        ->assertSee('KIỂM TRA &amp; TỐ CÁO SCAM.', false)
+        ->assertSee('Dữ liệu cộng đồng, được kiểm duyệt')
         ->assertSee('Hệ thống dữ liệu lớn nhất Việt Nam giúp bạn kiểm tra độ tín nhiệm của đối tác')
         ->assertSee('id="searchInput"', false)
         ->assertSee('action="'.route('search.index').'"', false)
+        ->assertSee('method="GET"', false)
+        ->assertSee('role="combobox"', false)
+        ->assertSee('for="searchInput"', false)
         ->assertSee(json_encode(route('search.autocomplete')), false)
-        ->assertSeeInOrder(['1', 'Kẻ lừa đảo', '2', 'Bình luận'])
         ->assertSee(now()->format('d/m/Y').' CÓ 1 CẢNH BÁO')
-        ->assertSeeInOrder(['KIỂM TRA', 'id="searchInput"', 'Lối tắt', 'CẢNH BÁO', 'Cảnh báo mới nhất', 'Bình luận mới', 'Đối tác tin cậy'], false)
+        ->assertSeeInOrder(['id="hero-title"', 'id="searchInput"', 'Lối tắt', 'CẢNH BÁO', 'Cảnh báo mới nhất', 'Bình luận mới', 'Đối tác tin cậy'], false)
         ->assertSee('Cảnh báo mới nhất')
         ->assertSee('Tìm kiếm nhiều trong tuần')
         ->assertSee('Bình luận mới')
@@ -47,7 +49,50 @@ test('home renders hero, real stats and sections', function () {
         ->assertSee('Tham gia cộng đồng Scamproof')
         ->assertSee('091***678')
         ->assertDontSee('0912.345.678')
-        ->assertDontSee('Nguyễn Văn Tèo');
+        ->assertDontSee('Nguyễn Văn Tèo')
+        ->getContent();
+
+    $heading = str($html)->after('id="hero-title"')->before('</h1>');
+
+    expect((string) $heading)->toContain('Kiểm tra&nbsp;&amp; tố cáo', 'scam.');
+});
+
+test('home hero heading carries the scanner line effect', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toMatch('/<h1\s+id="hero-title"\s+class="[^"]*\bscanner-title\b[^"]*"/');
+});
+
+test('home hero stats show real counts for scammers, comments and trusted partners', function () {
+    $report = homeApprovedReport();
+    homeApprovedReport(['target_id' => '1903456789012']);
+    homeApprovedReport(['status' => 'pending', 'target_id' => '0988000111']);
+    Comment::factory()->count(3)->create(['report_id' => $report->id]);
+    Insurance::factory()->count(2)->create(['status' => 1, 'expired_at' => now()->addMonth()]);
+    Insurance::factory()->create(['status' => 1, 'expired_at' => null]);
+    Insurance::factory()->create(['status' => 0, 'expired_at' => now()->addMonth()]);
+    Insurance::factory()->create(['status' => 1, 'expired_at' => now()->subDay()]);
+
+    $html = $this->get('/')->assertOk()->getContent();
+
+    $stats = preg_replace('/\s+/', ' ', strip_tags(str($html)->after('aria-label="Dữ liệu trên hệ thống"')->before('</ul>')));
+
+    expect($stats)
+        ->toContain('2 Đối tượng bị tố cáo')
+        ->toContain('3 Bình luận cộng đồng')
+        ->toContain('3 Đối tác bảo chứng');
+});
+
+test('home hero shows hint chips that only change the placeholder', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    $chips = str($html)->after('aria-label="Loại thông tin cần kiểm tra"')->before('</div>');
+
+    expect((string) $chips)->toContain('Thử tra cứu:', 'SĐT', 'Số tài khoản', 'Facebook', 'Website')
+        ->and(substr_count($chips, 'data-search-placeholder='))->toBe(4)
+        ->and(substr_count($chips, 'type="button"'))->toBe(4);
+
+    expect($html)->toContain('aria-describedby="search-hint"', 'id="search-hint"');
 });
 
 test('home hero action cards link to real pages', function () {
@@ -64,7 +109,7 @@ test('home hero action cards link to real pages', function () {
         url('/api-checkscam'),
     ])->not->toContain('#');
 
-    expect((string) $nav)->toContain('Tố cáo Scam', 'Bảo hiểm CS', 'Chợ buôn bán', 'Bot Check');
+    expect((string) $nav)->toContain('Tố cáo scam', 'Bảo hiểm CS', 'Chợ buôn bán', 'Bot check', 'fa-chevron-right');
 });
 
 test('search results keep the compact search bar without the home hero', function () {
@@ -74,8 +119,23 @@ test('search results keep the compact search bar without the home hero', functio
         ->assertOk()
         ->assertSee('id="searchInput"', false)
         ->assertSee('value="0912345678"', false)
+        ->assertSee('action="'.route('search.index').'"', false)
         ->assertSee(json_encode(route('search.autocomplete')), false)
-        ->assertDontSee('KIỂM TRA &amp; TỐ CÁO SCAM.', false)
+        ->assertDontSee('id="hero-title"', false)
+        ->assertDontSee('Thử tra cứu:')
+        ->assertDontSee('aria-label="Dữ liệu trên hệ thống"', false)
+        ->assertDontSee('aria-label="Lối tắt"', false);
+});
+
+test('scammer page shows only the compact search bar', function () {
+    $report = homeApprovedReport();
+
+    $this->get(route('scammer.show', $report->slug))
+        ->assertOk()
+        ->assertSee('id="searchInput"', false)
+        ->assertSee('action="'.route('search.index').'"', false)
+        ->assertDontSee('id="hero-title"', false)
+        ->assertDontSee('Thử tra cứu:')
         ->assertDontSee('aria-label="Lối tắt"', false);
 });
 

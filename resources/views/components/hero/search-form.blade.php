@@ -14,9 +14,10 @@
     ['label' => 'SĐT', 'placeholder' => 'Ví dụ: 0912 345 678', 'hint' => 'Nhập số điện thoại, có thể dùng dạng +84 hoặc 0.'],
     ['label' => 'Số tài khoản', 'placeholder' => 'Ví dụ: 1903 4567 8901', 'hint' => 'Chỉ cần nhập dãy số tài khoản, không cần tên ngân hàng.'],
     ['label' => 'Facebook', 'placeholder' => 'Ví dụ: facebook.com/ten.tai.khoan', 'hint' => 'Dán link trang cá nhân hoặc UID Facebook.'],
-    ['label' => 'Link', 'placeholder' => 'Ví dụ: https://ten-mien.com', 'hint' => 'Dán đường link website hoặc trang bán hàng cần kiểm tra.'],
+    ['label' => 'Website', 'placeholder' => 'Ví dụ: https://ten-mien.com', 'hint' => 'Dán đường link website hoặc trang bán hàng cần kiểm tra.'],
   ];
   $isLarge = $size === 'lg';
+  $defaultPlaceholder = 'Nhập số tài khoản, SĐT hoặc link...';
 @endphp
 
 <div {{ $attributes }}>
@@ -24,12 +25,12 @@
     <label for="searchInput" class="sr-only">Nhập SĐT, số tài khoản, Facebook hoặc link cần kiểm tra</label>
     <div
       id="search-wrapper"
-      class="{{ $isLarge ? 'rounded-2xl p-1.5 md:p-2' : 'rounded-xl p-1' }} border-line bg-surface focus-within:border-accent focus-within:ring-accent-soft relative border-2 shadow-xl shadow-ink/5 transition-colors focus-within:ring-4"
+      class="{{ $isLarge ? 'rounded-[20px] border p-2 shadow-[0_24px_50px_-24px_color-mix(in_oklab,var(--color-accent)_35%,transparent),0_2px_6px_color-mix(in_oklab,var(--color-ink)_5%,transparent)]' : 'rounded-xl border-2 p-1 shadow-xl shadow-ink/5' }} border-line bg-surface focus-within:border-accent focus-within:ring-accent-soft relative transition-colors focus-within:ring-4"
     >
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div class="relative flex min-w-0 flex-1 items-center">
           <i
-            class="fa-solid fa-magnifying-glass text-ink-subtle pointer-events-none absolute left-4 text-lg"
+            class="{{ $isLarge ? 'left-4 sm:left-5' : 'left-4' }} fa-solid fa-magnifying-glass text-ink-subtle pointer-events-none absolute text-lg"
             aria-hidden="true"
           ></i>
           <input
@@ -45,17 +46,23 @@
             aria-expanded="false"
             aria-controls="searchResults"
             @if ($hints) aria-describedby="search-hint" @endif
-            placeholder="Nhập Số tài khoản, SĐT hoặc Link..."
-            data-default-placeholder="Nhập Số tài khoản, SĐT hoặc Link..."
-            class="{{ $isLarge ? 'h-12' : 'h-11' }} text-ink placeholder:text-ink-subtle w-full border-0 bg-transparent pr-4 pl-12 text-base font-semibold outline-none focus:ring-0"
+            placeholder="{{ $defaultPlaceholder }}"
+            data-default-placeholder="{{ $defaultPlaceholder }}"
+            class="{{ $isLarge ? 'h-12 pl-11 text-[15px] font-medium sm:h-13.5 sm:pl-14 sm:text-[17px]' : 'h-11 pl-12 text-base font-semibold' }} text-ink placeholder:text-ink-subtle w-full border-0 bg-transparent pr-3 outline-none focus:ring-0 sm:pr-4"
           />
         </div>
 
         <button
           type="submit"
-          class="{{ $isLarge ? 'h-12 px-8 font-black' : 'h-11 px-6 font-bold' }} bg-accent hover:bg-accent-hover text-on-accent focus-visible:outline-accent inline-flex w-full cursor-pointer items-center justify-center rounded-xl text-sm tracking-widest whitespace-nowrap uppercase shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto"
+          class="{{ $isLarge ? 'h-12 gap-2.5 rounded-[14px] px-8 font-extrabold tracking-[0.06em] shadow-[0_8px_18px_-8px_color-mix(in_oklab,var(--color-accent)_70%,transparent)] sm:h-13.5' : 'h-11 rounded-xl px-6 font-bold tracking-widest shadow-sm' }} bg-accent hover:bg-accent-hover text-on-accent focus-visible:outline-accent group inline-flex w-full cursor-pointer items-center justify-center text-sm whitespace-nowrap uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto"
         >
           Tra cứu
+          @if ($isLarge)
+            <i
+              class="fa-solid fa-chevron-right text-on-accent/70 text-xs motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5"
+              aria-hidden="true"
+            ></i>
+          @endif
         </button>
       </div>
 
@@ -70,23 +77,24 @@
 
   @if ($hints)
     <div
-      class="mt-4 flex flex-wrap items-center justify-center gap-2"
+      class="text-ink-subtle mt-4 flex flex-wrap items-center justify-center gap-2 text-[13px]"
       role="group"
       aria-label="Loại thông tin cần kiểm tra"
     >
+      <span>Thử tra cứu:</span>
       @foreach ($hintTypes as $hintType)
         <button
           type="button"
           aria-pressed="false"
           data-search-hint="{{ $hintType['hint'] }}"
           data-search-placeholder="{{ $hintType['placeholder'] }}"
-          class="border-line text-ink-muted hover:border-line-strong hover:text-ink focus-visible:outline-accent aria-pressed:border-accent aria-pressed:bg-accent-soft aria-pressed:text-accent cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+          class="border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink focus-visible:outline-accent aria-pressed:border-accent aria-pressed:bg-accent-soft aria-pressed:text-accent cursor-pointer rounded-full border px-3 py-1 text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
         >
           {{ $hintType['label'] }}
         </button>
       @endforeach
     </div>
-    <p id="search-hint" class="text-ink-subtle mt-2 text-xs" aria-live="polite" data-default-hint="{{ $defaultHint }}">
+    <p id="search-hint" class="sr-only" aria-live="polite" data-default-hint="{{ $defaultHint }}">
       {{ $defaultHint }}
     </p>
   @endif
