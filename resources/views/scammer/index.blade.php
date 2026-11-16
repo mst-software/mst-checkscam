@@ -843,7 +843,7 @@
               Share
             </button>
             <a
-              href="/giai-quyet-khieu-nai"
+              href="{{ route('complaints.create', ['report' => $report->slug]) }}#gui-khieu-nai"
               class="text-cs_red flex flex-1 items-center justify-center gap-2 rounded-2xl border border-gray-100 bg-white py-3 text-xs font-bold tracking-widest uppercase transition-all hover:bg-red-50 dark:border-gray-700 dark:bg-slate-800 dark:hover:bg-red-900/20"
             >
               <i class="fa-solid fa-flag text-sm"></i>

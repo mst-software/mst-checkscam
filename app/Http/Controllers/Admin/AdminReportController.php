@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ScamType;
 use App\Helpers\FileHelper;
 use App\Http\Controllers\Controller;
 use App\Jobs\NotifyWatchersOfApprovedReport;
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AdminReportController extends Controller
 {
@@ -19,6 +21,9 @@ class AdminReportController extends Controller
         }
         if ($request->filled('type')) {
             $query->where('type', $request->type);
+        }
+        if ($scamType = ScamType::tryFrom($request->string('scam_type')->toString())) {
+            $query->ofScamType($scamType);
         }
 
         if ($request->filled('time_range')) {
@@ -123,6 +128,7 @@ class AdminReportController extends Controller
             'target_name' => 'nullable|string|max:255',
             'target_bank' => 'nullable|string|max:255',
             'category' => 'nullable|string|max:255',
+            'scam_type' => ['nullable', Rule::enum(ScamType::class)],
             'description' => 'required|string|min:50',
             'reporter_name' => 'nullable|string|max:255',
             'reporter_contact' => 'nullable|string|max:255',
@@ -156,6 +162,7 @@ class AdminReportController extends Controller
             'target_name' => $validated['target_name'] ?? null,
             'target_bank' => $validated['target_bank'] ?? null,
             'category' => $validated['category'] ?? null,
+            'scam_type' => $validated['scam_type'] ?? null,
             'description' => $validated['description'],
             'reporter_name' => $validated['reporter_name'] ?? 'Người dùng',
             'reporter_contact' => $validated['reporter_contact'] ?? '',

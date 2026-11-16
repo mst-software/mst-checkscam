@@ -4,7 +4,7 @@
   'alt' => '',
 ])
 
-<div class="mx-auto max-w-[950px] overflow-hidden rounded-lg dark:bg-white">
+<div class="border-line rounded-card mx-auto max-w-[950px] overflow-hidden border dark:bg-white">
   <a href="{{ $url }}" target="_blank">
     <img
       src="{{ Str::startsWith($image, ['http://', 'https://']) ? $image : asset('uploads/' . $image) }}"
