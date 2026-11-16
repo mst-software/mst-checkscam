@@ -75,7 +75,7 @@ class HomeController extends Controller
     }
 
     /**
-     * @return array{total_reports: int, total_scammers: int, total_comments: int}
+     * @return array{total_reports: int, total_scammers: int, total_comments: int, total_insurances: int}
      */
     private function getHomeStats(): array
     {
@@ -83,6 +83,7 @@ class HomeController extends Controller
             'total_reports' => Report::where('status', 'approved')->count(),
             'total_scammers' => Report::where('status', 'approved')->count(DB::raw('DISTINCT target_id')),
             'total_comments' => Comment::count(),
+            'total_insurances' => Insurance::query()->trusted()->count(),
         ];
     }
 
@@ -97,11 +98,9 @@ class HomeController extends Controller
 
     private function getTrustedInsurances(): Collection
     {
-        return Insurance::where('status', 1)
+        return Insurance::query()
+            ->trusted()
             ->with('media')
-            ->where(function ($query) {
-                $query->whereNull('expired_at')->orWhere('expired_at', '>', now());
-            })
             ->orderByDesc('amount')
             ->limit(6)
             ->get();
