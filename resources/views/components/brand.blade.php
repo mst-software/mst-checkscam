@@ -22,8 +22,9 @@
 
 <span {{ $attributes->class(['inline-flex items-center gap-2']) }}>
   <img src="{{ asset('img/logo-mark.svg') }}" alt="" width="64" height="72" class="{{ $mark }} w-auto shrink-0" />
-  <span class="{{ $word }} font-extrabold tracking-tight {{ $dark ? 'text-white' : 'text-ink' }}">
-    Scam
+  {{-- Flex container: whitespace between the two halves is ignored, so formatters cannot insert a gap. --}}
+  <span class="{{ $word }} inline-flex font-extrabold tracking-tight">
+    <span class="{{ $dark ? 'text-white' : 'text-ink' }}">Scam</span>
     <span class="{{ $dark ? 'text-red-400' : 'text-accent' }}">proof</span>
   </span>
 </span>
