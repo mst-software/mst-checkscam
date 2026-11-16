@@ -41,4 +41,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
+        'chat_rate_limit_per_minute' => (int) env('TELEGRAM_CHAT_RATE_LIMIT', 10),
+    ],
+
 ];

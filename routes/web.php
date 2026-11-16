@@ -24,6 +24,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SocialiteController;
+use App\Http\Controllers\TelegramWebhookController;
 use Illuminate\Support\Facades\Route;
 
 // --- Frontend Pages ---
@@ -51,6 +52,9 @@ Route::post('/api/newfeed/posts/{post}/report', [NewfeedPostReportController::cl
 Route::prefix('api/v1')->name('api.v1.')->group(function () {
     Route::get('/check', [ScamCheckController::class, 'show'])->name('check');
 });
+
+// --- Telegram Bot (CSRF-exempt in bootstrap/app.php) ---
+Route::post('/telegram/webhook/{secret}', [TelegramWebhookController::class, 'handle'])->name('telegram.webhook');
 
 // --- Google OAuth ---
 Route::get('/auth/google', [SocialiteController::class, 'redirect'])->name('auth.google');

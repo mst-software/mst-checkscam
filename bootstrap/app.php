@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(CheckMaintenanceMode::class);
         $middleware->validateCsrfTokens(except: [
             'api/v1/*',
+            'telegram/webhook/*',
         ]);
         $middleware->alias([
             'auth' => Authenticate::class,
