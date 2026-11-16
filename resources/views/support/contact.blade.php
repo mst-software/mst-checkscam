@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('title', 'Liên hệ Admin - Hỗ trợ và Giải đáp thắc mắc')
-
 @section('content')
   <main class="pb-24">
     <x-breadcrumb :links="[['name' => 'Liên hệ Admin', 'url' => '/lien-he-admin']]" />

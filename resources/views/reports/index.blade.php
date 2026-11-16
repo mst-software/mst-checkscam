@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('title', '[ Tố Cáo kẻ lừa đảo ] Cập nhật thêm data vào hệ thống')
-
 @push('styles')
   <style>
     /* Step visibility once JS is running (the report-js class is set inline before the form renders). */
