@@ -29,7 +29,8 @@
         "comments_count": 2
       }
     ],
-    "insurance": []
+    "insurance": [],
+    "verified_intermediary": false
   }
   JSON;
 
@@ -165,6 +166,16 @@
               <tr>
                 <td class="{{ $tdClass }}"><code class="{{ $codeClass }}">insurance</code></td>
                 <td class="{{ $tdClass }}">Đối tác bảo hiểm uy tín khớp với dữ liệu tra cứu.</td>
+              </tr>
+              <tr>
+                <td class="{{ $tdClass }}"><code class="{{ $codeClass }}">verified_intermediary</code></td>
+                <td class="{{ $tdClass }}">
+                  <code class="{{ $codeClass }}">true</code>
+                  khi dữ liệu tra cứu là kênh chính thức (SĐT, số tài khoản, Facebook, Telegram, Zalo, website) của một
+                  giao dịch viên còn hiệu lực trên Scamproof;
+                  <code class="{{ $codeClass }}">false</code>
+                  trong mọi trường hợp còn lại, kể cả kênh của giao dịch viên đã hết hạn hoặc bị tạm đình chỉ.
+                </td>
               </tr>
             </tbody>
           </table>

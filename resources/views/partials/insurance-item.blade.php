@@ -35,8 +35,14 @@
   <span class="min-w-0 flex-1">
     <span class="text-ink flex items-center gap-1.5 text-sm font-medium">
       <span class="truncate">{{ $insurance->full_name }}</span>
-      <i class="fa-solid fa-circle-check text-success text-xs" aria-hidden="true"></i>
-      <span class="sr-only">(đã xác thực)</span>
+      @if ($insurance->isTrusted())
+        <i class="fa-solid fa-circle-check text-success text-xs" aria-hidden="true" data-trusted-badge></i>
+        <span class="sr-only">(đã xác thực)</span>
+      @else
+        <x-ucs.badge :variant="$insurance->isSuspended() ? 'danger' : 'neutral'" class="shrink-0" data-status-badge>
+          {{ $insurance->status_label }}
+        </x-ucs.badge>
+      @endif
     </span>
     <span class="text-ink-muted block text-xs">
       Quỹ bảo hiểm:
