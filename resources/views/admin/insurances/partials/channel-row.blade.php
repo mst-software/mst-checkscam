@@ -23,9 +23,7 @@
     <div class="col-md-8 col-12">
       <div class="form-group mb-0">
         <label for="channel-value-{{ $index }}">
-          Giá trị (số / link /
-          @username
-          )
+          Giá trị (số / link / &#64;username)
           <span class="text-danger">*</span>
         </label>
         <input
