@@ -24,7 +24,7 @@
   </ul>
 </x-ucs.card>
 
-<x-ucs.card title="Cam kết của CheckScam">
+<x-ucs.card title="Cam kết của Scamproof">
   <ul class="space-y-3">
     @foreach ($assurances as $assurance)
       <li class="text-ink-muted flex items-start gap-2.5 text-sm">

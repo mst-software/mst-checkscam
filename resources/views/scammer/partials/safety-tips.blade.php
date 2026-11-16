@@ -1,7 +1,7 @@
 @php
   $tips = [
     'Không chuyển tiền đặt cọc hoặc "phí giữ chỗ" cho người lạ.',
-    'Kiểm tra số tài khoản, SĐT trên CheckScam trước mỗi giao dịch.',
+    'Kiểm tra số tài khoản, SĐT trên Scamproof trước mỗi giao dịch.',
     'Không cung cấp mã OTP, mật khẩu hoặc ảnh CCCD cho bất kỳ ai.',
     'Ưu tiên giao dịch qua sàn có trung gian hoặc nhận hàng rồi thanh toán.',
     'Bị lừa: báo ngay ngân hàng để phong toả và trình báo công an.',

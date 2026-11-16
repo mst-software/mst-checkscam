@@ -22,9 +22,8 @@
     <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-12">
       {{-- Brand --}}
       <div class="space-y-4 lg:col-span-4">
-        <a href="{{ route('home') }}" class="inline-block">
-          <img src="{{ asset('img/logo-light.svg') }}" alt="Cảnh Giác" class="h-12 w-auto dark:hidden" />
-          <img src="{{ asset('img/logo-dark.svg') }}" alt="Cảnh Giác" class="hidden h-12 w-auto dark:block" />
+        <a href="{{ route('home') }}" class="inline-block" aria-label="Scamproof">
+          <x-brand size="lg" dark />
         </a>
         <p class="max-w-sm text-sm leading-relaxed text-slate-400">
           {{ $siteConfig['description'] ?? 'Nền tảng kiểm tra độ tín nhiệm dữ liệu lớn nhất Việt Nam.' }}

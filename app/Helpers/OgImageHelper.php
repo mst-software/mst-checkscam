@@ -82,7 +82,7 @@ class OgImageHelper
 
         // Header band
         imagefilledrectangle($image, 0, 0, self::WIDTH, 120, $navy);
-        $siteName = Str::before((string) ConfigHelper::getConfig('site_title', 'CheckScam'), ' - ');
+        $siteName = Str::before((string) ConfigHelper::getConfig('site_title', 'Scamproof'), ' - ');
         self::drawText($image, Str::limit($siteName, 28, ''), self::PADDING, 38, 44, $white, 640);
         self::drawText($image, 'CẢNH BÁO LỪA ĐẢO', 780, 46, 30, $alert, 350);
 
@@ -105,7 +105,7 @@ class OgImageHelper
 
         // Footer band
         imagefilledrectangle($image, 0, 540, self::WIDTH, self::HEIGHT, $light);
-        $domain = parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'checkscam.vn';
+        $domain = parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'scamproof.vn';
         self::drawText($image, 'Kiểm tra tại '.$domain, self::PADDING, 567, 36, $navy, self::WIDTH - 2 * self::PADDING);
 
         ob_start();

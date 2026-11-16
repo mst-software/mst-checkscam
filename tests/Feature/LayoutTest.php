@@ -50,11 +50,11 @@ test('layout no longer loads the prebuilt tailwind stylesheet', function () {
         ->assertDontSee('/css/tailwind.css', false);
 });
 
-test('layout falls back to the bundled canh giac logo and favicon assets', function () {
+test('layout uses the scamproof brand mark, wordmark and favicon', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('/img/logo-light.svg', false)
-        ->assertSee('/img/logo-dark.svg', false)
+        ->assertSee('/img/logo-mark.svg', false)
         ->assertSee('/favicon.svg', false)
-        ->assertSee('alt="Cảnh Giác"', false);
+        ->assertSee('aria-label="Scamproof"', false)
+        ->assertDontSee('Cảnh Giác');
 });

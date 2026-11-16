@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Đang bảo trì - ' . ($siteConfig['title'] ?? 'CheckScam.vn'))
+@section('title', 'Đang bảo trì - ' . ($siteConfig['title'] ?? 'Scamproof.vn'))
 
 @section('content')
   <div class="relative flex min-h-[60vh] items-center justify-center p-4">
@@ -100,7 +100,7 @@
       <!-- FOOTER CREDIT -->
       <div class="mt-12 space-y-3">
         <p class="text-[10px] font-black tracking-[0.3em] text-gray-400 uppercase opacity-50 dark:text-gray-600">
-          &copy; {{ date('Y') }} CheckScam Security Ecosystem
+          &copy; {{ date('Y') }} Scamproof Security Ecosystem
         </p>
         <p class="text-[9px] font-black tracking-widest text-gray-400 uppercase dark:text-gray-500">
           Website được thiết kế bởi

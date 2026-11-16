@@ -54,7 +54,7 @@ class PostController extends Controller
         $post->incrementViewCount();
 
         // SEO
-        $siteTitle = ConfigHelper::getConfig('site_title', 'CheckScam');
+        $siteTitle = ConfigHelper::getConfig('site_title', 'Scamproof');
         $metaTitle = $post->title.' | '.$siteTitle;
         $metaDesc = $post->description ?? Str::limit(strip_tags($post->content), 160);
 

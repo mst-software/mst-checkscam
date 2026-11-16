@@ -113,7 +113,7 @@ class TelegramWebhookController extends Controller
         }
 
         $lines[] = '';
-        $lines[] = '<a href="'.e(route('search.index', ['q' => $query])).'">Xem chi tiết trên CheckScam</a>';
+        $lines[] = '<a href="'.e(route('search.index', ['q' => $query])).'">Xem chi tiết trên Scamproof</a>';
 
         return implode("\n", $lines);
     }
@@ -121,7 +121,7 @@ class TelegramWebhookController extends Controller
     private function helpText(): string
     {
         return implode("\n", [
-            '<b>Bot tra cứu lừa đảo CheckScam</b>',
+            '<b>Bot tra cứu lừa đảo Scamproof</b>',
             'Gửi SĐT, số tài khoản, link Facebook hoặc tên để kiểm tra.',
             'Hoặc dùng lệnh: <code>/check 0912345678</code>',
             '/help - Xem hướng dẫn',

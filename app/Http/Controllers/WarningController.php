@@ -161,7 +161,7 @@ class WarningController extends Controller
 
     private function setSeo(bool $hasFilters, int $page): void
     {
-        $siteTitle = ConfigHelper::getConfig('site_title', 'CheckScam');
+        $siteTitle = ConfigHelper::getConfig('site_title', 'Scamproof');
 
         SEOTools::setTitle("Danh sách cảnh báo lừa đảo mới nhất | {$siteTitle}");
         SEOTools::setDescription('Danh sách tài khoản ngân hàng, số điện thoại và Facebook đã bị cộng đồng tố cáo lừa đảo và được kiểm duyệt. Lọc theo loại, ngân hàng và thời gian.');

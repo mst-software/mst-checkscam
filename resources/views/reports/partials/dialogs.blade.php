@@ -17,7 +17,7 @@
       Cảm ơn bạn. Đội kiểm duyệt sẽ xem xét trong 30 phút đến 12 giờ. Sau đó bạn có thể tra cứu lại số tài khoản hoặc
       website vừa tố cáo để kiểm tra.
     </p>
-    <p class="text-ink-subtle mt-3 text-xs">Hãy nhắc người thân tra cứu trên CheckScam trước khi chuyển tiền.</p>
+    <p class="text-ink-subtle mt-3 text-xs">Hãy nhắc người thân tra cứu trên Scamproof trước khi chuyển tiền.</p>
   </div>
   <div class="border-line flex flex-col gap-2 border-t px-5 py-4 sm:flex-row-reverse sm:px-6">
     <a
