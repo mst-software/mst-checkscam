@@ -69,13 +69,18 @@ class WarningController extends Controller
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
+        // Pages past the end are not real listings: 404 instead of an indexable empty page.
+        if ($reports->currentPage() > 1 && $reports->currentPage() > $reports->lastPage()) {
+            abort(404);
+        }
+
         $hasFilters = $filters['type'] !== 'all'
             || $filters['bank'] !== ''
             || $filters['period'] !== null
             || $filters['q'] !== ''
             || $filters['sort'] !== 'newest';
 
-        $this->setSeo($hasFilters, $reports->currentPage());
+        $this->setSeo($hasFilters, $reports->currentPage(), $reports->isEmpty());
 
         return view('warnings.index', [
             'reports' => $reports,
@@ -159,7 +164,7 @@ class WarningController extends Controller
             ->pluck('target_bank');
     }
 
-    private function setSeo(bool $hasFilters, int $page): void
+    private function setSeo(bool $hasFilters, int $page, bool $isEmpty): void
     {
         $siteTitle = ConfigHelper::getConfig('site_title', 'Scamproof');
 
@@ -174,7 +179,7 @@ class WarningController extends Controller
         SEOTools::opengraph()->setUrl($canonical);
         SEOTools::jsonLd()->setUrl($canonical);
 
-        if ($hasFilters) {
+        if ($hasFilters || $isEmpty) {
             SEOTools::metatags()->setRobots('noindex, follow');
         }
     }

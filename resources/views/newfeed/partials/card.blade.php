@@ -45,7 +45,7 @@
           href="{{ $postUrl }}"
           class="hover:text-ink rounded-sm hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          {{ $post->created_at->diffForHumans() }}
+          {{ $post->created_at->locale("vi")->diffForHumans() }}
         </a>
         · {{ $post->category }}
       </p>

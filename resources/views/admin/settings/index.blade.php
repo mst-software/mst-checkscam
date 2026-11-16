@@ -43,7 +43,7 @@
                 type="text"
                 name="seo_keywords"
                 class="form-control"
-                placeholder="checkscam, lừa đảo, scam, kiểm tra..."
+                placeholder="scamproof, kiểm tra lừa đảo, tố cáo lừa đảo..."
                 value="{{ $settings['seo_keywords'] ?? '' }}"
               />
             </div>
@@ -478,7 +478,7 @@
                 type="text"
                 name="twitter_username"
                 class="form-control"
-                placeholder="@checkscam_vn"
+                placeholder="@scamproof"
                 value="{{ $settings['twitter_username'] ?? '' }}"
               />
             </div>

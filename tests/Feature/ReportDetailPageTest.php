@@ -225,6 +225,20 @@ test('watch, share, complaint and report links are present', function () {
         ->assertSee('Tố cáo thêm');
 });
 
+test('the share button copies the link with an inline status instead of a blocking alert', function () {
+    $report = detailReport();
+
+    $html = $this->get(route('scammer.show', $report->slug))
+        ->assertOk()
+        ->assertSee('data-copy="'.route('scammer.show', $report->slug).'"', false)
+        ->assertSee('<span data-copy-label aria-live="polite">Chia sẻ</span>', false)
+        ->assertSee("done('Đã sao chép')", false)
+        ->assertDontSee('Đã sao chép liên kết')
+        ->getContent();
+
+    expect(substr_count($html, "button.querySelector('[data-copy-label]')"))->toBe(1);
+});
+
 test('the page runs a bounded number of queries regardless of data size', function () {
     $queries = 0;
     DB::listen(function () use (&$queries) {

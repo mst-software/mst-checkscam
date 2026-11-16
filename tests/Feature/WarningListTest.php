@@ -213,6 +213,19 @@ test('filtered pages are noindex with a canonical to the unfiltered list', funct
         ->assertSee('<meta name="robots" content="noindex, follow">', false);
 });
 
+test('a page past the last one is not found', function () {
+    warningReport();
+
+    $this->get(route('warnings.index', ['page' => 2]))->assertNotFound();
+    $this->get(route('warnings.index', ['type' => 'bank', 'page' => 99]))->assertNotFound();
+});
+
+test('an empty list is noindex', function () {
+    $this->get(route('warnings.index'))
+        ->assertOk()
+        ->assertSee('<meta name="robots" content="noindex, follow">', false);
+});
+
 test('the unfiltered list stays indexable', function () {
     warningReport();
 

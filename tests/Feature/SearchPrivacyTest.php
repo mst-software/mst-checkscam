@@ -102,3 +102,42 @@ test('autocomplete is throttled to 30 requests per minute per ip', function () {
         ->assertHeader('Retry-After')
         ->assertExactJson([]);
 });
+
+function searchPageHead(string $html): string
+{
+    preg_match('/<head>(.*?)<\/head>/s', $html, $matches);
+
+    return $matches[1] ?? '';
+}
+
+test('search result pages are noindex and never echo the raw query into the head', function (string $raw, string $digits) {
+    $this->withoutVite();
+
+    $html = $this->get(route('search.index', ['q' => $raw]))->assertOk()->getContent();
+    $head = searchPageHead($html);
+    preg_match_all('/<meta\s+name="robots"\s+content="([^"]*)"/i', $head, $robots);
+
+    expect($head)->not->toBe('')
+        ->not->toContain($raw)
+        ->not->toContain(e($raw))
+        ->not->toContain($digits)
+        ->and($robots[1])->toBe(['noindex, follow']);
+
+    // The visible search box keeps what the visitor typed.
+    expect($html)->toContain('value="'.e($raw).'"');
+})->with([
+    'local phone' => ['0912345678', '2345'],
+    'international phone' => ['+84 912-345-678', '2345'],
+    'dotted bank account' => ['1903.6655.7788.99', '6655'],
+    'name followed by a phone' => ['Nguyen Van Lua 0987654321', '7654'],
+    'phone followed by a name' => ['0987654321 Lua', '7654'],
+    'facebook profile url' => ['https://www.facebook.com/profile.php?id=100012345678', '0012345'],
+]);
+
+test('search result titles show the masked phone number', function () {
+    $this->withoutVite();
+
+    $html = $this->get(route('search.index', ['q' => '0912345678']))->assertOk()->getContent();
+
+    expect(searchPageHead($html))->toContain('<title>Kết quả tra cứu 091***678 - Scamproof</title>');
+});

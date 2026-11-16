@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\SeoHelper;
 use App\Models\NewfeedPost;
 use App\Models\NewfeedPostReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class NewfeedController extends Controller
 {
@@ -16,6 +18,9 @@ class NewfeedController extends Controller
         }
 
         $post->load('user');
+
+        $excerpt = Str::squish(strip_tags($post->content));
+        SeoHelper::setPage(Str::limit($excerpt, 60).' - Khu mua bán', Str::limit($excerpt, 155));
 
         $imageUrls = [];
         if (! empty($post->image_paths)) {
@@ -37,6 +42,11 @@ class NewfeedController extends Controller
 
     public function index(Request $request)
     {
+        SeoHelper::setPage(
+            'Khu mua bán',
+            'Khu mua bán của cộng đồng: đăng tin, tìm dịch vụ MMO và tài khoản, báo cáo bài đăng có dấu hiệu lừa đảo.',
+        );
+
         $categories = config('newfeed.categories', []);
 
         $query = NewfeedPost::with('user')->visible()->latest();

@@ -60,7 +60,7 @@ class CommentController extends Controller
                     'id' => $comment->id,
                     'display_name' => $comment->display_name,
                     'content' => $comment->content,
-                    'created_at' => $comment->created_at->diffForHumans(),
+                    'created_at' => $comment->created_at->locale('vi')->diffForHumans(),
                     'is_anon' => $comment->is_anonymous,
                     'initials' => $this->getInitials($comment->full_name),
                     'can_modify' => true,

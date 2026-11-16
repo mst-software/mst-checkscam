@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ComplaintReason;
 use App\Enums\ComplaintStatus;
 use App\Helpers\FileHelper;
+use App\Helpers\SeoHelper;
 use App\Models\Complaint;
 use App\Models\Report;
 use Illuminate\Http\RedirectResponse;
@@ -23,6 +24,11 @@ class ComplaintController extends Controller
         $report = $request->filled('report')
             ? Report::approved()->where('slug', $request->string('report')->toString())->first()
             : null;
+
+        SeoHelper::setPage(
+            'Giải quyết khiếu nại',
+            'Gửi khiếu nại nếu bạn cho rằng một báo cáo lừa đảo chưa chính xác; ban quản trị sẽ xem xét và phản hồi qua email.',
+        );
 
         return view('legal.dispute', [
             'report' => $report,

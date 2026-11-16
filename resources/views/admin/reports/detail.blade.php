@@ -64,8 +64,17 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <div class="form-group">
-                <label>Phân loại lừa đảo</label>
-                <p class="mb-0"><strong>{{ $report->category ?? 'Chưa phân loại' }}</strong></p>
+                <label>Hình thức lừa đảo</label>
+                <p class="mb-0">
+                  @if ($report->scam_type)
+                    <strong>{{ $report->scam_type->label() }}</strong>
+                  @else
+                    <strong>Chưa phân loại</strong>
+                    @if (filled($report->category))
+                      <span class="text-muted">(cũ: {{ $report->category }})</span>
+                    @endif
+                  @endif
+                </p>
               </div>
             </div>
             <div class="col-md-6">
@@ -84,12 +93,6 @@
                     {{ $report->damage_amount ? number_format($report->damage_amount) . ' VNĐ' : 'Không cung cấp' }}
                   </strong>
                 </p>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Hình thức lừa đảo</label>
-                <p class="mb-0"><strong>{{ $report->scam_type?->label() ?? 'Chưa phân loại' }}</strong></p>
               </div>
             </div>
           </div>

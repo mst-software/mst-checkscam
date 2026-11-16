@@ -22,6 +22,7 @@ use App\Http\Controllers\NewfeedController;
 use App\Http\Controllers\NewfeedPostController;
 use App\Http\Controllers\NewfeedPostReportController;
 use App\Http\Controllers\OgImageController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
@@ -34,9 +35,7 @@ use Illuminate\Support\Facades\Route;
 
 // --- Frontend Pages ---
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/to-cao-lua-dao', function () {
-    return view('reports.index');
-})->name('reports');
+Route::get('/to-cao-lua-dao', [PageController::class, 'reportForm'])->name('reports');
 Route::post('/to-cao-lua-dao', [ReportController::class, 'store'])->name('report.store');
 
 Route::get('/bao-hiem-cs', [InsuranceController::class, 'index'])->name('insurances.frontend.index');
@@ -67,25 +66,15 @@ Route::get('/auth/google/callback', [SocialiteController::class, 'callback'])->n
 Route::post('/auth/logout', [SocialiteController::class, 'logout'])->name('auth.logout');
 
 // --- System Pages ---
-Route::get('/api-checkscam', function () {
-    return view('system.api');
-});
-Route::get('/doi-tac-uy-tin', function () {
-    return view('system.partners');
-});
+Route::get('/api-checkscam', [PageController::class, 'apiDocs']);
+Route::get('/doi-tac-uy-tin', [PageController::class, 'partners']);
 
 // --- Support Pages ---
-Route::get('/huong-dan-to-cao', function () {
-    return view('support.guide');
-});
-Route::get('/lien-he-admin', function () {
-    return view('support.contact');
-});
+Route::get('/huong-dan-to-cao', [PageController::class, 'guide']);
+Route::get('/lien-he-admin', [PageController::class, 'contact']);
 
 // --- Legal Pages ---
-Route::get('/dieu-khoan', function () {
-    return view('legal.terms');
-});
+Route::get('/dieu-khoan', [PageController::class, 'terms']);
 Route::get('/giai-quyet-khieu-nai', [ComplaintController::class, 'create'])->name('complaints.create');
 Route::post('/giai-quyet-khieu-nai', [ComplaintController::class, 'store'])->name('complaints.store');
 
@@ -213,8 +202,9 @@ Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('co
 // --- Warnings List ---
 Route::get('/warnings', [WarningController::class, 'index'])->name('warnings.index');
 
-// --- Sitemap Generator ---
-Route::get('/generate-sitemap', [SitemapController::class, 'generate'])->name('sitemap.generate');
+// --- Sitemap & robots (generated per request, cached; no files written to public/) ---
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 // --- Theo dõi (Watchlist) ---
 Route::middleware('auth')->group(function () {

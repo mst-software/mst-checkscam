@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Post>
+ * @extends Factory<Post>
  */
 class PostFactory extends Factory
 {
@@ -70,12 +70,12 @@ class PostFactory extends Factory
                 'hashtags' => 'ngan-hang, bao-mat, app-gia-mao, otp',
             ],
             [
-                'title' => 'Lừa đảo mạo danh admin CheckScam để chiếm đoạt tài sản',
-                'description' => 'Nhiều kẻ xấu đã lập các tài khoản Facebook giả mạo admin của hệ thống CheckScam để lừa phí "kiểm tra thông tin" của người dùng.',
-                'content' => '<h3>Cảnh báo mạo danh đội ngũ quản trị CheckScam</h3>
-                <p>Hệ thống CheckScam xin gửi thông báo quan trọng đến toàn thể người dùng về tình trạng mạo danh cán bộ, quản trị viên của chúng tôi để trục lợi cá nhân.</p>
-                <p><strong>Thủ đoạn của chúng:</strong> Các đối tượng sẽ sử dụng tên, hình ảnh và logo của CheckScam để tạo các trang fanpage hoặc tài khoản cá nhân. Khi người dùng nhắn tin nhờ kiểm tra thông tin một tài khoản lừa đảo khác, chúng sẽ yêu cầu đóng phí "tra cứu chuyên sâu" hoặc phí "mở hồ sơ den" với giá từ vài trăm nghìn đến hàng triệu đồng.</p>
-                <p>Chúng tôi xin khẳng định <strong>CheckScam là hệ thống tra cứu MIỄN PHÍ</strong> dành cho cộng đồng. Chúng tôi không bao giờ chủ động nhắn tin yêu cầu người dùng chuyển tiền để kiểm tra thông tin hay giải quyết khiếu nại.</p>
+                'title' => 'Lừa đảo mạo danh admin Scamproof để chiếm đoạt tài sản',
+                'description' => 'Nhiều kẻ xấu đã lập các tài khoản Facebook giả mạo admin của hệ thống Scamproof để lừa phí "kiểm tra thông tin" của người dùng.',
+                'content' => '<h3>Cảnh báo mạo danh đội ngũ quản trị Scamproof</h3>
+                <p>Hệ thống Scamproof xin gửi thông báo quan trọng đến toàn thể người dùng về tình trạng mạo danh cán bộ, quản trị viên của chúng tôi để trục lợi cá nhân.</p>
+                <p><strong>Thủ đoạn của chúng:</strong> Các đối tượng sẽ sử dụng tên, hình ảnh và logo của Scamproof để tạo các trang fanpage hoặc tài khoản cá nhân. Khi người dùng nhắn tin nhờ kiểm tra thông tin một tài khoản lừa đảo khác, chúng sẽ yêu cầu đóng phí "tra cứu chuyên sâu" hoặc phí "mở hồ sơ den" với giá từ vài trăm nghìn đến hàng triệu đồng.</p>
+                <p>Chúng tôi xin khẳng định <strong>Scamproof là hệ thống tra cứu MIỄN PHÍ</strong> dành cho cộng đồng. Chúng tôi không bao giờ chủ động nhắn tin yêu cầu người dùng chuyển tiền để kiểm tra thông tin hay giải quyết khiếu nại.</p>
                 <h4>Cách xử lý khi gặp đối tượng mạo danh</h4>
                 <p>Người dân nên thực hiện các bước sau:</p>
                 <ol>
@@ -83,9 +83,9 @@ class PostFactory extends Factory
                     <li>Gửi phản ánh ngay cho chúng tôi qua kênh liên hệ chính thức trên website.</li>
                     <li>Báo cáo (Report) tài khoản giả mạo đó cho Facebook/Telegram.</li>
                 </ol>
-                <p>Hãy là người dùng thông thái. Hãy cùng nhau xây dựng một cộng đồng CheckScam minh bạch và an toàn.</p>',
+                <p>Hãy là người dùng thông thái. Hãy cùng nhau xây dựng một cộng đồng Scamproof minh bạch và an toàn.</p>',
                 'thumbnail' => 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=1000&q=80',
-                'hashtags' => 'checkscam, canh-bao, mạo-danh, bao-ve-nguoi-dung',
+                'hashtags' => 'scamproof, canh-bao, mạo-danh, bao-ve-nguoi-dung',
             ],
             [
                 'title' => 'Deepfake - Công nghệ lừa đảo cuộc gọi video tinh vi năm 2024',
@@ -126,7 +126,7 @@ class PostFactory extends Factory
                     <li>Khó khăn trong việc rút tiền khi số dư lớn.</li>
                     <li>Đội ngũ điều hành thường ẩn danh hoặc dùng thông tin giả.</li>
                 </ul>
-                <p>Trước khi đầu tư, hãy tra cứu thông tin sàn trên các cộng đồng uy tín và CheckScam để xem có phản hồi xấu nào không.</p>',
+                <p>Trước khi đầu tư, hãy tra cứu thông tin sàn trên các cộng đồng uy tín và Scamproof để xem có phản hồi xấu nào không.</p>',
                 'thumbnail' => 'https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=1000&q=80',
                 'hashtags' => 'crypto, forex, dau-tu, ponzi',
             ],
@@ -202,9 +202,9 @@ class PostFactory extends Factory
             ],
             [
                 'title' => 'Tầm quan trọng của việc kiểm tra STK trước khi chuyển tiền',
-                'description' => 'Tại sao bạn nên tra cứu số tài khoản trên CheckScam trước khi thực hiện các giao dịch mua bán online với người lạ?',
+                'description' => 'Tại sao bạn nên tra cứu số tài khoản trên Scamproof trước khi thực hiện các giao dịch mua bán online với người lạ?',
                 'content' => '<h3>Phòng bệnh hơn chữa bệnh: Quy tắc 3 phút an toàn</h3>
-                <p>Mỗi ngày có hàng trăm số tài khoản lừa đảo được cập nhật lên hệ thống CheckScam. Chỉ cần dành ra 3 phút truy cập website để tra cứu:</p>
+                <p>Mỗi ngày có hàng trăm số tài khoản lừa đảo được cập nhật lên hệ thống Scamproof. Chỉ cần dành ra 3 phút truy cập website để tra cứu:</p>
                 <ul>
                     <li>Số tài khoản ngân hàng.</li>
                     <li>Số điện thoại liên hệ.</li>
@@ -212,7 +212,7 @@ class PostFactory extends Factory
                 </ul>
                 <p>Nếu kết quả hiện "Bị báo cáo lừa đảo", hãy dừng ngay giao dịch. Đây là cách đơn giản nhất để bảo vệ túi tiền của chính bạn khỏi những kẻ gian gian lận trên mạng.</p>',
                 'thumbnail' => 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1000&auto=format&fit=crop',
-                'hashtags' => 'checkscam, giao-dich, an-toan, ngan-hang',
+                'hashtags' => 'scamproof, giao-dich, an-toan, ngan-hang',
             ],
             [
                 'title' => 'Chiêu trò lừa đảo qua ứng dụng hẹn hò Tinder và Bumble',
@@ -224,7 +224,7 @@ class PostFactory extends Factory
                 'hashtags' => 'hen-ho, tinder, lua-dao-tc, scammer',
             ],
             [
-                'title' => 'Hướng dẫn báo cáo tài khoản lừa đảo lên hệ thống CheckScam',
+                'title' => 'Hướng dẫn báo cáo tài khoản lừa đảo lên hệ thống Scamproof',
                 'description' => 'Bạn vừa bị lừa hoặc phát hiện kẻ gian? Hãy xem hướng dẫn cách gửi bằng chứng báo cáo để cảnh báo cho cộng đồng.',
                 'content' => '<h3>Cùng nhau xây dựng cộng đồng mạng sạch bóng lừa đảo</h3>
                 <p>Để báo cáo một vụ lừa đảo thành công, bạn cần chuẩn bị đầy đủ các bằng chứng sau:</p>
@@ -235,7 +235,7 @@ class PostFactory extends Factory
                 </ol>
                 <p>Báo cáo của bạn sẽ giúp hàng nghìn người khác không bị mất tiền như bạn. Hãy chung tay bảo vệ cộng đồng!</p>',
                 'thumbnail' => 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop',
-                'hashtags' => 'report, checkscam, cong-dong, canh-bao',
+                'hashtags' => 'report, scamproof, cong-dong, canh-bao',
             ],
             [
                 'title' => 'Lừa đảo "nhận quà miễn phí" nhưng phải trả phí vận chuyển cao',
@@ -256,10 +256,10 @@ class PostFactory extends Factory
                 'hashtags' => 'netflix, game, premium, lua-dao',
             ],
             [
-                'title' => 'Quy trình đóng bảo hiểm tại CheckScam đảm bảo uy tín',
-                'description' => 'Tìm hiểu về hệ thống quỹ bảo hiểm tại CheckScam và cách nó bảo vệ quyền lợi cho cả người mua và người bán.',
-                'content' => '<h3>Xây dựng lòng tin bằng quỹ bảo hiểm CheckScam</h3>
-                <p>Hệ thống Đóng Bảo Hiểm tại CheckScam giúp định danh những người làm dịch vụ uy tín. Khi một cá nhân đóng bảo hiểm, số tiền đó sẽ được hệ thống giữ lại để bồi thường nếu có sự cố gian lận xảy ra.</p>
+                'title' => 'Quy trình đóng bảo hiểm tại Scamproof đảm bảo uy tín',
+                'description' => 'Tìm hiểu về hệ thống quỹ bảo hiểm tại Scamproof và cách nó bảo vệ quyền lợi cho cả người mua và người bán.',
+                'content' => '<h3>Xây dựng lòng tin bằng quỹ bảo hiểm Scamproof</h3>
+                <p>Hệ thống Đóng Bảo Hiểm tại Scamproof giúp định danh những người làm dịch vụ uy tín. Khi một cá nhân đóng bảo hiểm, số tiền đó sẽ được hệ thống giữ lại để bồi thường nếu có sự cố gian lận xảy ra.</p>
                 <p>Ưu điểm cho người đóng bảo hiểm:</p>
                 <ul>
                     <li>Tăng độ uy tín trong mắt khách hàng.</li>
@@ -268,7 +268,7 @@ class PostFactory extends Factory
                 </ul>
                 <p>Hãy liên hệ ngay với Admin chính thức để tìm hiểu về mức phí và quy trình tham gia bảo hiểm chuyên nghiệp.</p>',
                 'thumbnail' => 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1000&auto=format&fit=crop',
-                'hashtags' => 'bao-hiem, uy-tin, checkscam, quy-bao-hiem',
+                'hashtags' => 'bao-hiem, uy-tin, scamproof, quy-bao-hiem',
             ],
             [
                 'title' => 'Cảnh báo lừa đảo trúng thưởng qua điện thoại và Facebook',
