@@ -38,7 +38,7 @@ Follow the code that already exists in this repo. Read a sibling file before wri
 - **Models:** new models use `casts()` (older ones use `$casts`; when editing an old model match it, do not modernize drive-by). Every relationship has a return type. See `laravel-eloquent-conventions`.
 - **Media:** models with images implement `HasMedia` and register conversions in `registerMediaConversions()` (see `Report`).
 - **Config:** never call `env()` outside `config/`. Admin-editable settings go through `Setting` + `ConfigHelper`.
-- **Routes:** everything lives in `routes/web.php`; admin under `Route::prefix('admin')`. The catch-all `GET /{slug}` must stay last, so add new top-level routes above it. Always named routes and `route()`.
+- **Routes:** new URLs and route names are ALWAYS English (`/warnings`, `/watchlist`), never Vietnamese slugs. Existing Vietnamese URLs (`/to-cao-lua-dao`, `/bao-hiem-cs`, ...) stay for SEO; do not rename them without approval. Everything lives in `routes/web.php`; admin under `Route::prefix('admin')`. The catch-all `GET /{slug}` must stay last, so add new top-level routes above it. Always named routes and `route()`.
 - **Search/PII:** use `StringHelper` (`detectQueryType`, `normalizeString`, `mask_*`) instead of writing new ad-hoc normalization or masking.
 - **Slugs:** `Insurance` and `Post` share one slug namespace; use `StringHelper::generateGlobalUniqueSlug()`.
 - **Authorization:** policies (e.g. `NewfeedPostPolicy`) and `Auth::user()->cannot(...)`, not manual ownership checks. Admin role checks use `isAdmin()` / `isModerator()`.

@@ -16,7 +16,7 @@ class Authenticate extends Middleware
             }
 
             // Watchlist users sign in with Google
-            if ($request->is('theo-doi') || $request->is('theo-doi/*')) {
+            if ($request->is('watchlist') || $request->is('watchlist/*')) {
                 return route('auth.google');
             }
 

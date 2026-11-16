@@ -33,13 +33,13 @@ function warningReport(array $attributes = []): Report
 }
 
 test('the warnings page is served above the catch-all report route', function () {
-    warningReport(['slug' => 'canh-bao-shadow']);
+    warningReport(['slug' => 'warnings-shadow']);
 
     $routes = collect(Route::getRoutes()->getRoutes())->map(fn ($route) => $route->getName())->values();
 
     expect($routes->search('warnings.index'))->toBeLessThan($routes->search('scammer.show'));
 
-    $this->get('/canh-bao')
+    $this->get('/warnings')
         ->assertOk()
         ->assertViewIs('warnings.index')
         ->assertSee('Danh sách cảnh báo');

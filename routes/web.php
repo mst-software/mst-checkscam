@@ -211,16 +211,16 @@ Route::patch('/comments/{id}', [CommentController::class, 'update'])->name('comm
 Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comment.destroy');
 
 // --- Warnings List ---
-Route::get('/canh-bao', [WarningController::class, 'index'])->name('warnings.index');
+Route::get('/warnings', [WarningController::class, 'index'])->name('warnings.index');
 
 // --- Sitemap Generator ---
 Route::get('/generate-sitemap', [SitemapController::class, 'generate'])->name('sitemap.generate');
 
 // --- Theo dõi (Watchlist) ---
 Route::middleware('auth')->group(function () {
-    Route::get('/theo-doi', [WatchController::class, 'index'])->name('watch.index');
-    Route::post('/theo-doi', [WatchController::class, 'store'])->name('watch.store');
-    Route::delete('/theo-doi/{watch}', [WatchController::class, 'destroy'])->name('watch.destroy');
+    Route::get('/watchlist', [WatchController::class, 'index'])->name('watch.index');
+    Route::post('/watchlist', [WatchController::class, 'store'])->name('watch.store');
+    Route::delete('/watchlist/{watch}', [WatchController::class, 'destroy'])->name('watch.destroy');
 });
 
 // --- Share card (OG image) ---

@@ -16,8 +16,8 @@ test('guests are sent to google login', function (string $method, string $uri) {
 
     expect(Watch::count())->toBe(0);
 })->with([
-    'list' => ['GET', '/theo-doi'],
-    'add' => ['POST', '/theo-doi'],
+    'list' => ['GET', '/watchlist'],
+    'add' => ['POST', '/watchlist'],
 ]);
 
 test('the list page shows only the current user watches', function () {
