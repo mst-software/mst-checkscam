@@ -31,22 +31,52 @@ test('home renders hero, real stats and sections', function () {
 
     $this->get('/')
         ->assertOk()
-        ->assertSee('Kiểm tra trước khi chuyển tiền')
+        ->assertSee('KIỂM TRA &amp; TỐ CÁO SCAM.', false)
+        ->assertSee('Hệ thống dữ liệu lớn nhất Việt Nam giúp bạn kiểm tra độ tín nhiệm của đối tác')
         ->assertSee('id="searchInput"', false)
+        ->assertSee('action="'.route('search.index').'"', false)
         ->assertSee(json_encode(route('search.autocomplete')), false)
-        ->assertSeeInOrder(['Tố cáo đã duyệt', '1', 'Đối tượng bị tố cáo', '1', 'Bình luận cộng đồng', '2'])
-        ->assertSee(route('newfeed.index'), false)
-        ->assertSee(url('/api-checkscam'), false)
+        ->assertSeeInOrder(['1', 'Kẻ lừa đảo', '2', 'Bình luận'])
+        ->assertSee(now()->format('d/m/Y').' CÓ 1 CẢNH BÁO')
+        ->assertSeeInOrder(['KIỂM TRA', 'id="searchInput"', 'Lối tắt', 'CẢNH BÁO', 'Cảnh báo mới nhất', 'Bình luận mới', 'Đối tác tin cậy'], false)
         ->assertSee('Cảnh báo mới nhất')
         ->assertSee('Tìm kiếm nhiều trong tuần')
         ->assertSee('Bình luận mới')
         ->assertSee('Đối tác tin cậy')
         ->assertSee('Trần Bảo Hiểm')
         ->assertSee('Tham gia cộng đồng CheckScam')
-        ->assertSee('Dữ liệu do cộng đồng đóng góp và được kiểm duyệt')
         ->assertSee('091***678')
         ->assertDontSee('0912.345.678')
         ->assertDontSee('Nguyễn Văn Tèo');
+});
+
+test('home hero action cards link to real pages', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    $nav = str($html)->after('aria-label="Lối tắt"')->before('</nav>');
+
+    preg_match_all('/href="([^"]*)"/', $nav, $matches);
+
+    expect($matches[1])->toBe([
+        route('reports'),
+        route('insurances.frontend.index'),
+        route('newfeed.index'),
+        url('/api-checkscam'),
+    ])->not->toContain('#');
+
+    expect((string) $nav)->toContain('Tố cáo Scam', 'Bảo hiểm CS', 'Chợ buôn bán', 'Bot Check');
+});
+
+test('search results keep the compact search bar without the home hero', function () {
+    homeApprovedReport();
+
+    $this->get(route('search.index', ['q' => '0912345678']))
+        ->assertOk()
+        ->assertSee('id="searchInput"', false)
+        ->assertSee('value="0912345678"', false)
+        ->assertSee(json_encode(route('search.autocomplete')), false)
+        ->assertDontSee('KIỂM TRA &amp; TỐ CÁO SCAM.', false)
+        ->assertDontSee('aria-label="Lối tắt"', false);
 });
 
 test('weekly top searches only list reported targets searched in the last 7 days', function () {
