@@ -41,6 +41,7 @@ test('search page without a query outputs a single noindex robots meta', functio
 test('pages without their own robots use the site setting once', function () {
     Setting::setValue('site_index', 'index, nofollow');
     Cache::flush();
+    Report::factory()->create(['status' => 'approved', 'type' => 'account']);
 
     $html = $this->get(route('warnings.index'))->assertOk()->getContent();
 
