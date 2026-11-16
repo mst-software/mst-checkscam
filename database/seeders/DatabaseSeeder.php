@@ -22,14 +22,18 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(SettingSeeder::class);
         $this->call(BannerSeeder::class);
-        User::factory()->create([
-            'username' => 'admin',
-            'email' => 'admin@mstsoftware.vn',
-            'password' => Hash::make('123456'),
-            'full_name' => 'Quản trị viên',
-            'role' => 'admin',
-            'status' => 1,
-        ]);
+        // firstOrCreate keeps `migrate --seed` re-runnable on a database that already has the admin.
+        User::firstOrCreate(
+            ['username' => 'admin'],
+            User::factory()->raw([
+                'username' => 'admin',
+                'email' => 'admin@mstsoftware.vn',
+                'password' => Hash::make('123456'),
+                'full_name' => 'Quản trị viên',
+                'role' => 'admin',
+                'status' => 1,
+            ]),
+        );
 
         Report::factory()->count(50)->create();
         Insurance::factory()->count(200)->create();
