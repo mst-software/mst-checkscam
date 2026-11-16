@@ -50,9 +50,9 @@
         aria-describedby="nf-content-hint"
         class="{{ $fieldClass }} resize-y leading-relaxed"
       ></textarea>
-      <p id="nf-content-hint" class="text-ink-subtle mt-1 text-right text-xs tabular-nums">
+      <p id="nf-content-hint" class="text-ink-subtle mt-1 flex justify-end text-xs tabular-nums">
         <span id="nf-content-count">0</span>
-        /5000
+        <span>/5000</span>
       </p>
     </div>
 
@@ -60,7 +60,7 @@
       <div>
         <label for="nf-price" class="text-ink mb-1.5 block text-sm font-medium">
           Giá (đồng)
-          <span class="text-ink-subtle font-normal">, tuỳ chọn</span>
+          <span class="text-ink-subtle font-normal">(tuỳ chọn)</span>
         </label>
         <input
           id="nf-price"
@@ -98,7 +98,7 @@
     <div>
       <p class="text-ink mb-1.5 text-sm font-medium" id="nf-images-label">
         Ảnh
-        <span class="text-ink-subtle font-normal">, tuỳ chọn, tối đa 10 ảnh, mỗi ảnh 5MB</span>
+        <span class="text-ink-subtle font-normal">(tuỳ chọn, tối đa 10 ảnh, mỗi ảnh 5MB)</span>
       </p>
       <input
         id="nf-images"

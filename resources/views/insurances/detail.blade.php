@@ -104,9 +104,8 @@
             <ol class="text-ink mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed">
               <li>Chỉ giao dịch qua số tài khoản và kênh liên hệ được liệt kê tại trang này.</li>
               <li>
-                Mọi yêu cầu chuyển tiền từ tài khoản khác, dù trùng tên “{{ $insurance->full_name }}”, đều là
-                <strong class="text-danger font-semibold">lừa đảo</strong>
-                .
+                <strong class="text-danger font-semibold">Lừa đảo:</strong>
+                mọi yêu cầu chuyển tiền từ tài khoản khác, dù trùng tên “{{ $insurance->full_name }}”.
               </li>
               <li>Luôn kiểm tra đúng địa chỉ website {{ $siteName }} trước khi giao dịch.</li>
             </ol>
