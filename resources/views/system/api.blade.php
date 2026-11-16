@@ -49,7 +49,7 @@
     >
       <a
         href="{{ url('/lien-he-admin') }}"
-        class="bg-hero-action hover:bg-hero-action-hover rounded-control inline-flex h-10 items-center gap-2 px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        class="bg-hero-action hover:bg-hero-action-hover rounded-control inline-flex h-10 items-center gap-2 px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hero-action"
       >
         <i class="fa-solid fa-key" aria-hidden="true"></i>
         Đăng ký API key
@@ -101,10 +101,9 @@
 
       <x-ucs.card title="Xác thực">
         <p class="text-ink-muted text-sm leading-relaxed">
-          Gửi API key qua một trong hai header dưới đây. Mỗi key có giới hạn số truy vấn mỗi phút (mặc định 30), xem
-          header
+          Gửi API key qua một trong hai header dưới đây. Mỗi key có giới hạn số truy vấn mỗi phút (mặc định 30). Số lượt
+          còn lại được trả về trong header
           <code class="{{ $codeClass }}">X-RateLimit-Remaining</code>
-          .
         </p>
         <div class="mt-3 overflow-x-auto">
           <table class="w-full min-w-[480px]">
@@ -149,12 +148,10 @@
               <tr>
                 <td class="{{ $tdClass }}"><code class="{{ $codeClass }}">risk</code></td>
                 <td class="{{ $tdClass }}">
+                  Mức rủi ro tính theo số tố cáo đã duyệt và độ mới của tố cáo gần nhất, nhận một trong các giá trị
                   <code class="{{ $codeClass }}">low</code>
-                  ,
                   <code class="{{ $codeClass }}">medium</code>
-                  hoặc
                   <code class="{{ $codeClass }}">high</code>
-                  , tính theo số tố cáo đã duyệt và độ mới của tố cáo gần nhất.
                 </td>
               </tr>
               <tr>
@@ -203,9 +200,8 @@
                 <td class="{{ $tdClass }} tabular-nums">429</td>
                 <td class="{{ $tdClass }}"><code class="{{ $codeClass }}">rate_limited</code></td>
                 <td class="{{ $tdClass }}">
-                  Vượt giới hạn truy vấn, thử lại sau số giây trong header
+                  Vượt giới hạn truy vấn. Thời gian chờ (giây) nằm trong header
                   <code class="{{ $codeClass }}">Retry-After</code>
-                  .
                 </td>
               </tr>
             </tbody>
