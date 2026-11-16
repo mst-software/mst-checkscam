@@ -1,0 +1,15 @@
+<?php
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+test('the api docs page documents the real endpoint and how to get a key', function () {
+    $this->withoutVite()
+        ->get('/api-checkscam')
+        ->assertOk()
+        ->assertSee(route('api.v1.check'))
+        ->assertSee('Authorization: Bearer', false)
+        ->assertSee('X-Api-Key')
+        ->assertSee('Lấy API key');
+});

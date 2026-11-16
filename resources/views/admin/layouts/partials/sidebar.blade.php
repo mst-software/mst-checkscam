@@ -28,6 +28,12 @@
             </li>
           </ul>
         </li>
+        <li class="{{ request()->is('admin/complaints*') ? 'active' : '' }}">
+          <a href="{{ route('admin.complaints.index') }}">
+            <i data-feather="flag"></i>
+            <span>Khiếu nại</span>
+          </a>
+        </li>
 
         <li class="submenu">
           <a href="javascript:void(0);">
@@ -178,8 +184,8 @@
             </span>
           </a>
         </li>
-        <li>
-          <a href="{{ route('admin.upgrade') }}" class="pro-feature-link">
+        <li class="{{ request()->is('admin/api-keys*') ? 'active' : '' }}">
+          <a href="{{ route('admin.api-keys.index') }}" class="pro-feature-link">
             <i data-feather="code"></i>
             <span>
               <span class="pro-feature-text">Public API</span>

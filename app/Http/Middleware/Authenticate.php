@@ -15,6 +15,11 @@ class Authenticate extends Middleware
                 return route('admin.auth.login');
             }
 
+            // Watchlist users sign in with Google
+            if ($request->is('watchlist') || $request->is('watchlist/*')) {
+                return route('auth.google');
+            }
+
             // Nếu là khách (Client), bạn CHƯA định nghĩa route 'login'
             // nên nó báo lỗi. Bạn có 2 lựa chọn:
 

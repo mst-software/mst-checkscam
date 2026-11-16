@@ -4,6 +4,7 @@
 
   $systemLinks = [
     ['label' => 'Kiểm tra scam', 'url' => route('home')],
+    ['label' => 'Danh sách cảnh báo', 'url' => route('warnings.index')],
     ['label' => 'Quỹ bảo hiểm CS', 'url' => route('insurances.frontend.index')],
     ['label' => 'Khu mua bán', 'url' => route('newfeed.index')],
     ['label' => 'Hệ thống Public API', 'url' => url('/api-checkscam')],

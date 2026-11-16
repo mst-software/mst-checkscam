@@ -4,14 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Helpers\StatsHelper;
 use App\Helpers\StringHelper;
+use App\Models\Comment;
+use App\Models\Insurance;
 use App\Models\Report;
 use App\Models\SearchLog;
+use App\Services\ScamLookupService;
 use Artesaos\SEOTools\Facades\SEOTools;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 
 class SearchController extends Controller
 {
+    public function __construct(private ScamLookupService $scamLookup) {}
+
     public function index(Request $request)
     {
         $query = trim($request->query('q', ''));
@@ -34,31 +40,9 @@ class SearchController extends Controller
         $type = null;
 
         if ($query !== '') {
-            [$type, $formattedQuery] = StringHelper::detectQueryType($query);
-            $normalizedQuery = StringHelper::normalizeString($formattedQuery);
+            [$type] = StringHelper::detectQueryType($query);
 
-            $dbQuery = Report::where('status', 'approved')
-                ->with('comments')
-                ->when(in_array($type, ['phone', 'bank']), function ($q) use ($formattedQuery) {
-                    $q->whereRaw("REGEXP_REPLACE(target_id, '[^0-9]', '') = ?", [$formattedQuery]);
-                })
-                ->when($type == 'facebook', function ($q) use ($formattedQuery, $query) {
-                    $q->where(function ($sub) use ($formattedQuery, $query) {
-                        $sub->where('target_id', 'LIKE', "%{$formattedQuery}%")
-                            ->orWhere('slug', 'LIKE', "%{$formattedQuery}%")
-                            ->orWhere('target_name', 'LIKE', "%{$query}%");
-                    });
-                })
-                ->when($type == 'uuid', function ($q) use ($formattedQuery) {
-                    $q->where('slug', $formattedQuery);
-                })
-                ->when($type == 'name', function ($q) use ($normalizedQuery) {
-                    $q->whereRaw(
-                        "LOWER(TRIM(REGEXP_REPLACE(target_name, '\\\\s+', ' '))) = ?",
-                        [$normalizedQuery],
-                    );
-                })
-                ->orderByDesc('created_at');
+            $dbQuery = $this->scamLookup->reportsQuery($query)->with('comments');
 
             $matchedIds = (clone $dbQuery)->pluck('id');
             $ip = $request->ip();
@@ -69,31 +53,7 @@ class SearchController extends Controller
                 Cache::put($searchCacheKey, true, now()->addHours(24));
             }
 
-            $matchedInsurances = \App\Models\Insurance::where('status', 1)
-                ->where(function ($q) use ($query, $formattedQuery, $normalizedQuery) {
-                    $q->where('full_name', 'LIKE', "%{$query}%")
-                        ->orWhereRaw("LOWER(TRIM(REGEXP_REPLACE(full_name, '\\\\s+', ' '))) LIKE ?", ["%{$normalizedQuery}%"])
-                        ->orWhere('contact_info', 'LIKE', "%{$formattedQuery}%")
-                        ->orWhere('payment_accounts', 'LIKE', "%{$formattedQuery}%")
-                        ->orWhere('slug', 'LIKE', "%{$formattedQuery}%");
-                })
-                ->get()
-                ->sortByDesc(function ($insurance) use ($normalizedQuery, $query, $formattedQuery) {
-                    $normalizedName = StringHelper::normalizeString($insurance->full_name);
-                    if ($normalizedName === $normalizedQuery || strcasecmp($insurance->full_name, $query) === 0) {
-                        return 3;
-                    }
-
-                    if (
-                        str_contains(json_encode($insurance->contact_info), '"'.$formattedQuery.'"') ||
-                        str_contains(json_encode($insurance->payment_accounts), '"'.$formattedQuery.'"')
-                    ) {
-                        return 2;
-                    }
-
-                    return 1;
-                })
-                ->values();
+            $matchedInsurances = $this->scamLookup->matchingInsurances($query);
 
             $results = $dbQuery->paginate(10)->withQueryString();
             $isFound = $results->total() > 0 || $matchedInsurances->isNotEmpty();
@@ -137,14 +97,14 @@ class SearchController extends Controller
             $offset = 8 + ($page - 2) * 16;
         }
 
-        $commentsQuery = \App\Models\Comment::whereHas('report', function ($query) {
+        $commentsQuery = Comment::whereHas('report', function ($query) {
             $query->where('status', 'approved');
         })->with('report')->latest();
 
         $totalCommentsCount = $commentsQuery->count();
         $commentItems = $commentsQuery->skip($offset)->take($perPage)->get();
 
-        $comments = new \Illuminate\Pagination\LengthAwarePaginator(
+        $comments = new LengthAwarePaginator(
             $commentItems,
             $totalCommentsCount,
             $perPage,
@@ -195,7 +155,7 @@ class SearchController extends Controller
                 'slug' => $r->slug,
             ]);
 
-        $insuranceSuggestions = \App\Models\Insurance::where('status', 1)
+        $insuranceSuggestions = Insurance::where('status', 1)
             ->where(function ($q) use ($query, $formattedQuery) {
                 $q->where('contact_info', 'LIKE', "%{$formattedQuery}%")
                     ->orWhere('payment_accounts', 'LIKE', "%{$formattedQuery}%")
