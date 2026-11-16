@@ -28,6 +28,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TelegramWebhookController;
+use App\Http\Controllers\WarningController;
 use App\Http\Controllers\WatchController;
 use Illuminate\Support\Facades\Route;
 
@@ -208,6 +209,9 @@ Route::post('/search/clear-history', [SearchController::class, 'clearHistory'])-
 Route::post('/reports/{reportId}/comments', [CommentController::class, 'store'])->name('comment.store');
 Route::patch('/comments/{id}', [CommentController::class, 'update'])->name('comment.update');
 Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comment.destroy');
+
+// --- Warnings List ---
+Route::get('/canh-bao', [WarningController::class, 'index'])->name('warnings.index');
 
 // --- Sitemap Generator ---
 Route::get('/generate-sitemap', [SitemapController::class, 'generate'])->name('sitemap.generate');

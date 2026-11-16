@@ -5,6 +5,7 @@
 
   $navItems = [
     ['label' => 'Tra cứu', 'url' => route('home'), 'active' => request()->routeIs('home') || request()->is('search*')],
+    ['label' => 'Cảnh báo', 'url' => route('warnings.index'), 'active' => request()->routeIs('warnings.index')],
     ['label' => 'Tố cáo', 'url' => route('reports'), 'active' => request()->is('to-cao-lua-dao*')],
     ['label' => 'Bảo hiểm CS', 'url' => route('insurances.frontend.index'), 'active' => request()->is('bao-hiem-cs*')],
     ['label' => 'Khu mua bán', 'url' => route('newfeed.index'), 'active' => request()->is('newfeed*')],
