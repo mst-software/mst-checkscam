@@ -90,7 +90,7 @@ test('home hero action cards link to real pages', function () {
         url('/api-checkscam'),
     ])->not->toContain('#');
 
-    expect((string) $nav)->toContain('Tố cáo scam', 'Bảo hiểm CS', 'Chợ buôn bán', 'Bot check', 'fa-arrow-right');
+    expect((string) $nav)->toContain('Tố cáo scam', 'Bảo hiểm CS', 'Chợ buôn bán', 'Bot check', 'fa-chevron-right');
 
     expect($html)->not->toContain('aria-label="Dữ liệu trên hệ thống"');
 });

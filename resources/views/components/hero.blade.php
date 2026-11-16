@@ -40,23 +40,17 @@
 
         <x-hero.search-form class="mx-auto mt-8 max-w-[48.75rem] md:mt-9" hints :recent-searches="$recentSearches" />
 
-        <nav aria-label="Lối tắt" class="mt-10 md:mt-12">
+        <nav aria-label="Lối tắt" class="mt-8">
           <ul class="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             <li>
-              <x-hero.action-card
-                :href="route('reports')"
-                icon="fa-solid fa-flag"
-                label="Tố cáo scam"
-                description="Gửi bằng chứng để cảnh báo cộng đồng."
-                featured
-              />
+              <x-hero.action-card :href="route('reports')" icon="fa-solid fa-flag" label="Tố cáo scam" sub="Report" />
             </li>
             <li>
               <x-hero.action-card
                 :href="route('insurances.frontend.index')"
                 icon="fa-solid fa-shield-halved"
                 label="Bảo hiểm CS"
-                description="Giao dịch qua trung gian đã ký quỹ."
+                sub="Insurance"
               />
             </li>
             <li>
@@ -64,7 +58,7 @@
                 :href="route('newfeed.index')"
                 icon="fa-solid fa-store"
                 label="Chợ buôn bán"
-                description="Đăng và tìm tin mua bán trong cộng đồng."
+                sub="Trading"
               />
             </li>
             <li>
@@ -72,7 +66,7 @@
                 :href="url('/api-checkscam')"
                 icon="fa-solid fa-robot"
                 label="Bot check"
-                description="Tra cứu nhanh qua bot và API."
+                sub="Automation"
               />
             </li>
           </ul>
