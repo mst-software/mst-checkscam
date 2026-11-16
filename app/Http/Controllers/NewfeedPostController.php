@@ -125,7 +125,7 @@ class NewfeedPostController extends Controller
             'image_urls' => $this->getImageUrls($post),
             'report_count' => $post->report_count,
             'is_hidden' => $post->is_hidden,
-            'created_at' => $post->created_at->diffForHumans(),
+            'created_at' => $post->created_at->locale('vi')->diffForHumans(),
             'is_mine' => $authId && $authId === $post->user_id,
             'is_reported' => in_array($post->id, $reportedIds),
             'user' => [

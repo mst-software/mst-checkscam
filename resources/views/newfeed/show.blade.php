@@ -15,7 +15,7 @@
   <main class="flex-1 pb-20">
     <x-ucs.page-header
       title="Chi tiết bài đăng"
-      :description="$post->category . ' · đăng ' . $post->created_at->diffForHumans()"
+      :description="$post->category . ' · đăng ' . $post->created_at->locale('vi')->diffForHumans()"
       :breadcrumbs="[
         ['name' => 'Khu mua bán', 'url' => route('newfeed.index')],
         ['name' => 'Chi tiết bài đăng', 'url' => route('newfeed.show', $post->id)],
@@ -48,7 +48,7 @@
             </p>
             <p class="text-ink-subtle text-xs">
               <time datetime="{{ $post->created_at->toIso8601String() }}">
-                {{ $post->created_at->diffForHumans() }}
+                {{ $post->created_at->locale('vi')->diffForHumans() }}
               </time>
               ·
               <x-ucs.badge>{{ $post->category }}</x-ucs.badge>

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Helpers\ConfigHelper;
 use Artesaos\SEOTools\Facades\SEOTools;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // The UI is Vietnamese whatever APP_LOCALE says, so relative dates read "2 giờ trước".
+        Carbon::setLocale('vi');
+
         // client
         Blade::component('layouts.partials.header', 'header');
         Blade::component('layouts.partials.footer', 'footer');
