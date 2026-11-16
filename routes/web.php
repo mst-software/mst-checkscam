@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InsuranceController;
 use App\Http\Controllers\NewfeedController;
@@ -70,9 +71,8 @@ Route::get('/lien-he-admin', function () {
 Route::get('/dieu-khoan', function () {
     return view('legal.terms');
 });
-Route::get('/giai-quyet-khieu-nai', function () {
-    return view('legal.dispute');
-});
+Route::get('/giai-quyet-khieu-nai', [ComplaintController::class, 'create'])->name('complaints.create');
+Route::post('/giai-quyet-khieu-nai', [ComplaintController::class, 'store'])->name('complaints.store');
 
 // --- Admin Panel ---
 Route::name('admin.')->prefix('admin')->group(function () {
