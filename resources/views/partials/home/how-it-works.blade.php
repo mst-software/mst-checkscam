@@ -18,17 +18,20 @@
 <section aria-label="Cách Scamproof hoạt động">
   <x-ucs.section-title title="Cách Scamproof hoạt động" subtitle="Ba bước để quyết định có nên giao dịch hay không." />
 
-  <ol class="grid grid-cols-1 gap-4 md:grid-cols-3">
+  <ol class="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+    {{-- On mobile the step number sits beside the text to keep the page short. --}}
     @foreach ($steps as $index => $step)
-      <li class="border-line bg-surface rounded-card border p-5 sm:p-6">
+      <li class="border-line bg-surface rounded-card flex gap-4 border p-4 sm:p-6 md:block">
         <span
-          class="bg-accent-soft text-accent flex size-9 items-center justify-center rounded-full text-sm font-extrabold tabular-nums"
+          class="bg-accent-soft text-accent flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-extrabold tabular-nums"
           aria-hidden="true"
         >
           {{ $index + 1 }}
         </span>
-        <h3 class="text-ink mt-4 text-base font-bold">{{ $step['title'] }}</h3>
-        <p class="text-ink-muted mt-1.5 text-sm leading-relaxed">{{ $step['text'] }}</p>
+        <div class="min-w-0">
+          <h3 class="text-ink text-base font-bold md:mt-4">{{ $step['title'] }}</h3>
+          <p class="text-ink-muted mt-1.5 text-sm leading-relaxed">{{ $step['text'] }}</p>
+        </div>
       </li>
     @endforeach
   </ol>

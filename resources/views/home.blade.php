@@ -15,7 +15,7 @@
     @else
       <x-hero :stats="$stats" :recent-searches="$recentSearches ?? collect()" />
 
-      <x-ucs.container class="space-y-12 pb-8 lg:space-y-14 lg:pb-10">
+      <x-ucs.container class="space-y-10 pb-8 md:space-y-12 lg:space-y-14 lg:pb-10">
         @include('partials.home.how-it-works')
 
         @include('partials.home.moderation')
