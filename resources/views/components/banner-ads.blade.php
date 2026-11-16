@@ -25,7 +25,6 @@
   <div class="banner-ads-container" data-ad-container>
     @foreach ($banners as $banner)
       <div class="{{ $class }} last:mb-0" data-ad-slot>
-        <p class="text-ink-subtle mb-1 text-xs">Quảng cáo</p>
         @if ($banner->type === 'horizontal')
           <x-ads-horizontal :image="$banner->image_path" :url="$banner->redirect_url" :alt="$banner->title" />
         @else

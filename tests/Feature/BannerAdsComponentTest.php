@@ -17,20 +17,21 @@ function homeTopBanner(array $attributes = []): Banner
     ], $attributes));
 }
 
-test('banner ads render a labelled, lazy, sponsored slot that hides itself on image errors', function () {
+test('banner ads render a lazy, sponsored slot without label or border that hides itself on image errors', function () {
     homeTopBanner();
 
     $this->blade('<x-banner-ads position="home_top" />')
         ->assertSee('data-ad-container', false)
         ->assertSee('data-ad-slot', false)
-        ->assertSee('Quảng cáo')
+        ->assertDontSee('Quảng cáo')
         ->assertSee('href="https://partner.example.test/promo"', false)
         ->assertSee('target="_blank" rel="sponsored noopener"', false)
         ->assertSee('src="https://example.test/banner.png"', false)
         ->assertSee('loading="lazy"', false)
         ->assertSee('onerror="', false)
         ->assertSee('aspect-[8/1]', false)
-        ->assertSee('bg-surface-muted', false)
+        ->assertDontSee('bg-surface-muted', false)
+        ->assertDontSee('border-line', false)
         ->assertDontSee('dark:bg-white', false);
 });
 
