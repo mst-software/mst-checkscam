@@ -7,7 +7,7 @@
   ];
 
   $assurances = [
-    ['icon' => 'fa-solid fa-user-shield', 'text' => 'Mọi tố cáo được kiểm duyệt trước khi công khai, thường trong 30 phút đến 12 giờ.'],
+    ['icon' => 'fa-solid fa-user-shield', 'text' => 'Mọi tố cáo được kiểm duyệt trước khi công khai, thường được xem xét trong vòng 24 giờ.'],
     ['icon' => 'fa-solid fa-lock', 'text' => 'Tên và thông tin liên hệ của bạn không hiển thị công khai; chỉ quản trị viên xem được để xác minh.'],
     ['icon' => 'fa-solid fa-scale-balanced', 'text' => 'Tố cáo thiếu căn cứ hoặc sai sự thật sẽ bị từ chối hoặc gỡ.'],
     ['icon' => 'fa-solid fa-hand-holding-heart', 'text' => 'Tố cáo và tra cứu hoàn toàn miễn phí.'],

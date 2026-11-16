@@ -9,7 +9,7 @@
     ],
     [
       'title' => 'Người kiểm duyệt xem xét thế nào',
-      'body' => 'Mọi tố cáo mới đều ở trạng thái chờ duyệt, không có tố cáo nào tự động đăng. Người kiểm duyệt đọc từng tố cáo và:',
+      'body' => 'Mọi tố cáo mới đều ở trạng thái chờ duyệt, không có tố cáo nào tự động đăng. Tố cáo thường được xem xét trong vòng 24 giờ. Người kiểm duyệt đọc từng tố cáo và:',
       'items' => ['Đối chiếu bằng chứng với thông tin đối tượng được tố cáo.', 'Loại bỏ tố cáo trùng lặp, thiếu căn cứ hoặc không liên quan đến lừa đảo.', 'Có thể chỉnh sửa để che thông tin nhạy cảm trước khi công khai.'],
     ],
     [

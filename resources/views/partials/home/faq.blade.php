@@ -2,7 +2,7 @@
   $faqs = [
     [
       'question' => 'Làm sao để tố cáo lừa đảo?',
-      'answer' => 'Bấm "Tố cáo", điền thông tin đối tượng kèm hình ảnh bằng chứng rõ ràng. Ban quản trị sẽ duyệt trong 24 giờ.',
+      'answer' => 'Bấm "Tố cáo", điền thông tin đối tượng kèm hình ảnh bằng chứng rõ ràng. Tố cáo thường được xem xét trong vòng 24 giờ.',
     ],
     [
       'question' => 'Tại sao bài tố cáo chưa được duyệt?',
