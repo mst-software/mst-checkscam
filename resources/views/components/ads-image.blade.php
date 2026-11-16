@@ -6,7 +6,8 @@
 {{--
   Third-party banner images often fail (403, hotlink protection). On error the whole ad slot is
   hidden, and the banner-ads container too once none of its slots is left, so no blank gap or
-  broken-image icon is shown.
+  broken-image icon is shown. No box size is reserved: the slot takes the image's own height, so an
+  image that has not loaded yet (lazy) leaves no empty box.
 --}}
 <img
   src="{{ $src }}"
@@ -21,5 +22,5 @@
       c.hidden = true;
     }
   "
-  class="h-full w-full object-contain"
+  class="block h-auto w-full"
 />
