@@ -2,17 +2,13 @@
 
 @section('content')
   <main class="flex-1 pb-20">
-    <x-breadcrumb :links="[['name' => 'Danh sách cảnh báo']]" />
+    <x-ucs.page-header
+      title="Danh sách cảnh báo"
+      description="Tài khoản ngân hàng, số điện thoại và Facebook đã bị cộng đồng tố cáo và được kiểm duyệt. Thông tin đã được che bớt để bảo vệ quyền riêng tư."
+      :breadcrumbs="[['name' => 'Danh sách cảnh báo', 'url' => route('warnings.index')]]"
+    />
 
     <x-ucs.container>
-      <div class="mb-6 max-w-2xl">
-        <h1 class="text-ink text-2xl font-semibold tracking-tight sm:text-3xl">Danh sách cảnh báo</h1>
-        <p class="text-ink-subtle mt-2 text-sm sm:text-base">
-          Các tài khoản ngân hàng, số điện thoại và Facebook đã bị cộng đồng tố cáo và được kiểm duyệt. Thông tin đã
-          được che bớt để bảo vệ quyền riêng tư.
-        </p>
-      </div>
-
       @include('warnings.partials.filters')
 
       <p class="text-ink-muted mt-6 mb-3 text-sm">
