@@ -9,7 +9,7 @@
     >
       <a
         href="#gui-khieu-nai"
-        class="bg-hero-action hover:bg-hero-action-hover rounded-control inline-flex h-10 items-center gap-2 px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        class="bg-hero-action hover:bg-hero-action-hover rounded-control inline-flex h-10 items-center gap-2 px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hero-action"
       >
         <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
         Gửi khiếu nại

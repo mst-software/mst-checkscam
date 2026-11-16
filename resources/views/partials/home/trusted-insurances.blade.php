@@ -2,7 +2,7 @@
   <section aria-label="Đối tác tin cậy">
     <x-ucs.section-title
       title="Đối tác tin cậy"
-      subtitle="Trung gian đã ký quỹ với CheckScam, quỹ dùng để đền bù nếu xảy ra lừa đảo."
+      subtitle="Trung gian đã ký quỹ với Scamproof, quỹ dùng để đền bù nếu xảy ra lừa đảo."
       action-label="Xem tất cả"
       :action-url="route('insurances.frontend.index')"
     />

@@ -44,7 +44,7 @@ test('home renders hero, real stats and sections', function () {
         ->assertSee('Bình luận mới')
         ->assertSee('Đối tác tin cậy')
         ->assertSee('Trần Bảo Hiểm')
-        ->assertSee('Tham gia cộng đồng CheckScam')
+        ->assertSee('Tham gia cộng đồng Scamproof')
         ->assertSee('091***678')
         ->assertDontSee('0912.345.678')
         ->assertDontSee('Nguyễn Văn Tèo');

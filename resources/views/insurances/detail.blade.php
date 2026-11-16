@@ -4,16 +4,16 @@
   $contacts = is_array($insurance->contact_info) ? array_filter($insurance->contact_info, fn ($c) => ! empty($c['link'])) : [];
   $services = is_array($insurance->services) ? array_filter($insurance->services, fn ($s) => ! empty($s['title'])) : [];
   $accounts = is_array($insurance->payment_accounts) ? array_filter($insurance->payment_accounts, fn ($a) => ! empty($a['number'])) : [];
-  $siteName = $siteConfig['og_site_name'] ?? 'CheckScam';
+  $siteName = $siteConfig['og_site_name'] ?? 'Scamproof';
 @endphp
 
 @section('content')
   <main class="flex-1 pb-20">
     <x-ucs.page-header
       :title="$insurance->full_name"
-      description="Thành viên đã ký quỹ bảo hiểm và được CheckScam xác minh danh tính."
+      description="Thành viên đã ký quỹ bảo hiểm và được Scamproof xác minh danh tính."
       :breadcrumbs="[
-        ['name' => 'Quỹ bảo hiểm CS', 'url' => route('insurances.frontend.index')],
+        ['name' => 'Quỹ bảo hiểm', 'url' => route('insurances.frontend.index')],
         ['name' => $insurance->full_name, 'url' => route('insurances.frontend.show', $insurance->slug)],
       ]"
     >
@@ -22,7 +22,7 @@
           href="{{ reset($contacts)['link'] }}"
           target="_blank"
           rel="noopener noreferrer"
-          class="bg-hero-action hover:bg-hero-action-hover rounded-control inline-flex h-10 items-center gap-2 px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          class="bg-hero-action hover:bg-hero-action-hover rounded-control inline-flex h-10 items-center gap-2 px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hero-action"
         >
           <i class="fa-solid fa-message" aria-hidden="true"></i>
           Liên hệ thành viên

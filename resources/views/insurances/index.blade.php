@@ -3,9 +3,9 @@
 @section('content')
   <main class="flex-1 pb-20">
     <x-ucs.page-header
-      title="Quỹ bảo hiểm CS"
-      description="Trung gian đã ký quỹ với CheckScam. Giao dịch qua các thành viên trong danh sách để được bảo lãnh khi xảy ra rủi ro."
-      :breadcrumbs="[['name' => 'Quỹ bảo hiểm CS', 'url' => route('insurances.frontend.index')]]"
+      title="Quỹ bảo hiểm"
+      description="Trung gian đã ký quỹ với Scamproof. Giao dịch qua các thành viên trong danh sách để được bảo lãnh khi xảy ra rủi ro."
+      :breadcrumbs="[['name' => 'Quỹ bảo hiểm', 'url' => route('insurances.frontend.index')]]"
     />
 
     <x-ucs.container>
@@ -65,7 +65,7 @@
 
       <x-ucs.card class="mt-10" title="Quy định về quỹ bảo hiểm">
         <p class="text-ink-muted max-w-3xl text-sm leading-relaxed">
-          CheckScam chỉ bảo lãnh các giao dịch có sự tham gia của thành viên trong danh sách trên. Tiền ký quỹ của thành
+          Scamproof chỉ bảo lãnh các giao dịch có sự tham gia của thành viên trong danh sách trên. Tiền ký quỹ của thành
           viên được ban quản trị giữ để bồi thường trong trường hợp có rủi ro từ phía thành viên đó.
         </p>
         <div class="mt-4 flex flex-wrap gap-2">

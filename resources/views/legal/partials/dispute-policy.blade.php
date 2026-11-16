@@ -17,7 +17,7 @@
       Khôi phục uy tín
     </h2>
     <p class="text-ink-muted mt-2 text-sm leading-relaxed">
-      Khi hai bên đã giải quyết xong và người tố cáo ban đầu xác nhận, CheckScam sẽ gỡ bài viết trong tối đa 12 giờ làm
+      Khi hai bên đã giải quyết xong và người tố cáo ban đầu xác nhận, Scamproof sẽ gỡ bài viết trong tối đa 12 giờ làm
       việc.
     </p>
   </x-ucs.card>

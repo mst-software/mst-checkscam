@@ -10,7 +10,7 @@
       <button
         type="button"
         id="btn-open-post-form"
-        class="bg-hero-action hover:bg-hero-action-hover rounded-control inline-flex h-10 cursor-pointer items-center gap-2 px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        class="bg-hero-action hover:bg-hero-action-hover rounded-control inline-flex h-10 cursor-pointer items-center gap-2 px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hero-action"
       >
         <i class="fa-solid fa-plus" aria-hidden="true"></i>
         Đăng bài

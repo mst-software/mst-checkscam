@@ -34,7 +34,7 @@
         @if ($post->user->is_verified)
           <i
             class="fa-solid fa-circle-check text-success text-xs"
-            title="Tài khoản đã được CheckScam xác minh uy tín"
+            title="Tài khoản đã được Scamproof xác minh uy tín"
             aria-hidden="true"
           ></i>
           <span class="sr-only">(đã xác minh)</span>

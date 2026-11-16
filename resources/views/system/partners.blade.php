@@ -38,7 +38,7 @@
       <section class="mt-12 grid grid-cols-1 items-center gap-8 lg:grid-cols-2" aria-labelledby="become-partner-title">
         <div>
           <h2 id="become-partner-title" class="text-ink text-xl font-semibold sm:text-2xl">
-            Trở thành đối tác của CheckScam
+            Trở thành đối tác của Scamproof
           </h2>
           <p class="text-ink-muted mt-3 text-base leading-relaxed">
             Chúng tôi luôn mở rộng hợp tác với các cộng đồng MMO, đơn vị trung gian và nền tảng thanh toán để cùng chia
