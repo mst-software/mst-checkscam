@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Complaint;
 use App\Models\Insurance;
 use App\Models\NewfeedPost;
 use App\Models\Post;
@@ -13,11 +14,12 @@ beforeEach(function () {
     $this->withoutVite();
 });
 
-test('the page header renders breadcrumb, title, description and actions', function () {
+test('the page header is a light header with breadcrumb, title, description and actions', function () {
     $this->blade(
         '<x-ucs.page-header title="Tiêu đề" description="Mô tả ngắn" :breadcrumbs="[[\'name\' => \'Mục\', \'url\' => \'/muc\']]">Hành động</x-ucs.page-header>',
     )
-        ->assertSee('bg-hero', false)
+        ->assertSee('border-line bg-surface', false)
+        ->assertDontSee('bg-hero', false)
         ->assertSee('<h1 id="page-title"', false)
         ->assertSeeInOrder(['Trang chủ', 'Mục', 'Tiêu đề', 'Mô tả ngắn', 'Hành động']);
 });
@@ -26,9 +28,10 @@ test('static public pages render their page header', function (string $uri, stri
     $this->get($uri)
         ->assertOk()
         ->assertSee('<h1 id="page-title"', false)
-        ->assertSee($title);
+        ->assertSee($title)
+        ->assertDontSee('CheckScam');
 })->with([
-    'insurances' => ['/bao-hiem-cs', 'Quỹ bảo hiểm CS'],
+    'insurances' => ['/bao-hiem-cs', 'Quỹ bảo hiểm'],
     'posts' => ['/bai-viet', 'Kiến thức MMO'],
     'terms' => ['/dieu-khoan', 'Điều khoản sử dụng'],
     'dispute' => ['/giai-quyet-khieu-nai', 'Giải quyết khiếu nại'],
@@ -71,7 +74,8 @@ test('the insurance detail shows deposit, services, contacts and payment account
         ->assertSee('data-copy="0123456789"', false)
         // Bank names and profile links are no longer sent to third-party avatar/QR services.
         ->assertDontSee('ui-avatars.com', false)
-        ->assertDontSee('api.qrserver.com', false);
+        ->assertDontSee('api.qrserver.com', false)
+        ->assertDontSee('CheckScam');
 });
 
 test('the post list and detail render with cover image alt text and related posts', function () {
@@ -116,6 +120,21 @@ test('the dispute form marks invalid fields after a failed submit', function () 
         ->assertSee('aria-invalid="true"', false);
 });
 
+test('the dispute form still stores a complaint', function () {
+    $this->from(route('complaints.create'))
+        ->followingRedirects()
+        ->post(route('complaints.store'), [
+            'contact_name' => 'Nguyen Van A',
+            'contact_email' => 'a@example.com',
+            'reason' => 'not_scam',
+            'message' => 'Giao dịch đã hoàn tất, tôi gửi kèm biên lai chuyển khoản.',
+        ])
+        ->assertOk()
+        ->assertSee('role="status"', false);
+
+    expect(Complaint::count())->toBe(1);
+});
+
 test('the api docs page has copy buttons for code samples', function () {
     $this->get('/api-checkscam')
         ->assertOk()
@@ -136,7 +155,8 @@ test('the watch list renders the header, form and limit for a signed-in user', f
         ->assertSee('<h1 id="page-title"', false)
         ->assertSee('Danh sách theo dõi')
         ->assertSee('action="'.route('watch.store').'"', false)
-        ->assertSee('Bạn chưa theo dõi đối tượng nào');
+        ->assertSee('Bạn chưa theo dõi đối tượng nào')
+        ->assertDontSee('CheckScam');
 });
 
 test('the newfeed index and detail render posts and the post form for signed-in users', function () {
@@ -163,5 +183,6 @@ test('the newfeed index and detail render posts and the post form for signed-in 
     $this->get(route('newfeed.show', $post))
         ->assertOk()
         ->assertSee('<h1 id="page-title"', false)
-        ->assertSee('<strong>uy tín</strong>', false);
+        ->assertSee('<strong>uy tín</strong>', false)
+        ->assertDontSee('CheckScam');
 });
