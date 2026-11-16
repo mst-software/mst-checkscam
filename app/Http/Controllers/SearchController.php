@@ -31,7 +31,7 @@ class SearchController extends Controller
             SEOTools::metatags()->setCanonical(url()->current());
         } else {
             SEOTools::setTitle('Tìm kiếm đối tượng lừa đảo - CheckScam.vn');
-            SEOTools::metatags()->addMeta('robots', 'noindex, follow');
+            SEOTools::metatags()->setRobots('noindex, follow');
         }
 
         $results = collect();

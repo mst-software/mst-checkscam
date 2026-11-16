@@ -94,7 +94,11 @@ class AppServiceProvider extends ServiceProvider
 
             SEOTools::metatags()->addKeyword($siteConfig['keywords']);
             SEOTools::metatags()->addMeta('author', $siteConfig['site_author']);
-            SEOTools::metatags()->addMeta('robots', $siteConfig['site_index']);
+            // The site-wide default only applies when the controller did not set robots itself.
+            $metaTags = SEOTools::metatags();
+            if (! $metaTags->getRobots() && ! array_key_exists('robots', $metaTags->getMetatags())) {
+                $metaTags->setRobots($siteConfig['site_index']);
+            }
 
             // Site Verifications
             if ($siteConfig['google_site_verification']) {
