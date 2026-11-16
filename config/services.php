@@ -41,4 +41,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    // Share card (OG image). Absolute path to a TTF with Vietnamese glyphs; when empty,
+    // the card falls back to GD's built-in font with ASCII-folded text.
+    'og_image' => [
+        'font' => env('OG_IMAGE_FONT'),
+    ],
+
 ];

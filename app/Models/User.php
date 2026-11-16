@@ -52,6 +52,11 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(NewfeedPost::class);
     }
 
+    public function watches(): HasMany
+    {
+        return $this->hasMany(Watch::class);
+    }
+
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('thumb')

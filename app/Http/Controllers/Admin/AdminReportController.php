@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\ScamType;
 use App\Helpers\FileHelper;
 use App\Http\Controllers\Controller;
+use App\Jobs\NotifyWatchersOfApprovedReport;
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -89,6 +90,8 @@ class AdminReportController extends Controller
             'rejection_reason' => null,
         ]);
 
+        NotifyWatchersOfApprovedReport::dispatch($report);
+
         return back()->with('success', 'Báo cáo đã được duyệt thành công.');
     }
 
@@ -151,6 +154,7 @@ class AdminReportController extends Controller
         }
 
         $currentImages = array_values($currentImages);
+        $wasApproved = $report->isApproved();
 
         $report->update([
             'type' => $validated['type'],
@@ -168,6 +172,10 @@ class AdminReportController extends Controller
             'evidence_images' => $currentImages,
             'moderator_id' => auth()->id() ?? null,
         ]);
+
+        if (! $wasApproved && $report->isApproved()) {
+            NotifyWatchersOfApprovedReport::dispatch($report);
+        }
 
         return back()->with('success', 'Đã cập nhật toàn bộ thông tin báo cáo thành công.');
     }
