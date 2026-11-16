@@ -88,7 +88,7 @@
 
   <x-slot:footer>
     <p class="text-ink-subtle text-xs leading-relaxed">
-      Kết quả chỉ phản ánh dữ liệu tố cáo đã được kiểm duyệt trên CheckScam, không phải bảo đảm an toàn. Luôn xác minh
+      Kết quả chỉ phản ánh dữ liệu tố cáo đã được kiểm duyệt trên Scamproof, không phải bảo đảm an toàn. Luôn xác minh
       kỹ người nhận trước khi giao dịch.
     </p>
   </x-slot>
