@@ -5,30 +5,22 @@
 @php
   // Only render numbers the controller actually computed; never show placeholders.
   $items = collect([
-    'total_reports' => 'Tố cáo đã duyệt',
-    'total_scammers' => 'Đối tượng bị tố cáo',
-    'total_comments' => 'Bình luận cộng đồng',
-  ])->filter(fn ($label, $key) => isset($stats[$key]));
+    'total_scammers' => ['label' => 'Kẻ lừa đảo', 'dot' => 'bg-accent'],
+    'total_comments' => ['label' => 'Bình luận', 'dot' => 'bg-ink-subtle'],
+  ])->filter(fn ($item, $key) => isset($stats[$key]));
 @endphp
 
 @if ($items->isNotEmpty())
-  <div {{ $attributes->class(['bg-hero-2 border-t border-white/10']) }}>
-    <x-ucs.container class="py-6 sm:py-8">
-      <h2 class="sr-only">Dữ liệu trên hệ thống</h2>
-      <dl class="mx-auto grid max-w-3xl grid-cols-3 divide-x divide-white/15 text-center">
-        @foreach ($items as $key => $label)
-          <div class="flex flex-col-reverse gap-1 px-2">
-            <dt class="text-on-hero-muted text-xs sm:text-sm">{{ $label }}</dt>
-            <dd class="text-on-hero text-2xl font-semibold tabular-nums sm:text-3xl">
-              {{ number_format((int) $stats[$key], 0, ',', '.') }}
-            </dd>
-          </div>
-        @endforeach
-      </dl>
-      <p class="text-on-hero-muted mt-5 flex items-center justify-center gap-2 text-center text-xs sm:text-sm">
-        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-        Dữ liệu do cộng đồng đóng góp và được kiểm duyệt
-      </p>
-    </x-ucs.container>
-  </div>
+  <ul
+    {{ $attributes->class(['text-ink-muted flex flex-wrap justify-center gap-x-8 gap-y-2 text-xs font-bold md:text-sm']) }}
+    aria-label="Dữ liệu trên hệ thống"
+  >
+    @foreach ($items as $key => $item)
+      <li class="flex items-center gap-1.5">
+        <span class="{{ $item['dot'] }} size-1.5 rounded-full" aria-hidden="true"></span>
+        <span class="text-ink tabular-nums">{{ number_format((int) $stats[$key], 0, ',', '.') }}</span>
+        {{ $item['label'] }}
+      </li>
+    @endforeach
+  </ul>
 @endif

@@ -5,6 +5,7 @@
 --}}
 @php
   $isSearch = isset($results) && filled($query ?? null);
+  $totalReports = number_format((int) ($stats['total_reports'] ?? 0), 0, ',', '.');
 @endphp
 
 @section('content')
@@ -15,10 +16,12 @@
     @else
       <x-hero :stats="$stats" :recent-searches="$recentSearches ?? collect()" />
 
-      <x-ucs.container class="space-y-10 py-8 lg:py-10">
-        @include('partials.home.quick-actions')
-
+      <x-ucs.container class="space-y-10 pb-8 lg:pb-10">
         <x-banner-ads position="home_top" class="mb-0" />
+
+        <h2 class="text-accent text-center text-lg font-black uppercase md:text-xl">
+          {{ now()->format('d/m/Y') }} CÓ {{ $totalReports }} CẢNH BÁO
+        </h2>
 
         <div class="grid gap-8 lg:grid-cols-12">
           <div class="min-w-0 space-y-8 lg:col-span-8">
