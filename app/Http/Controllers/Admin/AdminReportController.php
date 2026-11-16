@@ -86,6 +86,7 @@ class AdminReportController extends Controller
 
         $report->update([
             'status' => 'approved',
+            'approved_at' => now(),
             'moderator_id' => auth()->id(),
             'rejection_reason' => null,
         ]);
@@ -168,6 +169,7 @@ class AdminReportController extends Controller
             'reporter_contact' => $validated['reporter_contact'] ?? '',
 
             'status' => $validated['status'],
+            'approved_at' => ! $wasApproved && $validated['status'] === 'approved' ? now() : $report->approved_at,
             'rejection_reason' => $validated['status'] == 'rejected' ? $validated['rejection_reason'] : null,
             'evidence_images' => $currentImages,
             'moderator_id' => auth()->id() ?? null,
