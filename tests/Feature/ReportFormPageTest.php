@@ -32,6 +32,22 @@ function ajaxHeaders(): array
     return ['X-Requested-With' => 'XMLHttpRequest', 'Accept' => 'application/json'];
 }
 
+it('states in the reporter step that only admins can see contact details', function () {
+    $html = $this->get(route('reports'))->assertOk()->getContent();
+
+    $note = (string) str($html)->after('data-reporter-privacy-note')->before('</p>');
+
+    expect($note)->toContain(
+        'không hiển thị công khai',
+        'chỉ quản trị viên xem được để xác minh tố cáo',
+        'chịu trách nhiệm về tính trung thực',
+        'href="'.route('moderation.policy').'"',
+    )->not->toContain('không bao giờ');
+
+    expect($html)->toContain('Tố cáo thiếu căn cứ hoặc sai sự thật sẽ bị từ chối hoặc gỡ.')
+        ->not->toContain('Chúng tôi không bao giờ công khai tên và thông tin liên hệ của bạn.');
+});
+
 it('renders the four step panels with the stepper on step one', function () {
     $this->get(route('reports'))
         ->assertOk()
