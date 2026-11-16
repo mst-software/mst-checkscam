@@ -50,7 +50,7 @@
         class="card mb-3"
         id="filter_inputs"
         style="
-          display: {{ request()->hasAny(['status', 'type', 'time_range', 'search']) ? 'block' : 'none' }};
+          display: {{ request()->hasAny(['status', 'type', 'scam_type', 'time_range', 'search']) ? 'block' : 'none' }};
           border: 1px solid #e2e8f0;
           border-radius: 12px;
           box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -76,6 +76,17 @@
                     Tài khoản (STK/SĐT)
                   </option>
                   <option value="website" {{ request('type') == 'website' ? 'selected' : '' }}>Website (URL)</option>
+                </select>
+              </div>
+              <div class="col-lg-2 col-md-6">
+                <label class="form-label fw-bold small text-muted mb-2">Hình thức</label>
+                <select name="scam_type" class="form-select select2-basic">
+                  <option value="">Tất cả hình thức</option>
+                  @foreach (\App\Enums\ScamType::cases() as $scamType)
+                    <option value="{{ $scamType->value }}" @selected(request('scam_type') === $scamType->value)>
+                      {{ $scamType->label() }}
+                    </option>
+                  @endforeach
                 </select>
               </div>
               <div class="col-lg-2 col-md-6">

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminApiKeyController;
 use App\Http\Controllers\Admin\AdminBannerController;
 use App\Http\Controllers\Admin\AdminCommentController;
+use App\Http\Controllers\Admin\AdminComplaintController;
 use App\Http\Controllers\Admin\AdminInsuranceController;
 use App\Http\Controllers\Admin\AdminNewfeedController;
 use App\Http\Controllers\Admin\AdminPostController;
@@ -14,17 +15,20 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Api\ScamCheckController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InsuranceController;
 use App\Http\Controllers\NewfeedController;
 use App\Http\Controllers\NewfeedPostController;
 use App\Http\Controllers\NewfeedPostReportController;
+use App\Http\Controllers\OgImageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TelegramWebhookController;
+use App\Http\Controllers\WatchController;
 use Illuminate\Support\Facades\Route;
 
 // --- Frontend Pages ---
@@ -81,9 +85,8 @@ Route::get('/lien-he-admin', function () {
 Route::get('/dieu-khoan', function () {
     return view('legal.terms');
 });
-Route::get('/giai-quyet-khieu-nai', function () {
-    return view('legal.dispute');
-});
+Route::get('/giai-quyet-khieu-nai', [ComplaintController::class, 'create'])->name('complaints.create');
+Route::post('/giai-quyet-khieu-nai', [ComplaintController::class, 'store'])->name('complaints.store');
 
 // --- Admin Panel ---
 Route::name('admin.')->prefix('admin')->group(function () {
@@ -128,6 +131,14 @@ Route::name('admin.')->prefix('admin')->group(function () {
         Route::name('comments.')->prefix('comments')->group(function () {
             Route::get('/', [AdminCommentController::class, 'index'])->name('index');
             Route::delete('/{id}', [AdminCommentController::class, 'destroy'])->name('destroy');
+        });
+
+        // Complaints
+        Route::name('complaints.')->prefix('complaints')->group(function () {
+            Route::get('/', [AdminComplaintController::class, 'index'])->name('index');
+            Route::get('/{complaint}', [AdminComplaintController::class, 'show'])->name('show');
+            Route::post('/{complaint}/resolve', [AdminComplaintController::class, 'resolve'])->name('resolve');
+            Route::post('/{complaint}/dismiss', [AdminComplaintController::class, 'dismiss'])->name('dismiss');
         });
 
         // Analytics
@@ -200,6 +211,18 @@ Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('co
 
 // --- Sitemap Generator ---
 Route::get('/generate-sitemap', [SitemapController::class, 'generate'])->name('sitemap.generate');
+
+// --- Theo dõi (Watchlist) ---
+Route::middleware('auth')->group(function () {
+    Route::get('/theo-doi', [WatchController::class, 'index'])->name('watch.index');
+    Route::post('/theo-doi', [WatchController::class, 'store'])->name('watch.store');
+    Route::delete('/theo-doi/{watch}', [WatchController::class, 'destroy'])->name('watch.destroy');
+});
+
+// --- Share card (OG image) ---
+Route::get('/og/{slug}.png', [OgImageController::class, 'report'])
+    ->where('slug', '[A-Za-z0-9_-]+')
+    ->name('og.report');
 
 // --- Slug / Catch-all ---
 Route::get('/{slug}', [ReportController::class, 'show'])->name('scammer.show');
