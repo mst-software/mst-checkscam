@@ -4,14 +4,19 @@
   'alt' => '',
 ])
 
+@php
+  $src = Str::startsWith($image, ['http://', 'https://']) ? $image : asset('uploads/' . $image);
+  $href = is_string($url) && preg_match('#^https?://#i', $url) ? $url : null;
+@endphp
+
 <div
-  {{ $attributes->merge(['class' => 'aspect-square border border-line rounded-card overflow-hidden dark:bg-white']) }}
+  {{ $attributes->merge(['class' => 'border-line bg-surface-muted rounded-card aspect-square w-full overflow-hidden border']) }}
 >
-  <a href="{{ $url }}" target="_blank" class="block h-full w-full">
-    <img
-      src="{{ Str::startsWith($image, ['http://', 'https://']) ? $image : asset('uploads/' . $image) }}"
-      class="h-full w-full"
-      alt="{{ $alt }}"
-    />
-  </a>
+  @if ($href)
+    <a href="{{ $href }}" target="_blank" rel="sponsored noopener" class="block h-full w-full">
+      <x-ads-image :src="$src" :alt="$alt" />
+    </a>
+  @else
+    <x-ads-image :src="$src" :alt="$alt" />
+  @endif
 </div>
