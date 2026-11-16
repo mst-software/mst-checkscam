@@ -87,6 +87,14 @@ class InsuranceClaim extends Model
     }
 
     /**
+     * Claims an admin still has to act on (not rejected or paid yet).
+     */
+    public function scopeAwaitingAction(Builder $query): Builder
+    {
+        return $query->whereNotIn('status', [ClaimStatus::Rejected, ClaimStatus::Paid]);
+    }
+
+    /**
      * Claimant name safe for public pages, e.g. "Nguyễn Văn A******".
      */
     public function maskedClaimantName(): string
