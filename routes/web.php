@@ -22,6 +22,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SocialiteController;
+use App\Http\Controllers\WatchController;
 use Illuminate\Support\Facades\Route;
 
 // --- Frontend Pages ---
@@ -181,6 +182,13 @@ Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('co
 
 // --- Sitemap Generator ---
 Route::get('/generate-sitemap', [SitemapController::class, 'generate'])->name('sitemap.generate');
+
+// --- Theo dõi (Watchlist) ---
+Route::middleware('auth')->group(function () {
+    Route::get('/theo-doi', [WatchController::class, 'index'])->name('watch.index');
+    Route::post('/theo-doi', [WatchController::class, 'store'])->name('watch.store');
+    Route::delete('/theo-doi/{watch}', [WatchController::class, 'destroy'])->name('watch.destroy');
+});
 
 // --- Slug / Catch-all ---
 Route::get('/{slug}', [ReportController::class, 'show'])->name('scammer.show');
