@@ -41,4 +41,16 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
+        'chat_rate_limit_per_minute' => (int) env('TELEGRAM_CHAT_RATE_LIMIT', 10),
+    ],
+
+    // Share card (OG image). Absolute path to a TTF with Vietnamese glyphs; when empty,
+    // the card falls back to GD's built-in font with ASCII-folded text.
+    'og_image' => [
+        'font' => env('OG_IMAGE_FONT'),
+    ],
+
 ];
