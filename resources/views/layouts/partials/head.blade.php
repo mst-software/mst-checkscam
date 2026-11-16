@@ -18,7 +18,17 @@
     crossorigin="anonymous"
   ></script>
 
-  <link href="/css/tailwind.css" rel="stylesheet" />
+  {{-- Apply the saved theme before first paint to avoid a light flash --}}
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   @if (! empty($siteConfig['favicon']))
     <link rel="icon" type="image/png" href="{{ asset('uploads/' . $siteConfig['favicon']) }}" />
@@ -30,12 +40,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&display=swap"
     rel="stylesheet"
   />
 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <script src="/js/jquery-4.0.0.min.js"></script>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   @hasSection('structured_data')
     @yield('structured_data')
@@ -47,6 +56,4 @@
   @if (! empty($siteConfig['header_scripts']))
     {!! $siteConfig['header_scripts'] !!}
   @endif
-
-  <style></style>
 </head>
