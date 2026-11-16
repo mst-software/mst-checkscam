@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ScamType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +28,7 @@ class Report extends Model implements HasMedia
         'target_name',
         'target_bank',
         'category',
+        'scam_type',
         'damage_amount',
         'description',
         'evidence_images',
@@ -42,6 +45,7 @@ class Report extends Model implements HasMedia
         'evidence_images' => 'array',
         'view_count' => 'integer',
         'search_count' => 'integer',
+        'scam_type' => ScamType::class,
     ];
 
     /**
@@ -72,6 +76,11 @@ class Report extends Model implements HasMedia
     public function scopeActive($query)
     {
         return $query->where('status', 'approved');
+    }
+
+    public function scopeOfScamType(Builder $query, ScamType $scamType): Builder
+    {
+        return $query->where('scam_type', $scamType);
     }
 
     /**
