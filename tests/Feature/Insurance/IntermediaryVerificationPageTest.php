@@ -132,6 +132,9 @@ test('raw input is escaped in the page', function () {
 });
 
 test('checks are throttled per ip', function () {
+    // The limiter window is one minute: freeze time so a minute rollover cannot reset it mid-test.
+    $this->freezeTime();
+
     for ($i = 0; $i < IntermediaryVerificationController::MAX_CHECKS_PER_MINUTE; $i++) {
         $this->get(route('intermediary.verify', ['q' => '0987654321']))->assertOk();
     }

@@ -18,6 +18,13 @@
     </div>
   @endif
 
+  @if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ session('error') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  @endif
+
   <div class="card">
     <div class="card-body">
       <div class="table-top">
@@ -133,7 +140,7 @@
                 </label>
               </th>
               <th>Thông tin user</th>
-              <th>Số tiền bảo hiểm</th>
+              <th>Số dư quỹ</th>
               <th>Ngày tham gia</th>
               <th>Ngày hết hạn</th>
               <th>Trạng thái</th>
@@ -157,7 +164,7 @@
                       class="rounded-circle"
                     />
                   </a>
-                  <a href="{{ route('admin.insurances.edit', $insurance->id) }}">
+                  <a href="{{ route('admin.insurances.show', $insurance) }}">
                     {{ $insurance->full_name }}
                   </a>
                 </td>
@@ -165,7 +172,9 @@
                 <td>{{ $insurance->insurance_date->format('d/m/Y') }}</td>
                 <td>{{ $insurance->expired_at ? $insurance->expired_at->format('d/m/Y') : '-' }}</td>
                 <td>
-                  @if (! $insurance->isActive())
+                  @if ($insurance->isSuspended())
+                    <span class="badges bg-lightred" title="{{ $insurance->suspension_reason }}">Tạm đình chỉ</span>
+                  @elseif (! $insurance->isActive())
                     <span class="badges bg-lightgrey">Tạm ngừng</span>
                   @else
                     @if ($insurance->isExpired())
@@ -182,17 +191,32 @@
                   @endif
                 </td>
                 <td>
-                  <a class="me-3" href="{{ route('admin.insurances.edit', $insurance->id) }}">
+                  <a class="me-3" href="{{ route('admin.insurances.show', $insurance) }}" title="Chi tiết & sổ quỹ">
+                    <img src="/assets/img/icons/eye.svg" alt="xem" />
+                  </a>
+                  <a class="me-3" href="{{ route('admin.insurances.edit', $insurance) }}" title="Sửa">
                     <img src="/assets/img/icons/edit.svg" alt="sửa" />
                   </a>
-                  <button
-                    type="button"
-                    class="btn-delete-single border-0 bg-transparent p-0"
-                    data-id="{{ $insurance->id }}"
-                    data-name="{{ $insurance->full_name }}"
-                  >
-                    <img src="/assets/img/icons/delete.svg" alt="xóa" />
-                  </button>
+                  @if ($insurance->ledger_entries_exists || $insurance->claims_exists || $insurance->status_events_exists)
+                    <span
+                      class="text-muted"
+                      title="Đã có sổ quỹ hoặc lịch sử: không thể xóa, hãy tạm đình chỉ"
+                      aria-label="Không thể xóa"
+                    >
+                      <i data-feather="lock" style="width: 16px"></i>
+                    </span>
+                  @else
+                    @can('delete', $insurance)
+                      <button
+                        type="button"
+                        class="btn-delete-single border-0 bg-transparent p-0"
+                        data-id="{{ $insurance->id }}"
+                        data-name="{{ $insurance->full_name }}"
+                      >
+                        <img src="/assets/img/icons/delete.svg" alt="xóa" />
+                      </button>
+                    @endcan
+                  @endif
                 </td>
               </tr>
             @empty
@@ -383,6 +407,7 @@
               .then((response) => response.json())
               .then((data) => {
                 if (data.success) {
+                  if (data.message) alert(data.message);
                   window.location.reload();
                 } else {
                   alert(data.message || 'Có lỗi xảy ra');
@@ -432,6 +457,7 @@
             })
               .then((response) => response.json())
               .then((data) => {
+                if (!data.success && data.message) alert(data.message);
                 window.location.reload();
               })
               .catch((error) => {

@@ -9,6 +9,13 @@
     ]
   )
 
+  @if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ session('error') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  @endif
+
   @if ($errors->any())
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
       <ul class="mb-0">
@@ -53,19 +60,40 @@
               </div>
 
               <div class="col-lg-6 col-sm-6 col-12">
-                <div class="form-group">
-                  <label>
-                    Số tiền đóng (VND)
-                    <span class="text-danger">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="amount"
-                    class="form-control"
-                    placeholder="20000000"
-                    value="{{ old('amount', isset($insurance) ? (int) $insurance->amount : '') }}"
-                  />
-                </div>
+                @if (isset($insurance))
+                  <div class="form-group">
+                    <label>Số dư quỹ hiện tại (VND)</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value="{{ number_format((float) $insurance->amount, 0, ',', '.') }} ₫"
+                      readonly
+                      disabled
+                    />
+                    <small class="text-muted">
+                      Số dư chỉ thay đổi qua sổ quỹ.
+                      <a href="{{ route('admin.insurances.show', $insurance) }}#ledger">Mở sổ quỹ</a>
+                    </small>
+                  </div>
+                @else
+                  <div class="form-group">
+                    <label for="opening_deposit">
+                      Số tiền ký quỹ ban đầu (VND)
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="opening_deposit"
+                      id="opening_deposit"
+                      class="form-control"
+                      min="0"
+                      step="1"
+                      placeholder="20000000"
+                      value="{{ old('opening_deposit', 0) }}"
+                    />
+                    <small class="text-muted">Được ghi vào sổ quỹ như bút toán nạp quỹ đầu tiên.</small>
+                  </div>
+                @endif
               </div>
               <div class="col-lg-6 col-sm-6 col-12">
                 <div class="form-group">
@@ -111,129 +139,28 @@
               </div>
             </div>
 
-            {{-- Dynamic: Thông tin liên hệ --}}
-            <h5 class="card-title mt-4">Thông tin liên hệ</h5>
-            <div id="contact-rows">
+            {{-- Dynamic: Kênh chính thức --}}
+            <h5 class="card-title mt-4">Kênh liên hệ & thanh toán chính thức</h5>
+            <p class="text-muted small mb-3">
+              Người dùng tra cứu SĐT, Facebook, Telegram, Zalo, số tài khoản hoặc website sẽ được đối chiếu với các kênh
+              chính thức này. Giá trị được chuẩn hóa khi lưu (VD: +84 912 345 678 → 0912345678).
+            </p>
+            <div id="channel-rows">
               @php
-                $contacts = old(
-                  'contact_info',
-                  $insurance->contact_info ?? [['platform' => '', 'link' => '']],
-                );
+                $channelFormRows = array_values(old('channels', $channelRows ?: [['type' => \App\Enums\ChannelType::Phone->value, 'value' => '', 'is_official' => true, 'verified' => false]]));
               @endphp
 
-              @foreach ($contacts as $i => $contact)
-                <div class="row align-items-end contact-row mb-3">
-                  <div class="col-lg-5">
-                    <div class="form-group mb-0">
-                      <label>
-                        Nền tảng (VD: Facebook, Zalo, SĐT)
-                        <span class="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="contact_info[{{ $i }}][platform]"
-                        required
-                        class="form-control"
-                        value="{{ $contact['platform'] ?? '' }}"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-lg-6">
-                    <div class="form-group mb-0">
-                      <label>
-                        Giá trị (Link/Số)
-                        <span class="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="contact_info[{{ $i }}][link]"
-                        required
-                        class="form-control"
-                        value="{{ $contact['link'] ?? '' }}"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-lg-1">
-                    <a href="javascript:void(0);" class="btn btn-danger btn-sm btn-remove-row">
-                      <i data-feather="trash-2"></i>
-                    </a>
-                  </div>
-                </div>
+              @foreach ($channelFormRows as $i => $row)
+                @include('admin.insurances.partials.channel-row', ['index' => $i, 'row' => $row])
               @endforeach
             </div>
+            <template id="channel-row-template">
+              @include('admin.insurances.partials.channel-row', ['index' => '__INDEX__', 'row' => []])
+            </template>
             <div class="mb-4 text-end">
-              <a href="javascript:void(0);" class="btn btn-sm btn-outline-primary" id="add-contact">
+              <a href="javascript:void(0);" class="btn btn-sm btn-outline-primary" id="add-channel">
                 <i data-feather="plus"></i>
-                Thêm liên hệ
-              </a>
-            </div>
-
-            {{-- Dynamic: Tài khoản thanh toán --}}
-            <h5 class="card-title mt-4">Tài khoản thanh toán (Ngân hàng/Momo)</h5>
-            <div id="payment-rows">
-              @php
-                $payments = old('payment_accounts', $insurance->payment_accounts ?? [['bank' => '', 'number' => '', 'name' => '']]);
-              @endphp
-
-              @foreach ($payments as $i => $payment)
-                <div class="row align-items-end payment-row mb-3">
-                  <div class="col-lg-4">
-                    <div class="form-group mb-0">
-                      <label>
-                        Ngân hàng/Ví
-                        <span class="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="payment_accounts[{{ $i }}][bank]"
-                        required
-                        class="form-control"
-                        value="{{ $payment['bank'] ?? '' }}"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-lg-4">
-                    <div class="form-group mb-0">
-                      <label>
-                        Số tài khoản
-                        <span class="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="payment_accounts[{{ $i }}][number]"
-                        required
-                        class="form-control"
-                        value="{{ $payment['number'] ?? '' }}"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-lg-3">
-                    <div class="form-group mb-0">
-                      <label>
-                        Chủ TK
-                        <span class="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="payment_accounts[{{ $i }}][name]"
-                        required
-                        class="form-control"
-                        value="{{ $payment['name'] ?? '' }}"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-lg-1">
-                    <a href="javascript:void(0);" class="btn btn-danger btn-sm btn-remove-row">
-                      <i data-feather="trash-2"></i>
-                    </a>
-                  </div>
-                </div>
-              @endforeach
-            </div>
-            <div class="mb-4 text-end">
-              <a href="javascript:void(0);" class="btn btn-sm btn-outline-primary" id="add-payment">
-                <i data-feather="plus"></i>
-                Thêm tài khoản
+                Thêm kênh
               </a>
             </div>
 
@@ -299,7 +226,7 @@
                     class="image-preview-item mt-2 position-relative d-inline-block border rounded p-1 existing-image"
                   >
                     <img
-                      src="{{ asset('uploads/' . $insurance->avatar) }}"
+                      src="{{ $insurance->avatar_url }}"
                       alt="avatar"
                       style="max-height: 150px; max-width: 100%; display: block"
                       class="rounded shadow-sm"
@@ -328,20 +255,15 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      let contactIdx = {{ count($contacts) }};
-      let paymentIdx = {{ count($payments) }};
+      let channelIdx = {{ count($channelFormRows) }};
       let serviceIdx = {{ count($services) }};
 
       // --- Logic: Ẩn/hiện icon thùng rác ---
       function toggleRemoveButtons() {
         const rowsTypes = [
           {
-            id: 'contact-rows',
-            class: 'contact-row',
-          },
-          {
-            id: 'payment-rows',
-            class: 'payment-row',
+            id: 'channel-rows',
+            class: 'channel-row',
           },
           {
             id: 'service-rows',
@@ -365,29 +287,22 @@
       // Gọi lần đầu để thiết lập trạng thái ẩn hiện icon xóa
       toggleRemoveButtons();
 
-      document.getElementById('add-contact').addEventListener('click', function () {
-        const html = `<div class="row align-items-end mb-3 contact-row">
-            <div class="col-lg-5"><div class="form-group mb-0"><label>Nền tảng</label><input type="text" name="contact_info[${contactIdx}][platform]" class="form-control" /></div></div>
-            <div class="col-lg-6"><div class="form-group mb-0"><label>Giá trị</label><input type="text" name="contact_info[${contactIdx}][link]" class="form-control" /></div></div>
-            <div class="col-lg-1 text-end"><a href="javascript:void(0);" class="btn btn-danger btn-sm btn-remove-row"><i data-feather="trash-2"></i></a></div>
-        </div>`;
-        document.getElementById('contact-rows').insertAdjacentHTML('beforeend', html);
+      document.getElementById('add-channel').addEventListener('click', function () {
+        const template = document.getElementById('channel-row-template').innerHTML;
+        document
+          .getElementById('channel-rows')
+          .insertAdjacentHTML('beforeend', template.replaceAll('__INDEX__', String(channelIdx)));
         if (typeof feather !== 'undefined') feather.replace();
-        contactIdx++;
+        channelIdx++;
         toggleRemoveButtons();
       });
 
-      document.getElementById('add-payment').addEventListener('click', function () {
-        const html = `<div class="row align-items-end mb-3 payment-row">
-            <div class="col-lg-4"><div class="form-group mb-0"><label>Ngân hàng/Ví</label><input type="text" name="payment_accounts[${paymentIdx}][bank]" class="form-control" /></div></div>
-            <div class="col-lg-4"><div class="form-group mb-0"><label>Số tài khoản</label><input type="text" name="payment_accounts[${paymentIdx}][number]" class="form-control" /></div></div>
-            <div class="col-lg-3"><div class="form-group mb-0"><label>Chủ TK</label><input type="text" name="payment_accounts[${paymentIdx}][name]" class="form-control" /></div></div>
-            <div class="col-lg-1 text-end"><a href="javascript:void(0);" class="btn btn-danger btn-sm btn-remove-row"><i data-feather="trash-2"></i></a></div>
-        </div>`;
-        document.getElementById('payment-rows').insertAdjacentHTML('beforeend', html);
-        if (typeof feather !== 'undefined') feather.replace();
-        paymentIdx++;
-        toggleRemoveButtons();
+      // Bank name / holder only apply to bank accounts.
+      document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('channel-type')) {
+          const row = e.target.closest('.channel-row');
+          row.querySelector('.channel-bank-fields').style.display = e.target.value === 'bank_account' ? '' : 'none';
+        }
       });
 
       document.getElementById('add-service').addEventListener('click', function () {
@@ -404,7 +319,7 @@
       document.addEventListener('click', function (e) {
         const removeBtn = e.target.closest('.btn-remove-row');
         if (removeBtn) {
-          removeBtn.closest('.row').remove();
+          (removeBtn.closest('.channel-row') || removeBtn.closest('.row')).remove();
           toggleRemoveButtons();
         }
       });

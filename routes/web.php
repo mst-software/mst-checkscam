@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminApiKeyController;
 use App\Http\Controllers\Admin\AdminBannerController;
 use App\Http\Controllers\Admin\AdminCommentController;
 use App\Http\Controllers\Admin\AdminComplaintController;
+use App\Http\Controllers\Admin\AdminInsuranceClaimController;
 use App\Http\Controllers\Admin\AdminInsuranceController;
 use App\Http\Controllers\Admin\AdminNewfeedController;
 use App\Http\Controllers\Admin\AdminPostController;
@@ -103,9 +104,26 @@ Route::name('admin.')->prefix('admin')->group(function () {
             Route::get('/', [AdminInsuranceController::class, 'index'])->name('index');
             Route::get('/create', [AdminInsuranceController::class, 'create'])->name('create');
             Route::post('/', [AdminInsuranceController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [AdminInsuranceController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [AdminInsuranceController::class, 'update'])->name('update');
-            Route::delete('/{id}', [AdminInsuranceController::class, 'destroy'])->name('destroy');
+            Route::get('/{insurance}', [AdminInsuranceController::class, 'show'])->name('show');
+            Route::get('/{insurance}/edit', [AdminInsuranceController::class, 'edit'])->name('edit');
+            Route::put('/{insurance}', [AdminInsuranceController::class, 'update'])->name('update');
+            Route::delete('/{insurance}', [AdminInsuranceController::class, 'destroy'])->name('destroy');
+            // Append-only ledger: entries can be recorded, never edited or deleted.
+            Route::post('/{insurance}/ledger', [AdminInsuranceController::class, 'storeLedgerEntry'])->name('ledger.store');
+            Route::post('/{insurance}/suspend', [AdminInsuranceController::class, 'suspend'])->name('suspend');
+            Route::post('/{insurance}/reinstate', [AdminInsuranceController::class, 'reinstate'])->name('reinstate');
+        });
+
+        // Insurance claims
+        Route::name('insurance-claims.')->prefix('insurance-claims')->group(function () {
+            Route::get('/', [AdminInsuranceClaimController::class, 'index'])->name('index');
+            Route::get('/{claim}', [AdminInsuranceClaimController::class, 'show'])->name('show');
+            Route::post('/{claim}/review', [AdminInsuranceClaimController::class, 'startReview'])->name('review');
+            Route::post('/{claim}/request-info', [AdminInsuranceClaimController::class, 'requestInfo'])->name('request-info');
+            Route::post('/{claim}/approve', [AdminInsuranceClaimController::class, 'approve'])->name('approve');
+            Route::post('/{claim}/reject', [AdminInsuranceClaimController::class, 'reject'])->name('reject');
+            Route::post('/{claim}/mark-paid', [AdminInsuranceClaimController::class, 'markPaid'])->name('mark-paid');
+            Route::post('/{claim}/summary', [AdminInsuranceClaimController::class, 'updateSummary'])->name('summary');
         });
 
         // Posts

@@ -19,6 +19,19 @@ class AdminSettingController extends Controller
 
     public function update(Request $request)
     {
+        $request->validate([
+            'insurance_min_balance' => ['nullable', 'integer', 'min:0', 'max:9999999999999'],
+        ], [
+            'insurance_min_balance.integer' => 'Số dư quỹ tối thiểu phải là số nguyên (VND).',
+            'insurance_min_balance.min' => 'Số dư quỹ tối thiểu không được âm.',
+            'insurance_min_balance.max' => 'Số dư quỹ tối thiểu quá lớn.',
+        ]);
+
+        // An emptied field turns the low-balance check off.
+        if ($request->has('insurance_min_balance')) {
+            $request->merge(['insurance_min_balance' => (string) ($request->input('insurance_min_balance') ?? '0')]);
+        }
+
         $keys = [
             'site_title',
             'site_description',
@@ -44,6 +57,7 @@ class AdminSettingController extends Controller
             'schema_organization_contact',
             'meta_extra',
             'site_notification_text',
+            'insurance_min_balance',
         ];
 
         foreach ($keys as $key) {
