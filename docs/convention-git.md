@@ -22,7 +22,7 @@ Tên nhánh phải luôn sử dụng **chữ thường (lowercase)**, phân các
 * *Ví dụ:* `feature/mst-101-auto-login-system`
 
 
-* **`bugfix/`**: Sửa lỗi trong quá trình phát triển (trên nhánh `develop`).
+* **`bugfix/`**: Sửa lỗi trong quá trình phát triển (trên nhánh `main`).
 * *Ví dụ:* `bugfix/fix-hero-responsive`
 
 
@@ -88,16 +88,15 @@ Tên nhánh phải luôn sử dụng **chữ thường (lowercase)**, phân các
 
 ## 3. Quy trình làm việc (Git Workflow)
 
-1. **Main/Master:** Chứa code đã ổn định nhất, dùng để deploy lên Server Production.
-2. **Develop:** Nhánh chính để code. Mọi nhánh `feature/`, `bugfix/` đều phải checkout từ đây.
-3. **Tạo nhánh:** Luôn checkout từ nhánh mới nhất của `develop`.
-* `git checkout develop`
-* `git pull origin develop`
+1. **Main:** Nhánh duy nhất, chứa code ổn định và dùng để deploy. Mọi nhánh `feature/`, `bugfix/` đều phải checkout từ đây.
+2. **Tạo nhánh:** Luôn checkout từ nhánh mới nhất của `main`.
+* `git checkout main`
+* `git pull origin main`
 * `git checkout -b feature/your-task-name`
 
 
-4. **Hoàn tất:** Sau khi hoàn thành code, tạo **Pull Request (PR)** để Leader (Tuấn) review trước khi merge vào `develop`.
-5. **Dọn dẹp:** Xóa nhánh local và remote sau khi đã merge thành công để tránh làm rối hệ thống.
+3. **Hoàn tất:** Sau khi hoàn thành code, tạo **Pull Request (PR)** để Leader (Tuấn) review trước khi merge vào `main`.
+4. **Dọn dẹp:** Xóa nhánh local và remote sau khi đã merge thành công để tránh làm rối hệ thống.
 
 ---
 

@@ -15,7 +15,7 @@ description: Orchestrates adding or changing features in the MST CheckScam Larav
 
 ## Step 1: Prepare
 
-Follow `git-workflow`: create `<prefix>/<short-description>` from an up-to-date `develop`.
+Follow `git-workflow`: create `<prefix>/<short-description>` from an up-to-date `main`.
 
 ## Step 2: Build
 
@@ -31,7 +31,7 @@ Pass only "blocking" / "should fix" findings to `laravel-builder`, then re-run `
 
 ## Step 5: Commit
 
-Small commits per `git-workflow` and `writing-commit-messages`. Open a PR (target `develop`) only when the user asks or the task is complete; state what was and was not verified.
+Small commits per `git-workflow` and `writing-commit-messages`. Open a PR (target `main`) only when the user asks or the task is complete; state what was and was not verified.
 
 ## Error handling
 
