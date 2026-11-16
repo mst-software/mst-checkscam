@@ -7,16 +7,24 @@ use App\Helpers\ConfigHelper;
 use App\Helpers\FileHelper;
 use App\Helpers\OgImageHelper;
 use App\Helpers\StringHelper;
+use App\Models\Comment;
 use App\Models\Report;
 use Artesaos\SEOTools\Facades\SEOTools;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class ReportController extends Controller
 {
+    private const TIMELINE_LIMIT = 10;
+
+    private const RELATED_LIMIT = 5;
+
     public function store(Request $request)
     {
         $ip = $request->ip();
@@ -92,110 +100,173 @@ class ReportController extends Controller
             ->with('success', 'Báo cáo đã được gửi và đang chờ kiểm duyệt.');
     }
 
-    public function show(string $slug)
+    public function show(Request $request, string $slug): View
     {
-        $report = Report::where('slug', $slug)
-            ->where('status', 'approved')
+        $report = Report::query()
+            ->approved()
+            ->where('slug', $slug)
             ->firstOrFail();
 
-        $cacheKey = 'view_'.$report->id.'_'.request()->ip();
-        if (! Cache::has($cacheKey)) {
+        $viewCacheKey = 'view_'.$report->id.'_'.$request->ip();
+        if (! Cache::has($viewCacheKey)) {
             $report->incrementViewCount();
-            Cache::put($cacheKey, true, now()->addHours(24));
+            Cache::put($viewCacheKey, true, now()->addHours(24));
         }
 
-        $displayReporterName = StringHelper::mask_reporter_name($report->reporter_name);
+        $maskedTarget = StringHelper::mask_id($report->target_id, $report->type);
+        $maskedName = StringHelper::mask_name($report->target_name);
+        $redact = fn (?string $text): string => $this->redactTarget((string) $text, $report);
 
-        $reportsCount = Report::where('target_id', $report->target_id)
-            ->where('status', 'approved')
-            ->count();
+        $targetStats = Report::query()
+            ->approved()
+            ->where('target_id', $report->target_id)
+            ->selectRaw('COUNT(*) as reports_count, MIN(created_at) as first_reported_at, MAX(created_at) as last_reported_at')
+            ->toBase()
+            ->first();
 
-        $totalSearchCount = Report::where('target_id', $report->target_id)
-            ->where('status', 'approved')
-            ->max('search_count');
+        $reportsCount = max(1, (int) $targetStats->reports_count);
+        $firstReportedAt = $targetStats->first_reported_at ? Carbon::parse($targetStats->first_reported_at) : $report->created_at;
+        $lastReportedAt = $targetStats->last_reported_at ? Carbon::parse($targetStats->last_reported_at) : $report->created_at;
 
-        $relatedReports = Report::where('status', 'approved')
-            ->where('id', '!=', $report->id)
-            ->where(function ($q) use ($report) {
-                if (! empty($report->target_bank)) {
-                    $q->where('target_bank', $report->target_bank);
+        $targetReports = $reportsCount > 1
+            ? Report::query()
+                ->approved()
+                ->where('target_id', $report->target_id)
+                ->latest()
+                ->limit(self::TIMELINE_LIMIT)
+                ->get(['id', 'slug', 'type', 'scam_type', 'category', 'damage_amount', 'created_at'])
+            : collect();
+
+        $relatedReports = $this->relatedReports($report);
+
+        $comments = $report->comments()->get();
+        $comments->each(fn (Comment $comment) => $comment->setAttribute('display_content', $redact($comment->content)));
+
+        $evidenceImages = collect($report->evidence_images ?? [])
+            ->filter(fn ($image): bool => is_string($image) && $image !== '')
+            ->map(fn (string $image): string => filter_var($image, FILTER_VALIDATE_URL) ? $image : asset('uploads/'.$image))
+            ->values();
+
+        $scamTypeLabel = $report->scam_type?->label();
+        $description = $redact($report->description);
+
+        $this->setReportSeo($report, $maskedTarget, $maskedName, $scamTypeLabel, $description, $reportsCount);
+
+        return view('scammer.index', [
+            'report' => $report,
+            'maskedTarget' => $maskedTarget,
+            'maskedName' => $maskedName,
+            'scamTypeLabel' => $scamTypeLabel,
+            'description' => $description,
+            'reportsCount' => $reportsCount,
+            'firstReportedAt' => $firstReportedAt,
+            'lastReportedAt' => $lastReportedAt,
+            'targetReports' => $targetReports,
+            'relatedReports' => $relatedReports,
+            'comments' => $comments,
+            'evidenceImages' => $evidenceImages,
+        ]);
+    }
+
+    /**
+     * Latest approved warnings with the same scam type or bank, excluding this target.
+     *
+     * @return Collection<int, Report>
+     */
+    private function relatedReports(Report $report): Collection
+    {
+        return Report::query()
+            ->approved()
+            ->whereKeyNot($report->id)
+            ->where('target_id', '!=', $report->target_id)
+            ->where(function (Builder $query) use ($report) {
+                if ($report->scam_type === null && empty($report->target_bank)) {
+                    $query->where('type', $report->type);
+
+                    return;
                 }
 
-                $q->orWhere('type', $report->type);
+                if ($report->scam_type !== null) {
+                    $query->where('scam_type', $report->scam_type);
+                }
+
+                if (! empty($report->target_bank)) {
+                    $query->orWhere('target_bank', $report->target_bank);
+                }
             })
             ->latest()
-            ->limit(4)
-            ->get();
+            ->limit(self::RELATED_LIMIT)
+            ->get(['id', 'slug', 'type', 'target_id', 'target_name', 'scam_type', 'created_at']);
+    }
 
-        $latestReports = Report::where('status', 'approved')
-            ->where('id', '!=', $report->id)
-            ->latest()
-            ->limit(3)
-            ->get();
+    /**
+     * Replace the raw target id and name inside free text with their masked forms.
+     */
+    private function redactTarget(string $text, Report $report): string
+    {
+        $replacements = [];
+        $targetId = trim((string) $report->target_id);
 
-        $comments = $report->comments()->latest()->get();
-        $stats = [
-            'total_scammers' => Report::where('status', 'approved')->count(DB::raw('DISTINCT target_id')),
-            'total_comments' => DB::table('comments')->count(),
-        ];
+        if (mb_strlen($targetId) >= 4) {
+            $replacements[$targetId] = StringHelper::mask_id($targetId, $report->type);
 
-        // Advanced SEO
+            $digits = preg_replace('/\D/', '', $targetId);
+            if ($report->type !== 'website' && strlen($digits) >= 6) {
+                $replacements[$digits] = StringHelper::mask_id($digits, $report->type);
+            }
+        }
+
+        foreach ($replacements as $raw => $masked) {
+            $text = str_ireplace((string) $raw, $masked, $text);
+        }
+
+        $targetName = trim((string) $report->target_name);
+        if (mb_strlen($targetName) >= 4) {
+            $text = preg_replace('/'.preg_quote($targetName, '/').'/iu', StringHelper::mask_name($targetName), $text) ?? $text;
+        }
+
+        return $text;
+    }
+
+    private function setReportSeo(Report $report, string $maskedTarget, string $maskedName, ?string $scamTypeLabel, string $description, int $reportsCount): void
+    {
         $siteTitle = ConfigHelper::getConfig('site_title', 'CheckScam');
-        $targetId = $report->target_id;
-        $targetName = $report->target_name ?? 'Đối tượng';
-        $category = $report->category ?? 'Lừa đảo';
+        $reportedOn = $report->created_at->format('d/m/Y');
+        $scamLabel = $scamTypeLabel ?? 'Lừa đảo';
+        $targetLabel = $report->type === 'website' ? 'website' : 'tài khoản';
 
-        // Optimize Title: STK/SĐT/FB - Name - Lừa đảo | SiteTitle
-        $metaTitle = "{$targetId} - {$targetName} - {$category} Lừa Đảo | {$siteTitle}";
-        $metaDesc = "Cảnh báo: {$targetName} ({$targetId}) bị tố cáo lừa đảo với hình thức {$category}. ".Str::limit($report->description, 150).' Xem bằng chứng và cảnh báo tại CheckScam.';
+        $metaTitle = "Cảnh báo {$maskedTarget} - {$scamLabel} ({$reportedOn}) | {$siteTitle}";
+        $metaDesc = "Cảnh báo {$targetLabel} {$maskedTarget} ({$maskedName}) bị tố cáo: ".mb_strtolower($scamLabel)
+            .". {$reportsCount} tố cáo đã kiểm duyệt, ngày {$reportedOn}. ".Str::limit($description, 110);
 
         SEOTools::setTitle($metaTitle);
         SEOTools::setDescription($metaDesc);
-        SEOTools::metatags()->addKeyword("{$targetId}, {$targetName}, lừa đảo, scammer, {$category}, check scam");
+        SEOTools::metatags()->addKeyword([$maskedTarget, $scamLabel, 'lừa đảo', 'cảnh báo lừa đảo', 'check scam']);
         SEOTools::opengraph()->addProperty('type', 'article');
 
         // Share card with masked data instead of evidence screenshots, which may expose PII
-        SEOTools::opengraph()->addImage(route('og.report', $report->slug), [
+        $shareImage = route('og.report', $report->slug);
+        SEOTools::opengraph()->addImage($shareImage, [
             'width' => OgImageHelper::WIDTH,
             'height' => OgImageHelper::HEIGHT,
             'type' => 'image/png',
         ]);
 
-        if (! empty($report->evidence_images)) {
-            $firstImg = $report->evidence_images[0];
-            $imgUrl = filter_var($firstImg, FILTER_VALIDATE_URL) ? $firstImg : asset('uploads/'.$firstImg);
+        $logo = (string) ConfigHelper::getConfig('logo');
 
-            SEOTools::jsonLd()->addImage($imgUrl);
-        }
-
-        // Structured Data for Scam Report (using Review/Article hybrid)
-        SEOTools::jsonLd()->setTitle($metaTitle);
-        SEOTools::jsonLd()->setDescription($metaDesc);
-        SEOTools::jsonLd()->setType('Article');
-        SEOTools::jsonLd()->addValue('author', [
+        SEOTools::jsonLdMulti()->setType('Article');
+        SEOTools::jsonLdMulti()->addImage($shareImage);
+        SEOTools::jsonLdMulti()->addValue('headline', "Cảnh báo lừa đảo {$maskedTarget} - {$scamLabel}");
+        SEOTools::jsonLdMulti()->addValue('datePublished', $report->created_at->toIso8601String());
+        SEOTools::jsonLdMulti()->addValue('dateModified', $report->updated_at?->toIso8601String() ?? $report->created_at->toIso8601String());
+        SEOTools::jsonLdMulti()->addValue('author', ['@type' => 'Organization', 'name' => $siteTitle]);
+        SEOTools::jsonLdMulti()->addValue('publisher', [
             '@type' => 'Organization',
-            'name' => 'CheckScam.vn',
-        ]);
-        SEOTools::jsonLd()->addValue('publisher', [
-            '@type' => 'Organization',
-            'name' => 'CheckScam.vn',
+            'name' => $siteTitle,
             'logo' => [
                 '@type' => 'ImageObject',
-                'url' => filter_var(ConfigHelper::getConfig('logo'), FILTER_VALIDATE_URL) ? ConfigHelper::getConfig('logo') : asset('uploads/'.ConfigHelper::getConfig('logo')),
+                'url' => filter_var($logo, FILTER_VALIDATE_URL) ? $logo : asset('uploads/'.$logo),
             ],
         ]);
-        SEOTools::jsonLd()->addValue('datePublished', $report->created_at->toIso8601String());
-        SEOTools::jsonLd()->addValue('headline', "Cảnh báo lừa đảo: {$targetName} - {$targetId}");
-
-        return view('scammer.index', compact(
-            'report',
-            'displayReporterName',
-            'reportsCount',
-            'totalSearchCount',
-            'relatedReports',
-            'latestReports',
-            'stats',
-            'comments',
-        ));
     }
 }
