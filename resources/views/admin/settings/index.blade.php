@@ -16,6 +16,8 @@
     </div>
   @endif
 
+  <x-admin-error />
+
   <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
     @csrf
 
@@ -220,6 +222,30 @@
                 <label for="maintenance_mode" class="checktoggle"></label>
                 <span class="ms-2 mb-2">Chế độ bảo trì</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{-- Quỹ bảo hiểm --}}
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Quỹ bảo hiểm</h5>
+        <div class="row">
+          <div class="col-lg-4 col-sm-6 col-12">
+            <div class="form-group">
+              <label for="insurance_min_balance">Số dư quỹ tối thiểu (VND)</label>
+              <input
+                type="number"
+                name="insurance_min_balance"
+                id="insurance_min_balance"
+                class="form-control"
+                min="0"
+                step="1"
+                value="{{ old('insurance_min_balance', (int) ($settings['insurance_min_balance'] ?? 0)) }}"
+              />
+              <small class="text-muted">Quỹ dưới mức này sẽ bị tự động đình chỉ; 0 = tắt</small>
             </div>
           </div>
         </div>
