@@ -1,7 +1,5 @@
 @php
-  $logoHeaderLight = ! empty($siteConfig['logo_header_light']) ? asset('uploads/' . $siteConfig['logo_header_light']) : asset('img/logo-light.svg');
-  $logoHeaderDark = ! empty($siteConfig['logo_header_dark']) ? asset('uploads/' . $siteConfig['logo_header_dark']) : asset('img/logo-dark.svg');
-  $siteTitle = $siteConfig['title'] ?? 'Cảnh Giác';
+  $siteTitle = $siteConfig['title'] ?? 'Scamproof';
 
   $navItems = [
     ['label' => 'Tra cứu', 'url' => route('home'), 'active' => request()->routeIs('home') || request()->is('search*')],
@@ -19,9 +17,8 @@
 <header class="border-line bg-surface sticky top-0 z-50 border-b">
   <div class="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
     {{-- Logo --}}
-    <a href="{{ route('home') }}" class="flex shrink-0 items-center" aria-label="Cảnh Giác">
-      <img src="{{ asset('img/logo-light.svg') }}" alt="Cảnh Giác" class="h-9 w-auto dark:hidden" />
-      <img src="{{ asset('img/logo-dark.svg') }}" alt="Cảnh Giác" class="hidden h-9 w-auto dark:block" />
+    <a href="{{ route('home') }}" class="flex shrink-0 items-center" aria-label="Scamproof">
+      <x-brand />
     </a>
 
     {{-- Desktop navigation --}}
