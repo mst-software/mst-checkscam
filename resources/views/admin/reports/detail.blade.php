@@ -86,6 +86,12 @@
                 </p>
               </div>
             </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Hình thức lừa đảo</label>
+                <p class="mb-0"><strong>{{ $report->scam_type?->label() ?? 'Chưa phân loại' }}</strong></p>
+              </div>
+            </div>
           </div>
           <div class="form-group mb-3">
             <label>Nội dung mô tả</label>
