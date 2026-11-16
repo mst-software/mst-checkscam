@@ -6,7 +6,22 @@
       title="Quỹ bảo hiểm"
       description="Trung gian đã ký quỹ với Scamproof. Giao dịch qua các thành viên trong danh sách để được bảo lãnh khi xảy ra rủi ro."
       :breadcrumbs="[['name' => 'Quỹ bảo hiểm', 'url' => route('insurances.frontend.index')]]"
-    />
+    >
+      <a
+        href="{{ route('intermediary.verify') }}"
+        class="bg-hero-action hover:bg-hero-action-hover rounded-control focus-visible:outline-hero-action inline-flex h-10 items-center gap-2 px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+      >
+        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+        Kiểm tra GDV
+      </a>
+      <x-ucs.button
+        :href="route('insurance-claims.create')"
+        variant="secondary"
+        icon="fa-solid fa-file-circle-exclamation"
+      >
+        Yêu cầu bồi thường
+      </x-ucs.button>
+    </x-ucs.page-header>
 
     <x-ucs.container>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
