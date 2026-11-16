@@ -18,7 +18,9 @@ use App\Http\Controllers\Api\ScamCheckController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InsuranceClaimController;
 use App\Http\Controllers\InsuranceController;
+use App\Http\Controllers\IntermediaryVerificationController;
 use App\Http\Controllers\NewfeedController;
 use App\Http\Controllers\NewfeedPostController;
 use App\Http\Controllers\NewfeedPostReportController;
@@ -220,6 +222,11 @@ Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('co
 
 // --- Warnings List ---
 Route::get('/warnings', [WarningController::class, 'index'])->name('warnings.index');
+
+// --- Intermediaries (GDV): channel verification and compensation claims ---
+Route::get('/verify-intermediary', [IntermediaryVerificationController::class, 'show'])->name('intermediary.verify');
+Route::get('/insurance-claims/create', [InsuranceClaimController::class, 'create'])->name('insurance-claims.create');
+Route::post('/insurance-claims', [InsuranceClaimController::class, 'store'])->name('insurance-claims.store');
 
 // --- Sitemap & robots (generated per request, cached; no files written to public/) ---
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');

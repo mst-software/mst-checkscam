@@ -6,6 +6,7 @@
     ['label' => 'Cảnh báo', 'url' => route('warnings.index'), 'active' => request()->routeIs('warnings.index')],
     ['label' => 'Tố cáo', 'url' => route('reports'), 'active' => request()->is('to-cao-lua-dao*')],
     ['label' => 'Bảo hiểm CS', 'url' => route('insurances.frontend.index'), 'active' => request()->is('bao-hiem-cs*')],
+    ['label' => 'Kiểm tra GDV', 'url' => route('intermediary.verify'), 'active' => request()->routeIs('intermediary.verify')],
     ['label' => 'Khu mua bán', 'url' => route('newfeed.index'), 'active' => request()->is('newfeed*')],
     ['label' => 'Bài viết', 'url' => route('posts.frontend.index'), 'active' => request()->is('bai-viet*')],
     ['label' => 'API', 'url' => url('/api-checkscam'), 'active' => request()->is('api-checkscam')],
@@ -22,12 +23,12 @@
     </a>
 
     {{-- Desktop navigation --}}
-    <nav class="ml-4 hidden items-center gap-1 lg:flex" aria-label="Điều hướng chính">
+    <nav class="hidden items-center gap-0.5 lg:flex xl:ml-4 xl:gap-1" aria-label="Điều hướng chính">
       @foreach ($navItems as $item)
         <a
           href="{{ $item['url'] }}"
           @if ($item['active']) aria-current="page" @endif
-          class="{{ $item['active'] ? 'bg-accent-soft text-accent' : 'text-ink-muted hover:bg-surface-muted hover:text-ink' }} rounded-control px-3 py-2 text-sm font-medium transition-colors"
+          class="{{ $item['active'] ? 'bg-accent-soft text-accent' : 'text-ink-muted hover:bg-surface-muted hover:text-ink' }} rounded-control px-2 py-2 text-sm font-medium whitespace-nowrap transition-colors xl:px-3"
         >
           {{ $item['label'] }}
         </a>

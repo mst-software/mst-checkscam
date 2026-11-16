@@ -13,3 +13,11 @@ test('the api docs page documents the real endpoint and how to get a key', funct
         ->assertSee('X-Api-Key')
         ->assertSee('Lấy API key');
 });
+
+test('the api docs page documents the verified_intermediary flag', function () {
+    $this->withoutVite()
+        ->get('/api-checkscam')
+        ->assertOk()
+        ->assertSee('"verified_intermediary": false')
+        ->assertSee('kể cả kênh của giao dịch viên đã hết hạn');
+});
