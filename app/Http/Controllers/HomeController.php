@@ -11,6 +11,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 
 class HomeController extends Controller
 {
@@ -28,6 +29,7 @@ class HomeController extends Controller
 
         $stats = $this->getHomeStats();
         $latestReports = $this->getLatestReports();
+        $latestApprovedAt = $this->getLatestApprovedAt();
         $topWeeklySearches = StatsHelper::getTopWeeklySearches();
         $trustedInsurances = $this->getTrustedInsurances();
 
@@ -41,6 +43,7 @@ class HomeController extends Controller
         return view('home', compact(
             'stats',
             'latestReports',
+            'latestApprovedAt',
             'topWeeklySearches',
             'trustedInsurances',
             'recentSearches',
@@ -83,13 +86,28 @@ class HomeController extends Controller
         ];
     }
 
+    /**
+     * Newest approvals first; evidence counts come from the loaded evidence_images column.
+     */
     private function getLatestReports(): Collection
     {
-        return Report::where('status', 'approved')
-            ->withCount('comments')
+        return Report::query()
+            ->approved()
+            ->select(['id', 'slug', 'type', 'target_id', 'target_name', 'category', 'scam_type', 'evidence_images', 'approved_at', 'created_at'])
+            ->orderByDesc('approved_at')
             ->latest()
             ->limit(6)
             ->get();
+    }
+
+    /**
+     * Time of the most recent approval, shown as the data freshness line.
+     */
+    private function getLatestApprovedAt(): ?Carbon
+    {
+        $latest = Report::query()->approved()->max('approved_at');
+
+        return $latest ? Carbon::parse($latest) : null;
     }
 
     private function getTrustedInsurances(): Collection
@@ -98,7 +116,7 @@ class HomeController extends Controller
             ->trusted()
             ->with('media')
             ->orderByDesc('amount')
-            ->limit(6)
+            ->limit(3)
             ->get();
     }
 }
