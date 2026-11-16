@@ -22,21 +22,30 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(SettingSeeder::class);
         $this->call(BannerSeeder::class);
-        User::factory()->create([
-            'username' => 'admin',
-            'email' => 'admin@mstsoftware.vn',
-            'password' => Hash::make('123456'),
-            'full_name' => 'Quản trị viên',
-            'role' => 'admin',
-            'status' => 1,
-        ]);
+        // Idempotent: re-running `db:seed` must not fail on the unique admin username.
+        $admin = User::updateOrCreate(
+            ['username' => 'admin'],
+            [
+                'email' => 'admin@mstsoftware.vn',
+                'password' => Hash::make('123456'),
+                'full_name' => 'Quản trị viên',
+                'role' => 'admin',
+                'status' => 1,
+            ],
+        );
+        if ($admin->email_verified_at === null) {
+            $admin->forceFill(['email_verified_at' => now()])->save();
+        }
 
-        Report::factory()->count(50)->create();
-        Insurance::factory()->count(200)->create();
-        Post::factory()->count(30)->create();
-        User::factory()->count(2)->create();
+        // Demo data is only generated on an empty database so repeated runs do not multiply it.
+        if (Report::query()->doesntExist()) {
+            Report::factory()->count(50)->create();
+            Insurance::factory()->count(200)->create();
+            Post::factory()->count(30)->create();
+            User::factory()->count(2)->create();
+        }
 
-        $approvedReports = Report::where('status', 'approved')->get();
+        $approvedReports = Report::where('status', 'approved')->doesntHave('comments')->get();
 
         $approvedReports->each(function ($report) {
             $count = fake()->numberBetween(2, 8);

@@ -5,38 +5,53 @@
 ])
 
 @if ($isAction)
-  <section aria-labelledby="hero-title">
-    <x-ucs.container class="pt-12 pb-10 text-center md:pt-16 md:pb-14">
-      <div class="mx-auto max-w-4xl">
+  {{-- Soft red glow at the top of the light page; colors come from tokens so dark mode follows. --}}
+  <section
+    aria-labelledby="hero-title"
+    class="bg-[radial-gradient(70%_55%_at_50%_-10%,color-mix(in_oklab,var(--color-accent)_10%,transparent),transparent_70%)]"
+  >
+    <x-ucs.container class="pt-10 pb-12 text-center md:pt-14 md:pb-16">
+      <div class="mx-auto max-w-5xl">
+        <div>
+          <span
+            class="border-line bg-surface text-ink-muted inline-flex items-center gap-2 rounded-full border py-1.5 pr-4 pl-3 text-[13px] font-semibold shadow-xs"
+          >
+            <span class="bg-success ring-success/15 size-2 shrink-0 rounded-full ring-4" aria-hidden="true"></span>
+            Dữ liệu cộng đồng, được kiểm duyệt
+          </span>
+        </div>
+
         <h1
           id="hero-title"
-          class="hero-title text-accent text-3xl leading-[1.3] font-black tracking-tight uppercase md:text-4xl lg:text-5xl"
+          class="scanner-title text-ink mt-1 text-[2.125rem] leading-[1.08] font-black tracking-[-0.03em] text-balance uppercase sm:text-5xl md:mt-2 md:text-6xl lg:text-[3.875rem]"
         >
-          KIỂM TRA &amp; TỐ CÁO SCAM.
+          Kiểm tra&nbsp;&amp; tố cáo
+          <br />
+          <span
+            class="text-accent relative inline-block whitespace-nowrap after:absolute after:right-0 after:-bottom-1.5 after:left-[2%] after:h-2 after:rounded-full after:bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--color-accent)_25%,transparent),transparent)]"
+          >
+            scam.
+          </span>
         </h1>
-        <p class="text-ink-muted mx-auto mt-5 max-w-2xl text-sm leading-relaxed font-medium md:text-lg">
-          Hệ thống dữ liệu lớn nhất Việt Nam giúp bạn kiểm tra độ tín nhiệm của đối tác thông qua SĐT, Số TK hoặc Link
-          mạng xã hội.
+
+        <p class="text-ink-muted mx-auto mt-5 max-w-[40rem] text-base leading-relaxed md:mt-6 md:text-lg">
+          Hệ thống dữ liệu lớn nhất Việt Nam giúp bạn kiểm tra độ tín nhiệm của đối tác thông qua SĐT, số tài khoản hoặc
+          link mạng xã hội.
         </p>
 
-        <x-hero.search-form class="mx-auto mt-8 max-w-3xl md:mt-10" :recent-searches="$recentSearches" />
+        <x-hero.search-form class="mx-auto mt-8 max-w-[48.75rem] md:mt-9" hints :recent-searches="$recentSearches" />
 
-        <x-hero.stats :stats="$stats" class="mt-6" />
+        <x-hero.stats :stats="$stats" class="mt-8" />
 
-        <nav aria-label="Lối tắt" class="mt-8 md:mt-12">
+        <nav aria-label="Lối tắt" class="mt-8">
           <ul class="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             <li>
-              <x-hero.action-card
-                :href="route('reports')"
-                icon="fa-solid fa-bullhorn"
-                label="Tố cáo Scam"
-                sub="Report"
-              />
+              <x-hero.action-card :href="route('reports')" icon="fa-solid fa-flag" label="Tố cáo scam" sub="Report" />
             </li>
             <li>
               <x-hero.action-card
                 :href="route('insurances.frontend.index')"
-                icon="fa-solid fa-shield-cat"
+                icon="fa-solid fa-shield-halved"
                 label="Bảo hiểm CS"
                 sub="Insurance"
               />
@@ -52,8 +67,8 @@
             <li>
               <x-hero.action-card
                 :href="url('/api-checkscam')"
-                icon="fa-brands fa-telegram"
-                label="Bot Check"
+                icon="fa-solid fa-robot"
+                label="Bot check"
                 sub="Automation"
               />
             </li>
