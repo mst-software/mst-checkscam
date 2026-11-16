@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Report;
 use App\Models\SearchLog;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class StatsHelper
@@ -39,6 +40,47 @@ class StatsHelper
                 'slug' => $scamInfo->slug ?? '#',
             ];
         });
+    }
+
+    /**
+     * Approved report targets searched most often during the last 7 days.
+     */
+    public static function getTopWeeklySearches(int $limit = 5): Collection
+    {
+        $topSearches = SearchLog::where('created_at', '>=', now()->subDays(7))
+            ->where('is_found', true)
+            ->select('search_query', DB::raw('COUNT(*) as count'))
+            ->groupBy('search_query')
+            ->orderByDesc('count')
+            ->limit(50)
+            ->get();
+
+        if ($topSearches->isEmpty()) {
+            return collect();
+        }
+
+        $reports = Report::whereIn('target_id', $topSearches->pluck('search_query'))
+            ->where('status', 'approved')
+            ->latest()
+            ->get()
+            ->unique('target_id')
+            ->keyBy('target_id');
+
+        return $topSearches
+            ->filter(fn ($search) => $reports->has($search->search_query))
+            ->take($limit)
+            ->map(function ($search) use ($reports) {
+                $report = $reports->get($search->search_query);
+
+                return (object) [
+                    'target_id' => $report->target_id,
+                    'target_name' => $report->target_name,
+                    'type' => $report->type,
+                    'slug' => $report->slug,
+                    'search_count' => (int) $search->count,
+                ];
+            })
+            ->values();
     }
 
     public static function getTopWeeklyReports()
