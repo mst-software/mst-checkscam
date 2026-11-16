@@ -39,6 +39,8 @@
 
         @include('partials.home.trusted-insurances', ['trustedInsurances' => $trustedInsurances ?? collect()])
 
+        @include('partials.home.community')
+
         @include('partials.home.faq')
       </x-ucs.container>
     @endif
