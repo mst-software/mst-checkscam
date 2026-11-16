@@ -33,6 +33,7 @@ class Report extends Model implements HasMedia
         'description',
         'evidence_images',
         'status',
+        'approved_at',
         'ip_address',
         'rejection_reason',
         'view_count',
@@ -43,6 +44,7 @@ class Report extends Model implements HasMedia
 
     protected $casts = [
         'evidence_images' => 'array',
+        'approved_at' => 'datetime',
         'view_count' => 'integer',
         'search_count' => 'integer',
         'scam_type' => ScamType::class,

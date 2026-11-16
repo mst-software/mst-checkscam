@@ -34,6 +34,7 @@ test('static public pages render their page header', function (string $uri, stri
     'insurances' => ['/bao-hiem-cs', 'Quỹ bảo hiểm'],
     'posts' => ['/bai-viet', 'Kiến thức MMO'],
     'terms' => ['/dieu-khoan', 'Điều khoản sử dụng'],
+    'moderation policy' => ['/moderation-policy', 'Quy trình kiểm duyệt'],
     'dispute' => ['/giai-quyet-khieu-nai', 'Giải quyết khiếu nại'],
     'api docs' => ['/api-checkscam', 'Public API'],
     'partners' => ['/doi-tac-uy-tin', 'Đối tác uy tín'],

@@ -75,6 +75,7 @@ Route::get('/lien-he-admin', [PageController::class, 'contact']);
 
 // --- Legal Pages ---
 Route::get('/dieu-khoan', [PageController::class, 'terms']);
+Route::get('/moderation-policy', [PageController::class, 'moderationPolicy'])->name('moderation.policy');
 Route::get('/giai-quyet-khieu-nai', [ComplaintController::class, 'create'])->name('complaints.create');
 Route::post('/giai-quyet-khieu-nai', [ComplaintController::class, 'store'])->name('complaints.store');
 

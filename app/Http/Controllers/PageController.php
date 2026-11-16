@@ -69,4 +69,14 @@ class PageController extends Controller
 
         return view('legal.terms');
     }
+
+    public function moderationPolicy(): View
+    {
+        SeoHelper::setPage(
+            'Quy trình kiểm duyệt',
+            'Cách Scamproof kiểm duyệt tố cáo lừa đảo: yêu cầu bằng chứng, đối chiếu, duyệt hoặc từ chối, che thông tin nhạy cảm và quyền khiếu nại của bên bị tố cáo.',
+        );
+
+        return view('legal.moderation-policy');
+    }
 }

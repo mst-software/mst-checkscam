@@ -40,6 +40,7 @@ test('the sitemap is valid xml listing pages, posts, insurances and approved rep
         url('/'),
         url('/warnings'),
         url('/dieu-khoan'),
+        url('/moderation-policy'),
         route('posts.frontend.show', $post->slug),
         route('insurances.frontend.show', $insurance->slug),
         route('scammer.show', $approved->slug),

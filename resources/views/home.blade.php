@@ -5,7 +5,6 @@
 --}}
 @php
   $isSearch = isset($results) && filled($query ?? null);
-  $totalReports = number_format((int) ($stats['total_reports'] ?? 0), 0, ',', '.');
 @endphp
 
 @section('content')
@@ -16,16 +15,20 @@
     @else
       <x-hero :stats="$stats" :recent-searches="$recentSearches ?? collect()" />
 
-      <x-ucs.container class="space-y-10 pb-8 lg:pb-10">
-        <x-banner-ads position="home_top" class="mb-0" />
+      <x-ucs.container class="space-y-10 pb-8 md:space-y-12 lg:space-y-14 lg:pb-10">
+        @include('partials.home.how-it-works')
 
-        <h2 class="text-accent text-center text-lg font-black uppercase md:text-xl">
-          {{ now()->format('d/m/Y') }} CÓ {{ $totalReports }} CẢNH BÁO
-        </h2>
+        @include('partials.home.moderation')
 
         <div class="grid gap-8 lg:grid-cols-12">
           <div class="min-w-0 space-y-8 lg:col-span-8">
-            @include('partials.home.latest-reports', ['latestReports' => $latestReports ?? collect()])
+            @include(
+              'partials.home.latest-reports',
+              [
+                'latestReports' => $latestReports ?? collect(),
+                'latestApprovedAt' => $latestApprovedAt ?? null,
+              ]
+            )
             <x-banner-ads position="home_between" class="mb-0" />
           </div>
 
@@ -42,9 +45,17 @@
 
         @include('partials.home.trusted-insurances', ['trustedInsurances' => $trustedInsurances ?? collect()])
 
-        @include('partials.home.community')
+        @include('partials.home.commitments')
+
+        <div class="space-y-6">
+          @include('partials.home.official-channels')
+
+          @include('partials.home.operator')
+        </div>
 
         @include('partials.home.faq')
+
+        <x-banner-ads position="home_top" class="mb-0" />
       </x-ucs.container>
     @endif
   </main>

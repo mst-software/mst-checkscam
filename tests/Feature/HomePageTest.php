@@ -1,6 +1,9 @@
 <?php
 
+use App\Enums\ScamType;
+use App\Helpers\ConfigHelper;
 use App\Helpers\StatsHelper;
+use App\Models\Banner;
 use App\Models\Comment;
 use App\Models\Insurance;
 use App\Models\Report;
@@ -24,7 +27,7 @@ function homeApprovedReport(array $attributes = []): Report
     ], $attributes));
 }
 
-test('home renders hero, real stats and sections', function () {
+test('home renders hero and the trust sections in order', function () {
     $report = homeApprovedReport();
     Comment::factory()->count(2)->create(['report_id' => $report->id]);
     Insurance::factory()->create(['full_name' => 'Trần Bảo Hiểm', 'status' => 1, 'expired_at' => now()->addMonth()]);
@@ -39,14 +42,28 @@ test('home renders hero, real stats and sections', function () {
         ->assertSee('role="combobox"', false)
         ->assertSee('for="searchInput"', false)
         ->assertSee(json_encode(route('search.autocomplete')), false)
-        ->assertSee(now()->format('d/m/Y').' CÓ 1 CẢNH BÁO')
-        ->assertSeeInOrder(['id="hero-title"', 'id="searchInput"', 'Lối tắt', 'CẢNH BÁO', 'Cảnh báo mới nhất', 'Bình luận mới', 'Đối tác tin cậy'], false)
-        ->assertSee('Cảnh báo mới nhất')
-        ->assertSee('Tìm kiếm nhiều trong tuần')
-        ->assertSee('Bình luận mới')
-        ->assertSee('Đối tác tin cậy')
+        ->assertDontSee('CẢNH BÁO')
+        ->assertSeeInOrder([
+            'id="hero-title"',
+            'id="searchInput"',
+            'Tra cứu miễn phí, không cần đăng ký',
+            'Mọi tố cáo đều qua kiểm duyệt',
+            'Không công khai danh tính người báo cáo',
+            'Lối tắt',
+            'Cách Scamproof hoạt động',
+            'Chúng tôi kiểm duyệt như thế nào',
+            'Cảnh báo mới nhất',
+            'Tìm kiếm nhiều trong tuần',
+            'Bình luận mới',
+            'Trung gian đã ký quỹ',
+            'Cam kết của chúng tôi',
+            'Cảnh giác mạo danh Scamproof',
+            'Vận hành bởi MST Software',
+            'Câu hỏi thường gặp',
+        ], false)
         ->assertSee('Trần Bảo Hiểm')
         ->assertSee('Tham gia cộng đồng Scamproof')
+        ->assertSee('href="'.route('moderation.policy').'"', false)
         ->assertSee('091***678')
         ->assertDontSee('0912.345.678')
         ->assertDontSee('Nguyễn Văn Tèo')
@@ -56,6 +73,139 @@ test('home renders hero, real stats and sections', function () {
 
     expect((string) $heading)->toContain('Kiểm tra &amp; tố cáo', 'scam.')
         ->and((string) $heading)->not->toContain('<br');
+});
+
+test('latest warnings show scam type, evidence count and approval date', function () {
+    homeApprovedReport([
+        'scam_type' => ScamType::Investment,
+        'evidence_images' => ['a.jpg', 'b.jpg', 'c.jpg'],
+        'approved_at' => '2026-11-14 08:00:00',
+    ]);
+    homeApprovedReport([
+        'target_id' => '1903456789012',
+        'scam_type' => null,
+        'category' => 'Lừa đảo nạp thẻ game',
+        'evidence_images' => [],
+        'approved_at' => '2026-11-10 08:00:00',
+    ]);
+
+    $html = $this->get('/')->assertOk()->getContent();
+    $table = (string) str($html)->after('data-latest-reports')->before('</ul>');
+
+    expect($table)->toContain(ScamType::Investment->label(), 'Lừa đảo nạp thẻ game', '14/11/2026', '10/11/2026')
+        ->toContain('data-evidence-count="3"', '3 ảnh')
+        ->not->toContain('data-evidence-count="0"');
+
+    expect(strpos($table, '14/11/2026'))->toBeLessThan(strpos($table, '10/11/2026'));
+});
+
+test('freshness line uses the newest approval time and is hidden without approved reports', function () {
+    $this->get('/')->assertOk()->assertDontSee('data-freshness', false)->assertDontSee('Cập nhật lần cuối');
+
+    Report::factory()->create(['status' => 'pending']);
+    homeApprovedReport(['approved_at' => now()->subMinutes(5)]);
+    homeApprovedReport(['approved_at' => now()->subDays(3)]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('data-freshness', false)
+        ->assertSee('Cập nhật lần cuối')
+        ->assertSee('5 phút trước')
+        ->assertSee('Dữ liệu được kiểm duyệt thủ công');
+});
+
+test('partner cards show deposit, validity, services and profile link without complaint counts', function () {
+    $insurance = Insurance::factory()->create([
+        'full_name' => 'Võ Thị Hồng',
+        'status' => 1,
+        'amount' => 500000000,
+        'expired_at' => '2027-12-31',
+        'insurance_date' => '2026-01-15',
+        'services' => [['title' => 'Trung gian giao dịch'], ['title' => 'Nhận cọc']],
+    ]);
+    Insurance::factory()->create(['full_name' => 'Không Thời Hạn', 'status' => 1, 'amount' => 400000000, 'expired_at' => null]);
+
+    $html = $this->get('/')->assertOk()->getContent();
+    $section = (string) str($html)->after('aria-label="Trung gian đã ký quỹ"')->before('</section>');
+
+    expect($section)->toContain('Võ Thị Hồng', 'Đã xác thực', 'Quỹ bảo hiểm', '500.000.000 đ', 'Hiệu lực đến', '31/12/2027')
+        ->toContain('Dịch vụ', 'Trung gian giao dịch, Nhận cọc', 'Xác thực từ 15/01/2026')
+        ->toContain('Không thời hạn')
+        ->toContain('href="'.route('insurances.frontend.show', $insurance->slug).'"', 'Xem hồ sơ')
+        ->not->toContain('khiếu nại');
+
+    expect(substr_count($section, 'data-partner-card'))->toBe(2);
+});
+
+test('official channels are built only from configured values', function () {
+    ConfigHelper::setConfig('telegram_link', 'https://t.me/kenh_that');
+    ConfigHelper::setConfig('hotline', '0900.111.222');
+    ConfigHelper::setConfig('zalo_link', '');
+    ConfigHelper::setConfig('support_email', 'hotro@example.test');
+
+    $html = $this->get('/')->assertOk()->getContent();
+    $box = (string) str($html)->after('aria-label="Cảnh giác mạo danh Scamproof"')->before('</section>');
+
+    expect($box)->toContain('không bao giờ', 'mã OTP')
+        ->toContain(parse_url(config('app.url'), PHP_URL_HOST), 't.me/kenh_that', '0900.111.222', 'hotro@example.test')
+        ->not->toContain('zalo');
+
+    expect(substr_count($box, 'data-official-channel'))->toBe(4);
+
+    $operator = (string) str($html)->after('aria-label="Đơn vị vận hành"')->before('</section>');
+
+    expect($operator)->toContain('Vận hành bởi MST Software', '0900.111.222', 'hotro@example.test');
+});
+
+test('commitments describe reporter privacy without claiming absolute anonymity', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+    $section = (string) str($html)->after('aria-label="Cam kết của chúng tôi"')->before('</section>');
+
+    expect($section)->toContain(
+        'Không công khai người báo cáo',
+        'chỉ quản trị viên xem được để xác minh',
+        'Quyền phản hồi cho cả hai bên',
+        'href="'.route('complaints.create').'"',
+        'Miễn phí cho cộng đồng',
+        'Minh bạch chính sách',
+        'href="'.url('/dieu-khoan').'"',
+        'href="'.route('moderation.policy').'"',
+    )->not->toContain('tuyệt đối', 'bên thứ ba');
+});
+
+test('the home_top banner is rendered at the end, after the faq', function () {
+    Banner::factory()->create([
+        'title' => 'Banner Cuối Trang',
+        'image_path' => 'https://example.test/home-top.png',
+        'position' => 'home_top',
+        'type' => 'horizontal',
+    ]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSeeInOrder(['Câu hỏi thường gặp', 'https://example.test/home-top.png', '<footer'], false)
+        ->assertDontSee('Quảng cáo');
+});
+
+test('home html never prints raw target identifiers', function () {
+    homeApprovedReport([
+        'target_id' => '0912345678',
+        'target_name' => 'Phạm Thị Bí Mật',
+        'slug' => 'pham-thi-b-abc12345',
+    ]);
+    homeApprovedReport([
+        'type' => 'website',
+        'target_id' => 'facebook.com/le.hoang.anh2000',
+        'target_name' => 'Lê Hoàng Anh',
+        'slug' => 'le-hoang-a-xyz98765',
+    ]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('091***678')
+        ->assertDontSee('0912345678')
+        ->assertDontSee('Phạm Thị Bí Mật')
+        ->assertDontSee('le.hoang.anh2000');
 });
 
 test('home hero heading carries the scanner line effect', function () {

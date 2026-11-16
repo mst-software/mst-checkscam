@@ -12,6 +12,7 @@
     ['label' => 'Hướng dẫn tố cáo', 'url' => url('/huong-dan-to-cao'), 'external' => false],
     ['label' => 'Liên hệ Admin', 'url' => $siteConfig['zalo_link'] ?? '#', 'external' => true],
     ['label' => 'Điều khoản', 'url' => url('/dieu-khoan'), 'external' => false],
+    ['label' => 'Quy trình kiểm duyệt', 'url' => route('moderation.policy'), 'external' => false],
     ['label' => 'Giải quyết khiếu nại', 'url' => url('/giai-quyet-khieu-nai'), 'external' => false],
   ];
 @endphp
@@ -144,9 +145,11 @@
       </div>
     </div>
 
-    <div
-      class="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-slate-500 md:flex-row"
-    >
+    <p class="mt-10 border-t border-white/10 pt-6 text-center text-xs text-slate-400 md:text-left">
+      Kết quả chỉ phản ánh dữ liệu tố cáo đã được kiểm duyệt trên Scamproof, không phải bảo đảm an toàn.
+    </p>
+
+    <div class="mt-3 flex flex-col items-center justify-between gap-3 text-xs text-slate-500 md:flex-row">
       <p class="text-center md:text-left">
         &copy; {{ date('Y') }}
         <span class="text-slate-300">{{ $siteConfig['title'] ?? 'Tra cứu lừa đảo' }}</span>

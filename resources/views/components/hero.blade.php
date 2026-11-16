@@ -40,6 +40,18 @@
 
         <x-hero.search-form class="mx-auto mt-8 max-w-[48.75rem] md:mt-9" hints :recent-searches="$recentSearches" />
 
+        <ul
+          aria-label="Cam kết khi tra cứu"
+          class="text-ink-muted mt-5 flex flex-col items-center gap-x-6 gap-y-2 text-[13px] font-medium sm:flex-row sm:flex-wrap sm:justify-center"
+        >
+          @foreach (['Tra cứu miễn phí, không cần đăng ký', 'Mọi tố cáo đều qua kiểm duyệt', 'Không công khai danh tính người báo cáo'] as $assurance)
+            <li class="inline-flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i>
+              {{ $assurance }}
+            </li>
+          @endforeach
+        </ul>
+
         <nav aria-label="Lối tắt" class="mt-8">
           <ul class="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             <li>

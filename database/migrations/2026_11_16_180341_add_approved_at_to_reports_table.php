@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('reports', function (Blueprint $table) {
+            $table->timestamp('approved_at')->nullable()->after('status')->index();
+        });
+
+        $this->backfillApprovedAt();
+    }
+
+    /**
+     * Already approved reports have no recorded approval time; their last update is the closest value.
+     */
+    public function backfillApprovedAt(): void
+    {
+        DB::table('reports')
+            ->where('status', 'approved')
+            ->whereNull('approved_at')
+            ->update(['approved_at' => DB::raw('updated_at')]);
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('reports', function (Blueprint $table) {
+            $table->dropIndex(['approved_at']);
+            $table->dropColumn('approved_at');
+        });
+    }
+};

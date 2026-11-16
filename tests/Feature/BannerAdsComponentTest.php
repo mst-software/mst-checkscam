@@ -29,19 +29,24 @@ test('banner ads render a lazy, sponsored slot without label or border that hide
         ->assertSee('src="https://example.test/banner.png"', false)
         ->assertSee('loading="lazy"', false)
         ->assertSee('onerror="', false)
-        ->assertSee('aspect-[8/1]', false)
+        ->assertSee('max-w-[950px]', false)
+        ->assertDontSee('aspect-', false)
         ->assertDontSee('bg-surface-muted', false)
         ->assertDontSee('border-line', false)
         ->assertDontSee('dark:bg-white', false);
 });
 
-test('square banners keep a square box', function () {
-    homeTopBanner(['position' => 'home_sidebar', 'type' => 'square']);
+test('banner slots reserve no height, so unloaded or failed images leave no blank box', function (string $position, string $type) {
+    homeTopBanner(['position' => $position, 'type' => $type]);
 
-    $this->blade('<x-banner-ads position="home_sidebar" />')
-        ->assertSee('aspect-square', false)
-        ->assertSee('object-contain', false);
-});
+    $this->blade('<x-banner-ads position="'.$position.'" />')
+        ->assertSee('class="block h-auto w-full"', false)
+        ->assertDontSee('aspect-', false)
+        ->assertDontSee('h-full w-full object-contain', false);
+})->with([
+    'horizontal' => ['home_top', 'horizontal'],
+    'square' => ['home_sidebar', 'square'],
+]);
 
 test('banners without a usable link render the image without an anchor', function (?string $redirectUrl) {
     homeTopBanner(['redirect_url' => $redirectUrl]);

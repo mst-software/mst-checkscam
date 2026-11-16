@@ -14,8 +14,8 @@
     </span>
     <h2 id="report-success-title" class="mt-4 text-lg font-semibold">Đã gửi tố cáo</h2>
     <p id="report-success-text" class="text-ink-muted mt-2 text-sm">
-      Cảm ơn bạn. Đội kiểm duyệt sẽ xem xét trong 30 phút đến 12 giờ. Sau đó bạn có thể tra cứu lại số tài khoản hoặc
-      website vừa tố cáo để kiểm tra.
+      Cảm ơn bạn. Tố cáo thường được xem xét trong vòng 24 giờ. Sau đó bạn có thể tra cứu lại số tài khoản hoặc website
+      vừa tố cáo để kiểm tra.
     </p>
     <p class="text-ink-subtle mt-3 text-xs">Hãy nhắc người thân tra cứu trên Scamproof trước khi chuyển tiền.</p>
   </div>

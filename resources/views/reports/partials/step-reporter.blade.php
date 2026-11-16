@@ -55,9 +55,23 @@
       </div>
     </div>
 
-    <p class="bg-success-soft text-ink rounded-control flex items-start gap-2.5 px-3 py-2.5 text-sm">
+    <p
+      class="bg-success-soft text-ink rounded-control flex items-start gap-2.5 px-3 py-2.5 text-sm"
+      data-reporter-privacy-note
+    >
       <i class="fa-solid fa-lock text-success mt-0.5" aria-hidden="true"></i>
-      <span>Thông tin liên hệ của bạn chỉ dùng để xác minh nội bộ và không bao giờ được công khai.</span>
+      <span>
+        Tên và thông tin liên hệ của bạn không hiển thị công khai; chỉ quản trị viên xem được để xác minh tố cáo. Bạn
+        chịu trách nhiệm về tính trung thực của nội dung đã gửi.
+        <a
+          href="{{ route('moderation.policy') }}"
+          class="text-accent hover:text-accent-hover focus-visible:outline-accent rounded-sm font-semibold underline-offset-2 hover:underline focus-visible:outline-2"
+          target="_blank"
+          rel="noopener"
+        >
+          Xem quy trình kiểm duyệt
+        </a>
+      </span>
     </p>
 
     {{-- Review summary, filled by the step script before submitting --}}

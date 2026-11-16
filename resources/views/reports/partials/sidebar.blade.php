@@ -7,8 +7,9 @@
   ];
 
   $assurances = [
-    ['icon' => 'fa-solid fa-user-shield', 'text' => 'Mọi tố cáo được kiểm duyệt trước khi công khai, thường trong 30 phút đến 12 giờ.'],
-    ['icon' => 'fa-solid fa-lock', 'text' => 'Chúng tôi không bao giờ công khai tên và thông tin liên hệ của bạn.'],
+    ['icon' => 'fa-solid fa-user-shield', 'text' => 'Mọi tố cáo được kiểm duyệt trước khi công khai, thường được xem xét trong vòng 24 giờ.'],
+    ['icon' => 'fa-solid fa-lock', 'text' => 'Tên và thông tin liên hệ của bạn không hiển thị công khai; chỉ quản trị viên xem được để xác minh.'],
+    ['icon' => 'fa-solid fa-scale-balanced', 'text' => 'Tố cáo thiếu căn cứ hoặc sai sự thật sẽ bị từ chối hoặc gỡ.'],
     ['icon' => 'fa-solid fa-hand-holding-heart', 'text' => 'Tố cáo và tra cứu hoàn toàn miễn phí.'],
   ];
 @endphp
@@ -33,6 +34,14 @@
       </li>
     @endforeach
   </ul>
+
+  <a
+    href="{{ route('moderation.policy') }}"
+    class="text-accent hover:text-accent-hover focus-visible:outline-accent mt-4 inline-flex items-center gap-1 rounded-sm text-sm font-semibold underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+  >
+    Xem quy trình kiểm duyệt
+    <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+  </a>
 
   <x-slot:footer>
     <p class="text-ink-subtle flex items-start gap-2 text-xs" data-rate-limit-notice>

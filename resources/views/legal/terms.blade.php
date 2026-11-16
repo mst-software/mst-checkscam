@@ -4,11 +4,11 @@
   $sections = [
     [
       'title' => 'Quy định về dữ liệu',
-      'body' => 'Tất cả thông tin trên hệ thống được đóng góp bởi cộng đồng và đội ngũ biên tập viên. Chúng tôi không chịu trách nhiệm về tính chính xác tuyệt đối nhưng cam kết xác minh kỹ lưỡng nhất có thể dựa trên các bằng chứng được cung cấp.',
+      'body' => 'Tất cả thông tin trên hệ thống được đóng góp bởi cộng đồng và đội ngũ biên tập viên. Chúng tôi không chịu trách nhiệm về tính chính xác tuyệt đối nhưng cam kết xác minh kỹ lưỡng nhất có thể dựa trên các bằng chứng được cung cấp. Mỗi tố cáo thường được xem xét trong vòng 24 giờ.',
     ],
     [
       'title' => 'Bảo mật thông tin người tố cáo',
-      'body' => 'Hệ thống cam kết bảo mật danh tính người tố cáo một cách tuyệt đối. Thông tin cá nhân của bạn sẽ không bao giờ được công khai hoặc cung cấp cho bên thứ ba, trừ khi có yêu cầu bằng văn bản từ cơ quan chức năng có thẩm quyền.',
+      'body' => 'Thông tin cá nhân của người tố cáo (tên, liên hệ, địa chỉ IP) không được hiển thị công khai. Chỉ quản trị viên xem được các thông tin này để xác minh tố cáo và xử lý tố cáo sai sự thật. Thông tin của bạn sẽ không được cung cấp cho bên thứ ba, trừ khi có yêu cầu bằng văn bản từ cơ quan chức năng có thẩm quyền. Người gửi tố cáo chịu trách nhiệm về tính trung thực của nội dung đã cung cấp.',
     ],
     [
       'title' => 'Gỡ bài viết',
@@ -21,7 +21,7 @@
   <main class="flex-1 pb-20">
     <x-ucs.page-header
       title="Điều khoản sử dụng"
-      description="Cập nhật lần cuối ngày 08/03/2026."
+      description="Cập nhật lần cuối ngày 16/11/2026."
       :breadcrumbs="[['name' => 'Điều khoản sử dụng', 'url' => url('/dieu-khoan')]]"
     />
 

@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Report;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Report>
+ * @extends Factory<Report>
  */
 class ReportFactory extends Factory
 {
@@ -84,5 +85,17 @@ class ReportFactory extends Factory
             'created_at' => $this->faker->dateTimeBetween('-15 days', 'now'),
             'updated_at' => now(),
         ];
+    }
+
+    /**
+     * Approved reports get an approval time unless the caller sets one.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Report $report) {
+            if ($report->status === 'approved' && $report->approved_at === null) {
+                $report->approved_at = $report->created_at ?? now();
+            }
+        });
     }
 }
