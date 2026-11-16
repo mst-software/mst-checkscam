@@ -10,12 +10,12 @@ Full team convention: `docs/convention-git.md`. Commit message format: use the `
 ## 1. One task = one branch
 
 ```
-git checkout develop && git pull origin develop
+git checkout main && git pull origin main
 git checkout -b <prefix>/<short-kebab-description>
 ```
 
-- Branch from `develop`, never from `main`. Never commit on `develop` or `main`.
-- Prefixes: `feature/`, `bugfix/`, `hotfix/` (from `main`), `refactor/`, `docs/`, `test/`, `style/`, `ui/`, `chore/`.
+- Branch from an up-to-date `main` (the only long-lived branch). Never commit on `main`.
+- Prefixes: `feature/`, `bugfix/`, `hotfix/`, `refactor/`, `docs/`, `test/`, `style/`, `ui/`, `chore/`.
 - Lowercase, hyphenated, describe the component: `bugfix/footer-login-link`, not `fix-bug`. No personal names. One task per branch.
 
 ## 2. Commit as small as possible
@@ -28,10 +28,10 @@ git checkout -b <prefix>/<short-kebab-description>
 
 ## 3. Pull requests
 
-- One PR per branch, opened when the task is done; target `develop`. Leader reviews before merge.
+- One PR per branch, opened when the task is done; target `main`. Leader reviews before merge.
 - Push with `git push -u origin HEAD`; no force-push on shared branches.
 - Body: short bullets (what, why, how verified, what was not verified). For UI changes, check desktop and mobile width in a browser first.
-- Do not merge unless the user says so. Never merge locally into `develop` or `main`; use `gh pr create` / `gh pr merge`.
+- Do not merge unless the user says so. Never merge locally into `main`; use `gh pr create` / `gh pr merge`.
 - Delete the branch after merge.
 
 ## 4. Never commit
