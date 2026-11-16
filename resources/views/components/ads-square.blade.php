@@ -10,7 +10,7 @@
 @endphp
 
 <div
-  {{ $attributes->merge(['class' => 'rounded-card w-full overflow-hidden']) }}
+  {{ $attributes->merge(['class' => 'rounded-card mx-auto w-full max-w-sm overflow-hidden lg:max-w-none']) }}
 >
   @if ($href)
     <a href="{{ $href }}" target="_blank" rel="sponsored noopener" class="block h-full w-full">
