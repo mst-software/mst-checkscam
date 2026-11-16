@@ -12,16 +12,23 @@
 @endphp
 
 @if ($items->isNotEmpty())
-  <div {{ $attributes }}>
-    <h2 class="text-ink-muted mb-3 text-sm font-medium">Dữ liệu trên hệ thống</h2>
-    <div class="grid grid-cols-3 gap-3 lg:grid-cols-1">
-      @foreach ($items as $key => $label)
-        <x-ucs.stat
-          :label="$label"
-          :value="number_format((int) $stats[$key], 0, ',', '.')"
-          class="lg:flex lg:items-baseline lg:justify-between lg:gap-4 lg:[&>p:last-child]:mt-0"
-        />
-      @endforeach
-    </div>
+  <div {{ $attributes->class(['bg-hero-2 border-t border-white/10']) }}>
+    <x-ucs.container class="py-6 sm:py-8">
+      <h2 class="sr-only">Dữ liệu trên hệ thống</h2>
+      <dl class="mx-auto grid max-w-3xl grid-cols-3 divide-x divide-white/15 text-center">
+        @foreach ($items as $key => $label)
+          <div class="flex flex-col-reverse gap-1 px-2">
+            <dt class="text-on-hero-muted text-xs sm:text-sm">{{ $label }}</dt>
+            <dd class="text-on-hero text-2xl font-semibold tabular-nums sm:text-3xl">
+              {{ number_format((int) $stats[$key], 0, ',', '.') }}
+            </dd>
+          </div>
+        @endforeach
+      </dl>
+      <p class="text-on-hero-muted mt-5 flex items-center justify-center gap-2 text-center text-xs sm:text-sm">
+        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+        Dữ liệu do cộng đồng đóng góp và được kiểm duyệt
+      </p>
+    </x-ucs.container>
   </div>
 @endif

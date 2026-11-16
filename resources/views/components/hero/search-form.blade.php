@@ -1,8 +1,13 @@
 @props([
   'hints' => true,
   'recentSearches' => collect(),
+  'size' => 'lg',
 ])
 
+{{--
+  Search form rendered on the navy hero band. The green submit button is a local style
+  (the ucs button has no "hero action" variant).
+--}}
 @php
   $defaultHint = 'Hệ thống tự nhận diện loại thông tin khi bạn tra cứu.';
   $hintTypes = [
@@ -11,6 +16,7 @@
     ['label' => 'Facebook', 'placeholder' => 'Ví dụ: facebook.com/ten.tai.khoan', 'hint' => 'Dán link trang cá nhân hoặc UID Facebook.'],
     ['label' => 'Link', 'placeholder' => 'Ví dụ: https://ten-mien.com', 'hint' => 'Dán đường link website hoặc trang bán hàng cần kiểm tra.'],
   ];
+  $height = $size === 'lg' ? 'h-14' : 'h-12';
 @endphp
 
 <div {{ $attributes }}>
@@ -19,7 +25,7 @@
     <div class="flex flex-col gap-2 sm:flex-row">
       <div class="relative min-w-0 flex-1" id="search-wrapper">
         <i
-          class="fa-solid fa-magnifying-glass text-ink-subtle pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm"
+          class="fa-solid fa-magnifying-glass pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-slate-500"
           aria-hidden="true"
         ></i>
         <input
@@ -37,47 +43,58 @@
           @if ($hints) aria-describedby="search-hint" @endif
           placeholder="Nhập SĐT, số tài khoản, Facebook hoặc link..."
           data-default-placeholder="Nhập SĐT, số tài khoản, Facebook hoặc link..."
-          class="border-line bg-surface text-ink placeholder:text-ink-subtle focus:border-accent focus:ring-accent/25 h-11 w-full rounded-xl border pr-4 pl-10 text-base transition-colors outline-none focus:ring-3"
+          class="{{ $height }} w-full rounded-xl border border-white bg-white pr-4 pl-11 text-base text-slate-900 transition-shadow outline-none placeholder:text-slate-500 focus:ring-4 focus:ring-white/35"
         />
 
         <ul
           id="searchResults"
           role="listbox"
           aria-label="Gợi ý tra cứu"
-          class="border-line bg-surface absolute top-full right-0 left-0 z-40 mt-1 hidden max-h-80 overflow-y-auto rounded-xl border py-1 shadow-lg"
+          class="border-line bg-surface absolute top-full right-0 left-0 z-40 mt-1 hidden max-h-80 overflow-y-auto rounded-xl border py-1 text-left shadow-lg"
         ></ul>
       </div>
 
-      <x-ucs.button type="submit" size="lg" class="w-full sm:w-auto">Kiểm tra</x-ucs.button>
+      <button
+        type="submit"
+        class="{{ $height }} bg-hero-action hover:bg-hero-action-hover inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-7 text-base font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      >
+        <i class="fa-solid fa-shield-halved text-sm" aria-hidden="true"></i>
+        Tra cứu
+      </button>
     </div>
   </form>
 
   @if ($hints)
-    <div class="mt-3 flex flex-wrap items-center gap-2" role="group" aria-label="Loại thông tin cần kiểm tra">
+    <div class="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Loại thông tin cần kiểm tra">
       @foreach ($hintTypes as $hintType)
         <button
           type="button"
           aria-pressed="false"
           data-search-hint="{{ $hintType['hint'] }}"
           data-search-placeholder="{{ $hintType['placeholder'] }}"
-          class="border-line text-ink-muted hover:border-line-strong hover:text-ink aria-pressed:border-accent aria-pressed:bg-accent-soft aria-pressed:text-accent focus-visible:outline-accent cursor-pointer rounded-md border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+          class="text-on-hero-muted aria-pressed:text-hero cursor-pointer rounded-full border border-white/25 px-3 py-1 text-xs font-medium transition-colors hover:border-white/50 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white aria-pressed:border-white aria-pressed:bg-white"
         >
           {{ $hintType['label'] }}
         </button>
       @endforeach
     </div>
-    <p id="search-hint" class="text-ink-subtle mt-2 text-xs" aria-live="polite" data-default-hint="{{ $defaultHint }}">
+    <p
+      id="search-hint"
+      class="text-on-hero-muted mt-2 text-xs"
+      aria-live="polite"
+      data-default-hint="{{ $defaultHint }}"
+    >
       {{ $defaultHint }}
     </p>
   @endif
 
   @if ($recentSearches->isNotEmpty())
     <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-      <span class="text-ink-subtle">Bạn đã tra cứu:</span>
+      <span class="text-on-hero-muted">Bạn đã tra cứu:</span>
       @foreach ($recentSearches as $search)
         <a
           href="{{ route('search.index', ['q' => $search]) }}"
-          class="text-accent hover:text-accent-hover focus-visible:outline-accent max-w-48 truncate rounded-sm hover:underline focus-visible:outline-2"
+          class="max-w-48 truncate rounded-sm text-white underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-white"
         >
           {{ $search }}
         </a>
