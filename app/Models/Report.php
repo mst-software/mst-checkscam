@@ -63,6 +63,11 @@ class Report extends Model implements HasMedia
         return $this->hasMany(Comment::class, 'report_id')->latest();
     }
 
+    public function complaints(): HasMany
+    {
+        return $this->hasMany(Complaint::class);
+    }
+
     /**
      * ------------------------------------------------------
      * Scopes
