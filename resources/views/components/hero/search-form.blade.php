@@ -1,12 +1,12 @@
 @props([
-  'hints' => true,
+  'hints' => false,
   'recentSearches' => collect(),
   'size' => 'lg',
 ])
 
 {{--
-  Search form rendered on the navy hero band. The green submit button is a local style
-  (the ucs button has no "hero action" variant).
+  Search box on the light hero: white rounded box with a red "Tra cứu" action.
+  The suggestion list is anchored to the box (#search-wrapper) so it also opens below on mobile.
 --}}
 @php
   $defaultHint = 'Hệ thống tự nhận diện loại thông tin khi bạn tra cứu.';
@@ -16,85 +16,88 @@
     ['label' => 'Facebook', 'placeholder' => 'Ví dụ: facebook.com/ten.tai.khoan', 'hint' => 'Dán link trang cá nhân hoặc UID Facebook.'],
     ['label' => 'Link', 'placeholder' => 'Ví dụ: https://ten-mien.com', 'hint' => 'Dán đường link website hoặc trang bán hàng cần kiểm tra.'],
   ];
-  $height = $size === 'lg' ? 'h-14' : 'h-12';
+  $isLarge = $size === 'lg';
 @endphp
 
 <div {{ $attributes }}>
   <form action="{{ route('search.index') }}" method="GET" role="search" data-search-form>
     <label for="searchInput" class="sr-only">Nhập SĐT, số tài khoản, Facebook hoặc link cần kiểm tra</label>
-    <div class="flex flex-col gap-2 sm:flex-row">
-      <div class="relative min-w-0 flex-1" id="search-wrapper">
-        <i
-          class="fa-solid fa-magnifying-glass pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-slate-500"
-          aria-hidden="true"
-        ></i>
-        <input
-          type="text"
-          name="q"
-          id="searchInput"
-          value="{{ request()->query('q') }}"
-          autocomplete="off"
-          enterkeyhint="search"
-          required
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded="false"
-          aria-controls="searchResults"
-          @if ($hints) aria-describedby="search-hint" @endif
-          placeholder="Nhập SĐT, số tài khoản, Facebook hoặc link..."
-          data-default-placeholder="Nhập SĐT, số tài khoản, Facebook hoặc link..."
-          class="{{ $height }} w-full rounded-xl border border-white bg-white pr-4 pl-11 text-base text-slate-900 transition-shadow outline-none placeholder:text-slate-500 focus:ring-4 focus:ring-white/35"
-        />
+    <div
+      id="search-wrapper"
+      class="{{ $isLarge ? 'rounded-2xl p-1.5 md:p-2' : 'rounded-xl p-1' }} border-line bg-surface focus-within:border-accent focus-within:ring-accent-soft relative border-2 shadow-xl shadow-ink/5 transition-colors focus-within:ring-4"
+    >
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div class="relative flex min-w-0 flex-1 items-center">
+          <i
+            class="fa-solid fa-magnifying-glass text-ink-subtle pointer-events-none absolute left-4 text-lg"
+            aria-hidden="true"
+          ></i>
+          <input
+            type="text"
+            name="q"
+            id="searchInput"
+            value="{{ request()->query('q') }}"
+            autocomplete="off"
+            enterkeyhint="search"
+            required
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-controls="searchResults"
+            @if ($hints) aria-describedby="search-hint" @endif
+            placeholder="Nhập Số tài khoản, SĐT hoặc Link..."
+            data-default-placeholder="Nhập Số tài khoản, SĐT hoặc Link..."
+            class="{{ $isLarge ? 'h-12' : 'h-11' }} text-ink placeholder:text-ink-subtle w-full border-0 bg-transparent pr-4 pl-12 text-base font-semibold outline-none focus:ring-0"
+          />
+        </div>
 
-        <ul
-          id="searchResults"
-          role="listbox"
-          aria-label="Gợi ý tra cứu"
-          class="border-line bg-surface absolute top-full right-0 left-0 z-40 mt-1 hidden max-h-80 overflow-y-auto rounded-xl border py-1 text-left shadow-lg"
-        ></ul>
+        <button
+          type="submit"
+          class="{{ $isLarge ? 'h-12 px-8 font-black' : 'h-11 px-6 font-bold' }} bg-accent hover:bg-accent-hover text-on-accent focus-visible:outline-accent inline-flex w-full cursor-pointer items-center justify-center rounded-xl text-sm tracking-widest whitespace-nowrap uppercase shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto"
+        >
+          Tra cứu
+        </button>
       </div>
 
-      <button
-        type="submit"
-        class="{{ $height }} bg-hero-action hover:bg-hero-action-hover inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-7 text-base font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-      >
-        <i class="fa-solid fa-shield-halved text-sm" aria-hidden="true"></i>
-        Tra cứu
-      </button>
+      <ul
+        id="searchResults"
+        role="listbox"
+        aria-label="Gợi ý tra cứu"
+        class="border-line bg-surface absolute top-full right-0 left-0 z-40 mt-2 hidden max-h-80 overflow-y-auto rounded-xl border py-1 text-left shadow-lg"
+      ></ul>
     </div>
   </form>
 
   @if ($hints)
-    <div class="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Loại thông tin cần kiểm tra">
+    <div
+      class="mt-4 flex flex-wrap items-center justify-center gap-2"
+      role="group"
+      aria-label="Loại thông tin cần kiểm tra"
+    >
       @foreach ($hintTypes as $hintType)
         <button
           type="button"
           aria-pressed="false"
           data-search-hint="{{ $hintType['hint'] }}"
           data-search-placeholder="{{ $hintType['placeholder'] }}"
-          class="text-on-hero-muted aria-pressed:text-hero cursor-pointer rounded-full border border-white/25 px-3 py-1 text-xs font-medium transition-colors hover:border-white/50 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white aria-pressed:border-white aria-pressed:bg-white"
+          class="border-line text-ink-muted hover:border-line-strong hover:text-ink focus-visible:outline-accent aria-pressed:border-accent aria-pressed:bg-accent-soft aria-pressed:text-accent cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
         >
           {{ $hintType['label'] }}
         </button>
       @endforeach
     </div>
-    <p
-      id="search-hint"
-      class="text-on-hero-muted mt-2 text-xs"
-      aria-live="polite"
-      data-default-hint="{{ $defaultHint }}"
-    >
+    <p id="search-hint" class="text-ink-subtle mt-2 text-xs" aria-live="polite" data-default-hint="{{ $defaultHint }}">
       {{ $defaultHint }}
     </p>
   @endif
 
   @if ($recentSearches->isNotEmpty())
-    <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-      <span class="text-on-hero-muted">Bạn đã tra cứu:</span>
+    <div class="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs">
+      <span class="text-ink-subtle">Bạn đã tra cứu:</span>
       @foreach ($recentSearches as $search)
         <a
           href="{{ route('search.index', ['q' => $search]) }}"
-          class="max-w-48 truncate rounded-sm text-white underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-white"
+          class="text-accent focus-visible:outline-accent max-w-48 truncate rounded-sm font-semibold underline-offset-2 hover:underline focus-visible:outline-2"
         >
           {{ $search }}
         </a>
