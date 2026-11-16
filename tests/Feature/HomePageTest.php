@@ -54,7 +54,8 @@ test('home renders hero, real stats and sections', function () {
 
     $heading = str($html)->after('id="hero-title"')->before('</h1>');
 
-    expect((string) $heading)->toContain('Kiểm tra&nbsp;&amp; tố cáo', 'scam.');
+    expect((string) $heading)->toContain('Kiểm tra &amp; tố cáo', 'scam.')
+        ->and((string) $heading)->not->toContain('<br');
 });
 
 test('home hero heading carries the scanner line effect', function () {
