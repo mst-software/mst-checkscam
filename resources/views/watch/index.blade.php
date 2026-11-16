@@ -39,7 +39,7 @@
               maxlength="255"
               required
               placeholder="Ví dụ: 0912345678"
-              class="border-line bg-surface text-ink placeholder:text-ink-subtle rounded-control focus-visible:outline-accent aria-invalid:border-danger h-10 min-w-0 flex-1 border px-3 text-base focus-visible:outline-2 focus-visible:outline-offset-1 sm:text-sm"
+              class="border-line bg-surface text-ink placeholder:text-ink-subtle rounded-control focus-visible:outline-accent aria-invalid:border-danger h-10 w-full min-w-0 border sm:flex-1 px-3 text-base focus-visible:outline-2 focus-visible:outline-offset-1 sm:text-sm"
               @error("value")
                   aria-invalid="true"
               @enderror
