@@ -61,7 +61,8 @@ return [
         'defaults' => [
             'title' => false, // set false to total remove
             'description' => false, // set false to total remove
-            'url' => null, // Set to null or 'full' to use Url::full(), set to 'current' to use Url::current(), set false to remove
+            // 'current' (no query string) so visitor input such as ?q=<phone> never lands in JSON-LD.
+            'url' => 'current', // Set to null or 'full' to use Url::full(), set to 'current' to use Url::current(), set false to remove
             'type' => 'WebPage',
             'images' => [],
         ],

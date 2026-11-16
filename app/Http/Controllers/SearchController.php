@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\SeoHelper;
 use App\Helpers\StatsHelper;
 use App\Helpers\StringHelper;
 use App\Models\Comment;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class SearchController extends Controller
 {
@@ -31,17 +33,23 @@ class SearchController extends Controller
     {
         $query = trim($request->query('q', ''));
 
+        // Result pages are per-visitor lookups: keep them out of the index and never echo the raw query
+        // (someone's phone or bank account) into the title, description, OpenGraph or JSON-LD.
         if ($query !== '') {
-            $metaTitle = "Kết quả check scam: {$query} | Tra cứu lừa đảo";
-            $metaDesc = "Dữ liệu mới nhất về {$query}. Xem đối tượng này có trong danh sách đen lừa đảo hay không. Tra cứu STK, SĐT, Link FB tại Scamproof.";
-            SEOTools::setTitle($metaTitle);
-            SEOTools::setDescription($metaDesc);
+            $maskedQuery = $this->maskedQuery($query);
+            SeoHelper::setPage(
+                "Kết quả tra cứu {$maskedQuery}",
+                "Kết quả tra cứu {$maskedQuery} trong danh sách cảnh báo lừa đảo. Tra cứu STK, SĐT, Facebook trước khi giao dịch.",
+            );
             SEOTools::opengraph()->setUrl(url()->current());
             SEOTools::metatags()->setCanonical(url()->current());
         } else {
-            SEOTools::setTitle('Tìm kiếm đối tượng lừa đảo - Scamproof');
-            SEOTools::metatags()->setRobots('noindex, follow');
+            SeoHelper::setPage(
+                'Tìm kiếm đối tượng lừa đảo',
+                'Tra cứu số tài khoản, số điện thoại, Facebook trong danh sách cảnh báo lừa đảo trước khi giao dịch.',
+            );
         }
+        SEOTools::metatags()->setRobots('noindex, follow');
 
         $results = collect();
         $matchedInsurances = collect();
@@ -223,6 +231,22 @@ class SearchController extends Controller
             ]);
 
         return response()->json($insuranceSuggestions->concat($reportSuggestions)->take(8)->values());
+    }
+
+    /**
+     * The visitor's query as it may appear in page metadata: phone and bank numbers through
+     * StringHelper::mask_id, anything else through StringHelper::mask_name. Free text that still
+     * carries a long digit run (e.g. "0912345678 abc") is replaced by a generic label.
+     */
+    private function maskedQuery(string $query): string
+    {
+        [$type, $formattedQuery] = StringHelper::detectQueryType($query);
+
+        $masked = in_array($type, ['phone', 'bank'], true)
+            ? StringHelper::mask_id($formattedQuery)
+            : StringHelper::mask_name(Str::limit($formattedQuery, 50, ''));
+
+        return preg_match('/\d{4,}/', $masked) === 1 ? 'từ khóa của bạn' : $masked;
     }
 
     /**
