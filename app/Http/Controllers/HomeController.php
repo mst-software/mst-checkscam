@@ -11,7 +11,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -75,15 +74,12 @@ class HomeController extends Controller
     }
 
     /**
-     * @return array{total_reports: int, total_scammers: int, total_comments: int, total_insurances: int}
+     * @return array{total_reports: int}
      */
     private function getHomeStats(): array
     {
         return [
             'total_reports' => Report::where('status', 'approved')->count(),
-            'total_scammers' => Report::where('status', 'approved')->count(DB::raw('DISTINCT target_id')),
-            'total_comments' => Comment::count(),
-            'total_insurances' => Insurance::query()->trusted()->count(),
         ];
     }
 

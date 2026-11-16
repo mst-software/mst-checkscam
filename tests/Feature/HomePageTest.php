@@ -64,26 +64,6 @@ test('home hero heading carries the scanner line effect', function () {
     expect($html)->toMatch('/<h1\s+id="hero-title"\s+class="[^"]*\bscanner-title\b[^"]*"/');
 });
 
-test('home hero stats show real counts for scammers, comments and trusted partners', function () {
-    $report = homeApprovedReport();
-    homeApprovedReport(['target_id' => '1903456789012']);
-    homeApprovedReport(['status' => 'pending', 'target_id' => '0988000111']);
-    Comment::factory()->count(3)->create(['report_id' => $report->id]);
-    Insurance::factory()->count(2)->create(['status' => 1, 'expired_at' => now()->addMonth()]);
-    Insurance::factory()->create(['status' => 1, 'expired_at' => null]);
-    Insurance::factory()->create(['status' => 0, 'expired_at' => now()->addMonth()]);
-    Insurance::factory()->create(['status' => 1, 'expired_at' => now()->subDay()]);
-
-    $html = $this->get('/')->assertOk()->getContent();
-
-    $stats = preg_replace('/\s+/', ' ', strip_tags(str($html)->after('aria-label="Dữ liệu trên hệ thống"')->before('</ul>')));
-
-    expect($stats)
-        ->toContain('2 Đối tượng bị tố cáo')
-        ->toContain('3 Bình luận cộng đồng')
-        ->toContain('3 Đối tác bảo chứng');
-});
-
 test('home hero shows hint chips that only change the placeholder', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
@@ -110,7 +90,9 @@ test('home hero action cards link to real pages', function () {
         url('/api-checkscam'),
     ])->not->toContain('#');
 
-    expect((string) $nav)->toContain('Tố cáo scam', 'Bảo hiểm CS', 'Chợ buôn bán', 'Bot check', 'fa-chevron-right');
+    expect((string) $nav)->toContain('Tố cáo scam', 'Bảo hiểm CS', 'Chợ buôn bán', 'Bot check', 'fa-arrow-right');
+
+    expect($html)->not->toContain('aria-label="Dữ liệu trên hệ thống"');
 });
 
 test('search results keep the compact search bar without the home hero', function () {
