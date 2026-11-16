@@ -184,8 +184,8 @@
             </span>
           </a>
         </li>
-        <li>
-          <a href="{{ route('admin.upgrade') }}" class="pro-feature-link">
+        <li class="{{ request()->is('admin/api-keys*') ? 'active' : '' }}">
+          <a href="{{ route('admin.api-keys.index') }}" class="pro-feature-link">
             <i data-feather="code"></i>
             <span>
               <span class="pro-feature-text">Public API</span>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminApiKeyController;
 use App\Http\Controllers\Admin\AdminBannerController;
 use App\Http\Controllers\Admin\AdminCommentController;
 use App\Http\Controllers\Admin\AdminComplaintController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Api\ScamCheckController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\HomeController;
@@ -25,6 +27,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SocialiteController;
+use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Controllers\WatchController;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +51,14 @@ Route::get('/api/newfeed/posts', [NewfeedPostController::class, 'index'])->name(
 Route::post('/api/newfeed/posts', [NewfeedPostController::class, 'store'])->name('api.newfeed.posts.store');
 Route::delete('/api/newfeed/posts/{post}', [NewfeedPostController::class, 'destroy'])->name('api.newfeed.posts.destroy');
 Route::post('/api/newfeed/posts/{post}/report', [NewfeedPostReportController::class, 'store'])->name('api.newfeed.posts.report');
+
+// --- Public API v1 (API key auth, CSRF-exempt in bootstrap/app.php) ---
+Route::prefix('api/v1')->name('api.v1.')->group(function () {
+    Route::get('/check', [ScamCheckController::class, 'show'])->name('check');
+});
+
+// --- Telegram Bot (CSRF-exempt in bootstrap/app.php) ---
+Route::post('/telegram/webhook/{secret}', [TelegramWebhookController::class, 'handle'])->name('telegram.webhook');
 
 // --- Google OAuth ---
 Route::get('/auth/google', [SocialiteController::class, 'redirect'])->name('auth.google');
@@ -166,6 +177,14 @@ Route::name('admin.')->prefix('admin')->group(function () {
         Route::get('/upgrade', function () {
             return view('admin.system.upgrade');
         })->name('upgrade');
+
+        // Public API keys
+        Route::name('api-keys.')->prefix('api-keys')->group(function () {
+            Route::get('/', [AdminApiKeyController::class, 'index'])->name('index');
+            Route::get('/create', [AdminApiKeyController::class, 'create'])->name('create');
+            Route::post('/', [AdminApiKeyController::class, 'store'])->name('store');
+            Route::patch('/{apiKey}/revoke', [AdminApiKeyController::class, 'revoke'])->name('revoke');
+        });
 
         // Khu Mua Bán (Newfeed Admin)
         Route::get('/newfeed/hidden', [AdminNewfeedController::class, 'hidden'])->name('newfeed.hidden');
