@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminBannerController;
 use App\Http\Controllers\Admin\AdminCommentController;
+use App\Http\Controllers\Admin\AdminComplaintController;
 use App\Http\Controllers\Admin\AdminInsuranceController;
 use App\Http\Controllers\Admin\AdminNewfeedController;
 use App\Http\Controllers\Admin\AdminPostController;
@@ -117,6 +118,14 @@ Route::name('admin.')->prefix('admin')->group(function () {
         Route::name('comments.')->prefix('comments')->group(function () {
             Route::get('/', [AdminCommentController::class, 'index'])->name('index');
             Route::delete('/{id}', [AdminCommentController::class, 'destroy'])->name('destroy');
+        });
+
+        // Complaints
+        Route::name('complaints.')->prefix('complaints')->group(function () {
+            Route::get('/', [AdminComplaintController::class, 'index'])->name('index');
+            Route::get('/{complaint}', [AdminComplaintController::class, 'show'])->name('show');
+            Route::post('/{complaint}/resolve', [AdminComplaintController::class, 'resolve'])->name('resolve');
+            Route::post('/{complaint}/dismiss', [AdminComplaintController::class, 'dismiss'])->name('dismiss');
         });
 
         // Analytics
