@@ -49,3 +49,12 @@ test('layout no longer loads the prebuilt tailwind stylesheet', function () {
         ->assertOk()
         ->assertDontSee('/css/tailwind.css', false);
 });
+
+test('layout falls back to the bundled canh giac logo and favicon assets', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('/img/logo-light.svg', false)
+        ->assertSee('/img/logo-dark.svg', false)
+        ->assertSee('/favicon.svg', false)
+        ->assertSee('alt="Cảnh Giác"', false);
+});
