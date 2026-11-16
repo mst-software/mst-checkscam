@@ -11,8 +11,8 @@ class SettingSeeder extends Seeder
     {
         $settings = [
             // SEO & Website
-            'site_title' => 'Check Scam - Tra cứu lừa đảo',
-            'site_description' => 'CheckScam - Nền tảng kiểm tra độ tín nhiệm dữ liệu lớn nhất Việt Nam. Tra cứu số điện thoại, số tài khoản, link Facebook lừa đảo để bảo vệ túi tiền của bạn.',
+            'site_title' => 'Scamproof - Kiểm tra lừa đảo trước khi giao dịch',
+            'site_description' => 'Scamproof - Nền tảng kiểm tra độ tín nhiệm dữ liệu lớn nhất Việt Nam. Tra cứu số điện thoại, số tài khoản, link Facebook lừa đảo để bảo vệ túi tiền của bạn.',
             'seo_keywords' => 'check scam, tố cáo lừa đảo, kiểm tra stk lừa đảo, kiểm tra sdt lừa đảo, quỹ bảo đảm, checkscam',
 
             // Contact
@@ -46,10 +46,10 @@ class SettingSeeder extends Seeder
             'google_site_verification' => null,
             'bing_site_verification' => null,
             'site_index' => 'index, follow',
-            'og_site_name' => 'CheckScam.vn',
+            'og_site_name' => 'Scamproof',
             'twitter_username' => '@checkscam_vn',
             'meta_extra' => null,
-            'schema_organization_name' => 'MST CheckScam Ecosystem',
+            'schema_organization_name' => 'Scamproof',
             'schema_organization_logo' => 'https://i.ibb.co/7xfz0v3K/black.png',
             'schema_organization_url' => 'https://checkscam.vn',
             'schema_organization_contact' => '0812.665.001',

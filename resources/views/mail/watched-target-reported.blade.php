@@ -88,7 +88,7 @@
 
       <div class="footer">
         <p>
-          Bạn nhận được email này vì đã bật theo dõi trên CheckScam.
+          Bạn nhận được email này vì đã bật theo dõi trên Scamproof.
           <a href="{{ $manageUrl }}">Quản lý danh sách theo dõi</a>
         </p>
         <p>Email này được gửi tự động. Vui lòng không trả lời email này.</p>

@@ -89,8 +89,8 @@
       <p style="margin-top: 24px">Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ với admin để được hỗ trợ.</p>
 
       <div class="footer">
-        <p>Email này được gửi tự động từ hệ thống CheckScam. Vui lòng không trả lời email này.</p>
-        <p>© CheckScam — Cộng đồng MMO Việt Nam</p>
+        <p>Email này được gửi tự động từ hệ thống Scamproof. Vui lòng không trả lời email này.</p>
+        <p>© Scamproof — Cộng đồng MMO Việt Nam</p>
       </div>
     </div>
   </body>
