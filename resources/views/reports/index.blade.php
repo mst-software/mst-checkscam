@@ -84,9 +84,9 @@
               nhân.
             </p>
           </x-ucs.card>
-          <x-ucs.card title="CheckScam có thu phí không?">
+          <x-ucs.card title="Scamproof có thu phí không?">
             <p class="text-ink-muted text-sm leading-relaxed">
-              CheckScam là dự án cộng đồng phi lợi nhuận. Mọi hoạt động tố cáo và tra cứu đều miễn phí 100%.
+              Scamproof là dự án cộng đồng phi lợi nhuận. Mọi hoạt động tố cáo và tra cứu đều miễn phí 100%.
             </p>
           </x-ucs.card>
         </div>

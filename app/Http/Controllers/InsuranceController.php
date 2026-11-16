@@ -39,9 +39,9 @@ class InsuranceController extends Controller
             ->firstOrFail();
 
         // Advanced SEO
-        $siteTitle = ConfigHelper::getConfig('site_title', 'CheckScam');
+        $siteTitle = ConfigHelper::getConfig('site_title', 'Scamproof');
         $metaTitle = "Xác Minh Tín Nhiệm: {$insurance->full_name} | Bảo Hiểm {$siteTitle}";
-        $metaDesc = "{$insurance->full_name} đã tham gia quỹ bảo hiểm CheckScam với số tiền ".number_format($insurance->amount).' VNĐ. Đã được MST CheckScam xác minh danh tính và uy tín. An tâm tuyệt đối khi giao dịch.';
+        $metaDesc = "{$insurance->full_name} đã tham gia quỹ bảo hiểm Scamproof với số tiền ".number_format($insurance->amount).' VNĐ. Đã được Scamproof xác minh danh tính và uy tín. An tâm tuyệt đối khi giao dịch.';
 
         SEOTools::setTitle($metaTitle);
         SEOTools::setDescription($metaDesc);

@@ -42,8 +42,8 @@ class AppServiceProvider extends ServiceProvider
             if ($siteConfig == null) {
                 // We use a local variable to build the config, then assign to static
                 $config = [
-                    'title' => ConfigHelper::getConfig('site_title', 'Cảnh Giác - Tra cứu lừa đảo'),
-                    'description' => ConfigHelper::getConfig('site_description', 'Cảnh Giác — Kiểm tra số tài khoản, số điện thoại, Facebook trước khi giao dịch. Cảnh báo lừa đảo, bảo vệ cộng đồng.'),
+                    'title' => ConfigHelper::getConfig('site_title', 'Scamproof - Kiểm tra lừa đảo trước khi giao dịch'),
+                    'description' => ConfigHelper::getConfig('site_description', 'Scamproof — Kiểm tra số tài khoản, số điện thoại, Facebook trước khi giao dịch. Cảnh báo lừa đảo, bảo vệ cộng đồng.'),
                     'keywords' => ConfigHelper::getConfig('seo_keywords', 'check scam, tố cáo lừa đảo'),
                     'hotline' => ConfigHelper::getConfig('hotline', '0812.665.001'),
                     'support_email' => ConfigHelper::getConfig('support_email', 'support@mstsoftware.vn'),
@@ -137,7 +137,7 @@ class AppServiceProvider extends ServiceProvider
 
             // Organization / Business Schema for Home
             if (request()->is('/') || request()->is('home')) {
-                $orgName = ConfigHelper::getConfig('schema_organization_name', 'CheckScam');
+                $orgName = ConfigHelper::getConfig('schema_organization_name', 'Scamproof');
                 $orgLogo = ConfigHelper::getConfig('schema_organization_logo');
 
                 SEOTools::jsonLd()->addValue('@graph', [
