@@ -62,16 +62,16 @@ class ScamCheckController extends Controller
                     'message' => $validator->errors()->first(),
                     'fields' => $validator->errors()->toArray(),
                 ],
-            ], 422, $rateLimitHeaders);
+            ], 422, $rateLimitHeaders, JSON_UNESCAPED_UNICODE);
         }
 
         $result = $this->scamLookup->lookup(trim($validator->validated()['q']));
 
-        return response()->json($result->toPublicArray(), 200, $rateLimitHeaders);
+        return response()->json($result->toPublicArray(), 200, $rateLimitHeaders, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     private function error(string $code, string $message, int $status): JsonResponse
     {
-        return response()->json(['error' => ['code' => $code, 'message' => $message]], $status);
+        return response()->json(['error' => ['code' => $code, 'message' => $message]], $status, [], JSON_UNESCAPED_UNICODE);
     }
 }
