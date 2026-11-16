@@ -89,6 +89,23 @@ describe('admin', function () {
             ->assertSee(ScamType::JobOffer->label());
     });
 
+    it('shows one scam type row with the legacy category as a hint when unclassified', function () {
+        $legacy = Report::factory()->create(['scam_type' => null, 'category' => 'Lừa đảo cọc']);
+        $classified = Report::factory()->create(['scam_type' => ScamType::JobOffer, 'category' => 'Lừa đảo cọc']);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.reports.detail', $legacy->id))
+            ->assertOk()
+            ->assertDontSee('Phân loại lừa đảo')
+            ->assertSeeInOrder(['Hình thức lừa đảo', 'Chưa phân loại', '(cũ: Lừa đảo cọc)']);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.reports.detail', $classified->id))
+            ->assertOk()
+            ->assertSee(ScamType::JobOffer->label())
+            ->assertDontSee('(cũ: Lừa đảo cọc)');
+    });
+
     it('updates the scam type of a report', function () {
         $report = Report::factory()->create(['scam_type' => null, 'status' => 'pending']);
 
