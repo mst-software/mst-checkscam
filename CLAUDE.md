@@ -104,3 +104,7 @@ Vite entry: `resources/css/app.css` (Tailwind) + `resources/js/app.js`. `@vite` 
 - `app/Http/Controllers/SearchController.php` — core search with caching and logging
 - `app/Models/Report.php` — main domain model with scopes and media config
 - `composer.json` — all dev/build/test scripts
+
+## Harness: CheckScam development
+
+For any request to build, change, fix or review app code or UI, use the `checkscam-dev-workflow` skill (agents `laravel-builder` and `qa-reviewer` in `.claude/agents/`). Read-only questions can be answered directly. Code changes follow `mst-laravel-conventions`; every change to files follows `git-workflow` (branch from `develop`) and `writing-commit-messages`. Browser checks use `playwright-cli`.
