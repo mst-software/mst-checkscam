@@ -2,12 +2,15 @@
 
 namespace Database\Factories;
 
+use App\Enums\LedgerEntryType;
 use App\Models\Insurance;
+use App\Models\InsuranceChannel;
+use App\Models\InsuranceLedgerEntry;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Insurance>
+ * @extends Factory<Insurance>
  */
 class InsuranceFactory extends Factory
 {
@@ -144,8 +147,67 @@ class InsuranceFactory extends Factory
                 ->toArray(),
             'status' => 1, // 100% active to match user expectations for 200 members
             'slug' => Str::slug($fullName).'-'.$this->faker->unique()->numberBetween(1000, 9999),
+            'verified_at' => $insuranceDate,
             'created_at' => $insuranceDate,
             'updated_at' => now(),
         ];
+    }
+
+    /**
+     * Every partner starts with one opening deposit equal to its amount, like the migration backfill.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Insurance $insurance) {
+            if ((float) $insurance->amount > 0 && $insurance->ledgerEntries()->doesntExist()) {
+                InsuranceLedgerEntry::create([
+                    'insurance_id' => $insurance->id,
+                    'type' => LedgerEntryType::Deposit,
+                    'amount' => $insurance->amount,
+                    'balance_after' => $insurance->amount,
+                    'note' => 'Số dư ban đầu',
+                ]);
+            }
+        });
+    }
+
+    /**
+     * Official channels derived from the partner's contact_info / payment_accounts JSON,
+     * so the public profile and the verification lookup agree.
+     */
+    public function withChannels(): static
+    {
+        return $this->afterCreating(function (Insurance $insurance) {
+            $channels = InsuranceChannel::fromLegacyJson($insurance->contact_info, $insurance->payment_accounts);
+
+            foreach ($channels as $channel) {
+                $insurance->channels()->firstOrCreate(
+                    ['type' => $channel['type'], 'normalized_value' => $channel['normalized_value']],
+                    ['value' => $channel['value'], 'is_official' => true, 'verified_at' => now()],
+                );
+            }
+        });
+    }
+
+    public function suspended(string $reason = 'Tạm đình chỉ để kiểm tra'): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'suspended_at' => now(),
+            'suspension_reason' => $reason,
+        ]);
+    }
+
+    public function expired(): static
+    {
+        return $this->state(fn (array $attributes) => ['expired_at' => now()->subDays(3)]);
+    }
+
+    public function trusted(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 1,
+            'expired_at' => now()->addYear(),
+            'suspended_at' => null,
+        ]);
     }
 }
