@@ -48,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
                 $config = [
                     'title' => ConfigHelper::getConfig('site_title', 'Scamproof - Kiểm tra lừa đảo trước khi giao dịch'),
                     'description' => ConfigHelper::getConfig('site_description', 'Scamproof — Kiểm tra số tài khoản, số điện thoại, Facebook trước khi giao dịch. Cảnh báo lừa đảo, bảo vệ cộng đồng.'),
-                    'keywords' => ConfigHelper::getConfig('seo_keywords', 'check scam, tố cáo lừa đảo'),
+                    'keywords' => ConfigHelper::getConfig('seo_keywords', 'scamproof, kiểm tra lừa đảo, tố cáo lừa đảo, kiểm tra stk, kiểm tra sđt'),
                     'hotline' => ConfigHelper::getConfig('hotline', '0812.665.001'),
                     'support_email' => ConfigHelper::getConfig('support_email', 'support@mstsoftware.vn'),
                     'zalo_link' => ConfigHelper::getConfig('zalo_link', 'https://zalo.me/0812665001'),
@@ -67,7 +67,7 @@ class AppServiceProvider extends ServiceProvider
                     'bing_site_verification' => ConfigHelper::getConfig('bing_site_verification'),
                     'site_index' => ConfigHelper::getConfig('site_index', 'index, follow'),
                     'og_site_name' => ConfigHelper::getConfig('og_site_name', 'MSTSOFTWARE.vn'),
-                    'twitter_username' => ConfigHelper::getConfig('twitter_username', '@mstsoftware'),
+                    'twitter_username' => ConfigHelper::getConfig('twitter_username', ''),
                     'meta_extra' => ConfigHelper::getConfig('meta_extra'),
                     'site_notification_text' => ConfigHelper::getConfig('site_notification_text'),
                 ];
@@ -126,7 +126,9 @@ class AppServiceProvider extends ServiceProvider
             }
 
             // Twitter Global
-            SEOTools::twitter()->setSite($siteConfig['twitter_username']);
+            if ($siteConfig['twitter_username']) {
+                SEOTools::twitter()->setSite($siteConfig['twitter_username']);
+            }
 
             // Json-Ld Default Schema
             SEOTools::jsonLd()->setType('WebSite');

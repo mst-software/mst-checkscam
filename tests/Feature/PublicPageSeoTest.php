@@ -83,6 +83,23 @@ test('every public page has a unique title, a description and exactly one robots
     expect(array_unique($titles))->toHaveCount(count($titles));
 });
 
+test('public pages no longer mention the old checkscam brand', function () {
+    foreach (publicPageUrls() as $url) {
+        $html = $this->get($url)->assertOk()->getContent();
+        // The API docs URL keeps its old path for SEO; the host may contain anything.
+        $html = str_ireplace(['/api-checkscam', url('/')], '', $html);
+
+        expect(stripos($html, 'checkscam'))->toBeFalse("{$url} still mentions checkscam");
+    }
+});
+
+test('the default keywords and twitter tags use the scamproof brand', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toContain('scamproof, kiểm tra lừa đảo, tố cáo lừa đảo, kiểm tra stk, kiểm tra sđt')
+        ->not->toContain('name="twitter:site"');
+});
+
 test('static pages use the "<page> - Scamproof" title format', function (string $url, string $title) {
     expect(seoHead($this->get($url)->assertOk()->getContent())['title'])->toBe($title);
 })->with([

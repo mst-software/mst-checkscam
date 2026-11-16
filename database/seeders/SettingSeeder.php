@@ -13,14 +13,14 @@ class SettingSeeder extends Seeder
             // SEO & Website
             'site_title' => 'Scamproof - Kiểm tra lừa đảo trước khi giao dịch',
             'site_description' => 'Scamproof - Nền tảng kiểm tra độ tín nhiệm dữ liệu lớn nhất Việt Nam. Tra cứu số điện thoại, số tài khoản, link Facebook lừa đảo để bảo vệ túi tiền của bạn.',
-            'seo_keywords' => 'check scam, tố cáo lừa đảo, kiểm tra stk lừa đảo, kiểm tra sdt lừa đảo, quỹ bảo đảm, checkscam',
+            'seo_keywords' => 'scamproof, kiểm tra lừa đảo, tố cáo lừa đảo, kiểm tra stk, kiểm tra sđt, quỹ bảo đảm',
 
             // Contact
             'hotline' => '0812.665.001',
             'support_email' => 'info@mstsoftware.vn',
             'zalo_link' => 'https://zalo.me/0812665001',
             'facebook_link' => 'https://www.facebook.com/mstsoftware.vn',
-            'telegram_link' => 'https://t.me/checkscam',
+            'telegram_link' => 'https://t.me/mstsoftware',
 
             // Images
             'logo' => null,
@@ -47,11 +47,11 @@ class SettingSeeder extends Seeder
             'bing_site_verification' => null,
             'site_index' => 'index, follow',
             'og_site_name' => 'Scamproof',
-            'twitter_username' => '@checkscam_vn',
+            'twitter_username' => null,
             'meta_extra' => null,
             'schema_organization_name' => 'Scamproof',
             'schema_organization_logo' => 'https://i.ibb.co/7xfz0v3K/black.png',
-            'schema_organization_url' => 'https://checkscam.vn',
+            'schema_organization_url' => config('app.url'),
             'schema_organization_contact' => '0812.665.001',
             'site_notification_text' => 'Hiện nay có rất nhiều tài khoản FB, TK ngân hàng, website, group và bot giả mạo <span class="bg-cs_blue/10 text-cs_blue rounded px-1.5 font-bold uppercase italic">Admin/Gdv CS</span> nhằm lừa đảo người dùng.',
         ];

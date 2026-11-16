@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Comment;
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Comment>
+ * @extends Factory<Comment>
  */
 class CommentFactory extends Factory
 {
@@ -28,7 +29,7 @@ class CommentFactory extends Factory
             'Phan Thị Linh',
         ];
 
-        // Pool nội dung comment thực tế, phù hợp ngữ cảnh checkscam
+        // Pool nội dung comment thực tế, phù hợp ngữ cảnh Scamproof
         $commentContents = [
             'Tôi cũng bị thằng này lừa rồi, mất gần 3 triệu. Mọi người cẩn thận nhé!',
             'Xác nhận đây là scammer, đã báo cáo lên công an phường nhưng chưa có phản hồi.',
@@ -48,16 +49,16 @@ class CommentFactory extends Factory
         ];
 
         $isAnonymous = $this->faker->boolean(30);
-        $ip          = $this->faker->ipv4();
+        $ip = $this->faker->ipv4();
 
         return [
-            'report_id'    => Report::where('status', 'approved')->inRandomOrder()->value('id') ?? 1,
-            'full_name'    => $isAnonymous ? 'Ẩn danh (' . $ip . ')' : $this->faker->randomElement($vietnameseNames),
-            'content'      => $this->faker->randomElement($commentContents),
-            'ip_address'   => $ip,
+            'report_id' => Report::where('status', 'approved')->inRandomOrder()->value('id') ?? 1,
+            'full_name' => $isAnonymous ? 'Ẩn danh ('.$ip.')' : $this->faker->randomElement($vietnameseNames),
+            'content' => $this->faker->randomElement($commentContents),
+            'ip_address' => $ip,
             'is_anonymous' => $isAnonymous,
-            'created_at'   => $this->faker->dateTimeBetween('-10 days', 'now'),
-            'updated_at'   => now(),
+            'created_at' => $this->faker->dateTimeBetween('-10 days', 'now'),
+            'updated_at' => now(),
         ];
     }
 }
