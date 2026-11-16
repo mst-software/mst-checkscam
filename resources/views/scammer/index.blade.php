@@ -850,6 +850,8 @@
               Gỡ phốt
             </a>
           </div>
+          @include('partials.watch-button', ['value' => $report->target_id])
+          @include('partials.share-links', ['url' => route('scammer.show', $report->slug), 'title' => 'Cảnh báo lừa đảo: ' . StringHelper::mask_id($report->target_id, $report->type)])
         </div>
       </div>
     </div>

@@ -17,6 +17,7 @@ use App\Http\Controllers\InsuranceController;
 use App\Http\Controllers\NewfeedController;
 use App\Http\Controllers\NewfeedPostController;
 use App\Http\Controllers\NewfeedPostReportController;
+use App\Http\Controllers\OgImageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
@@ -189,6 +190,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/theo-doi', [WatchController::class, 'store'])->name('watch.store');
     Route::delete('/theo-doi/{watch}', [WatchController::class, 'destroy'])->name('watch.destroy');
 });
+
+// --- Share card (OG image) ---
+Route::get('/og/{slug}.png', [OgImageController::class, 'report'])
+    ->where('slug', '[A-Za-z0-9_-]+')
+    ->name('og.report');
 
 // --- Slug / Catch-all ---
 Route::get('/{slug}', [ReportController::class, 'show'])->name('scammer.show');

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ConfigHelper;
+use App\Helpers\FileHelper;
+use App\Helpers\OgImageHelper;
 use App\Helpers\StringHelper;
 use App\Models\Report;
 use Artesaos\SEOTools\Facades\SEOTools;
@@ -73,7 +75,7 @@ class ReportController extends Controller
         ]);
 
         if ($request->hasFile('evidence_images')) {
-            $paths = \App\Helpers\FileHelper::uploadMultipleImages($request->file('evidence_images'), 'reports');
+            $paths = FileHelper::uploadMultipleImages($request->file('evidence_images'), 'reports');
             $report->update(['evidence_images' => $paths]);
         }
 
@@ -147,12 +149,17 @@ class ReportController extends Controller
         SEOTools::metatags()->addKeyword("{$targetId}, {$targetName}, lừa đảo, scammer, {$category}, check scam");
         SEOTools::opengraph()->addProperty('type', 'article');
 
+        // Share card with masked data instead of evidence screenshots, which may expose PII
+        SEOTools::opengraph()->addImage(route('og.report', $report->slug), [
+            'width' => OgImageHelper::WIDTH,
+            'height' => OgImageHelper::HEIGHT,
+            'type' => 'image/png',
+        ]);
+
         if (! empty($report->evidence_images)) {
             $firstImg = $report->evidence_images[0];
             $imgUrl = filter_var($firstImg, FILTER_VALIDATE_URL) ? $firstImg : asset('uploads/'.$firstImg);
 
-            // For OpenGraph, we use addImages to replace/set the list
-            SEOTools::opengraph()->addImages([$imgUrl]);
             SEOTools::jsonLd()->addImage($imgUrl);
         }
 
