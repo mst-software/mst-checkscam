@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminBannerController;
 use App\Http\Controllers\Admin\AdminCommentController;
+use App\Http\Controllers\Admin\AdminComplaintController;
 use App\Http\Controllers\Admin\AdminInsuranceController;
 use App\Http\Controllers\Admin\AdminNewfeedController;
 use App\Http\Controllers\Admin\AdminPostController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InsuranceController;
 use App\Http\Controllers\NewfeedController;
@@ -70,9 +72,8 @@ Route::get('/lien-he-admin', function () {
 Route::get('/dieu-khoan', function () {
     return view('legal.terms');
 });
-Route::get('/giai-quyet-khieu-nai', function () {
-    return view('legal.dispute');
-});
+Route::get('/giai-quyet-khieu-nai', [ComplaintController::class, 'create'])->name('complaints.create');
+Route::post('/giai-quyet-khieu-nai', [ComplaintController::class, 'store'])->name('complaints.store');
 
 // --- Admin Panel ---
 Route::name('admin.')->prefix('admin')->group(function () {
@@ -117,6 +118,14 @@ Route::name('admin.')->prefix('admin')->group(function () {
         Route::name('comments.')->prefix('comments')->group(function () {
             Route::get('/', [AdminCommentController::class, 'index'])->name('index');
             Route::delete('/{id}', [AdminCommentController::class, 'destroy'])->name('destroy');
+        });
+
+        // Complaints
+        Route::name('complaints.')->prefix('complaints')->group(function () {
+            Route::get('/', [AdminComplaintController::class, 'index'])->name('index');
+            Route::get('/{complaint}', [AdminComplaintController::class, 'show'])->name('show');
+            Route::post('/{complaint}/resolve', [AdminComplaintController::class, 'resolve'])->name('resolve');
+            Route::post('/{complaint}/dismiss', [AdminComplaintController::class, 'dismiss'])->name('dismiss');
         });
 
         // Analytics

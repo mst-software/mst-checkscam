@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ScamType;
 use App\Helpers\ConfigHelper;
+use App\Helpers\FileHelper;
 use App\Helpers\StringHelper;
 use App\Models\Report;
 use Artesaos\SEOTools\Facades\SEOTools;
@@ -10,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ReportController extends Controller
 {
@@ -37,6 +40,7 @@ class ReportController extends Controller
             'target_name' => 'nullable|string|max:255',
             'target_bank' => 'nullable|string|max:255',
             'category' => 'nullable|string|max:255',
+            'scam_type' => ['nullable', Rule::enum(ScamType::class)],
             'damage_amount' => 'nullable|numeric|min:0',
             'description' => 'required|string|min:50',
             'reporter_name' => 'nullable|string|max:255',
@@ -45,6 +49,7 @@ class ReportController extends Controller
             'evidence_images' => 'required|array|min:1',
             'evidence_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
         ], [
+            'scam_type.enum' => 'Hình thức lừa đảo không hợp lệ.',
             'damage_amount.numeric' => 'Số tiền thiệt hại phải là chữ số.',
             'damage_amount.min' => 'Số tiền không được nhỏ hơn 0.',
             'description.min' => 'Vui lòng mô tả hành vi lừa đảo với ít nhất 50 ký tự.',
@@ -65,6 +70,7 @@ class ReportController extends Controller
             'target_name' => $validated['target_name'] ?? null,
             'target_bank' => $validated['target_bank'] ?? null,
             'category' => $validated['category'] ?? null,
+            'scam_type' => $validated['scam_type'] ?? null,
             'damage_amount' => $validated['damage_amount'] ?? null,
             'description' => $validated['description'],
             'status' => 'pending',
@@ -73,7 +79,7 @@ class ReportController extends Controller
         ]);
 
         if ($request->hasFile('evidence_images')) {
-            $paths = \App\Helpers\FileHelper::uploadMultipleImages($request->file('evidence_images'), 'reports');
+            $paths = FileHelper::uploadMultipleImages($request->file('evidence_images'), 'reports');
             $report->update(['evidence_images' => $paths]);
         }
 

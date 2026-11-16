@@ -28,6 +28,12 @@
             </li>
           </ul>
         </li>
+        <li class="{{ request()->is('admin/complaints*') ? 'active' : '' }}">
+          <a href="{{ route('admin.complaints.index') }}">
+            <i data-feather="flag"></i>
+            <span>Khiếu nại</span>
+          </a>
+        </li>
 
         <li class="submenu">
           <a href="javascript:void(0);">
