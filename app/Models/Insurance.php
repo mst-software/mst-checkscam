@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Image\Enums\Fit;
@@ -45,6 +46,17 @@ class Insurance extends Model implements HasMedia
     public function isActive(): bool
     {
         return $this->status == 1;
+    }
+
+    /**
+     * Active (status 1) partners whose guarantee has not expired.
+     */
+    public function scopeTrusted(Builder $query): Builder
+    {
+        return $query->where('status', 1)
+            ->where(function (Builder $query) {
+                $query->whereNull('expired_at')->orWhere('expired_at', '>', now());
+            });
     }
 
     public function isExpired(): bool
