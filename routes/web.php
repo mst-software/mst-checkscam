@@ -202,8 +202,9 @@ Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('co
 // --- Warnings List ---
 Route::get('/warnings', [WarningController::class, 'index'])->name('warnings.index');
 
-// --- Sitemap Generator ---
-Route::get('/generate-sitemap', [SitemapController::class, 'generate'])->name('sitemap.generate');
+// --- Sitemap & robots (generated per request, cached; no files written to public/) ---
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 // --- Theo dõi (Watchlist) ---
 Route::middleware('auth')->group(function () {
