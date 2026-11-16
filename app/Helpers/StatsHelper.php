@@ -44,6 +44,10 @@ class StatsHelper
 
     /**
      * Approved report targets searched most often during the last 7 days.
+     *
+     * Logged queries are grouped by StringHelper::detectQueryType, so "0912345678", "+84912345678"
+     * and "0912.345.678" count as one target. Only the 50 most frequent raw queries are considered,
+     * which keeps both queries bounded.
      */
     public static function getTopWeeklySearches(int $limit = 5): Collection
     {
@@ -59,28 +63,60 @@ class StatsHelper
             return collect();
         }
 
-        $reports = Report::whereIn('target_id', $topSearches->pluck('search_query'))
-            ->where('status', 'approved')
+        $searchCounts = $topSearches
+            ->groupBy(fn ($search) => self::targetKey($search->search_query))
+            ->map(fn (Collection $searches) => (int) $searches->sum('count'))
+            ->sortDesc();
+
+        $numericKeys = $searchCounts->keys()
+            ->filter(fn (string $key) => str_starts_with($key, 'digits:'))
+            ->map(fn (string $key) => substr($key, strlen('digits:')))
+            ->values();
+
+        $reports = Report::where('status', 'approved')
+            ->where(function ($query) use ($numericKeys, $topSearches) {
+                $query->whereIn('target_id', $topSearches->pluck('search_query'));
+
+                if ($numericKeys->isNotEmpty()) {
+                    $query->orWhereIn(DB::raw("REGEXP_REPLACE(target_id, '[^0-9]', '')"), $numericKeys);
+                }
+            })
+            ->select('target_id', 'target_name', 'type', 'slug', 'created_at')
             ->latest()
             ->get()
-            ->unique('target_id')
-            ->keyBy('target_id');
+            ->unique(fn (Report $report) => self::targetKey($report->target_id))
+            ->keyBy(fn (Report $report) => self::targetKey($report->target_id));
 
-        return $topSearches
-            ->filter(fn ($search) => $reports->has($search->search_query))
+        return $searchCounts
+            ->filter(fn (int $count, string $key) => $reports->has($key))
             ->take($limit)
-            ->map(function ($search) use ($reports) {
-                $report = $reports->get($search->search_query);
+            ->map(function (int $count, string $key) use ($reports) {
+                $report = $reports->get($key);
 
                 return (object) [
                     'target_id' => $report->target_id,
                     'target_name' => $report->target_name,
                     'type' => $report->type,
                     'slug' => $report->slug,
-                    'search_count' => (int) $search->count,
+                    'search_count' => $count,
                 ];
             })
             ->values();
+    }
+
+    /**
+     * Grouping key for a searched value or report target: digits for phones and bank accounts,
+     * the normalized text otherwise.
+     */
+    private static function targetKey(string $value): string
+    {
+        [$type, $formattedQuery] = StringHelper::detectQueryType(trim($value));
+
+        if (in_array($type, ['phone', 'bank'], true)) {
+            return 'digits:'.$formattedQuery;
+        }
+
+        return 'text:'.StringHelper::normalizeString($value);
     }
 
     public static function getTopWeeklyReports()

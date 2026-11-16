@@ -60,6 +60,21 @@ test('weekly top searches only list reported targets searched in the last 7 days
         ->and($topSearches->first()->search_count)->toBe(1);
 });
 
+test('weekly top searches group phone variants of the same target', function () {
+    $report = homeApprovedReport();
+    homeApprovedReport(['target_id' => '1903456789012', 'target_name' => 'Trần Văn B', 'created_at' => now()->subDays(2)]);
+    foreach (['0912345678', '+84912345678', '0912 345 678', '1903456789012'] as $index => $query) {
+        SearchLog::create(['search_query' => $query, 'is_found' => true, 'ip_address' => '10.0.0.'.$index]);
+    }
+
+    $topSearches = StatsHelper::getTopWeeklySearches();
+
+    expect($topSearches)->toHaveCount(2)
+        ->and($topSearches->first()->slug)->toBe($report->slug)
+        ->and($topSearches->first()->search_count)->toBe(3)
+        ->and($topSearches->last()->search_count)->toBe(1);
+});
+
 test('search for a reported phone shows the verdict with masked data only', function () {
     homeApprovedReport();
 
