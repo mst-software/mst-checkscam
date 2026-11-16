@@ -9,6 +9,7 @@ use App\Models\Insurance;
 use App\Models\Report;
 use App\Models\SearchLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
@@ -35,7 +36,7 @@ test('home renders hero and the trust sections in order', function () {
     $html = $this->get('/')
         ->assertOk()
         ->assertSee('Dữ liệu cộng đồng, được kiểm duyệt')
-        ->assertSee('Hệ thống dữ liệu lớn nhất Việt Nam giúp bạn kiểm tra độ tín nhiệm của đối tác')
+        ->assertSee('Tra cứu SĐT, số tài khoản, Facebook hoặc link trước khi chuyển tiền.')
         ->assertSee('id="searchInput"', false)
         ->assertSee('action="'.route('search.index').'"', false)
         ->assertSee('method="GET"', false)
@@ -49,10 +50,10 @@ test('home renders hero and the trust sections in order', function () {
             'Tra cứu miễn phí, không cần đăng ký',
             'Mọi tố cáo đều qua kiểm duyệt',
             'Không công khai danh tính người báo cáo',
+            'Cảnh báo mới nhất',
             'Lối tắt',
             'Cách Scamproof hoạt động',
             'Chúng tôi kiểm duyệt như thế nào',
-            'Cảnh báo mới nhất',
             'Tìm kiếm nhiều trong tuần',
             'Bình luận mới',
             'Trung gian đã ký quỹ',
@@ -74,43 +75,138 @@ test('home renders hero and the trust sections in order', function () {
         ->and((string) $heading)->not->toContain('<br');
 });
 
-test('latest warnings show scam type, evidence count and approval date', function () {
+/**
+ * Approved reports with distinct masked ids, newest first: index 0 was approved $index + 1 hours ago.
+ *
+ * @return list<Report>
+ */
+function homeApprovedReports(int $count): array
+{
+    return collect(range(0, $count - 1))
+        ->map(fn (int $index): Report => homeApprovedReport([
+            'target_id' => '09'.str_pad((string) ($index + 1), 8, '0', STR_PAD_LEFT),
+            'target_name' => 'Đối Tượng Số'.($index + 1),
+            'slug' => 'doi-tuong-'.($index + 1),
+            'approved_at' => now()->subHours($index + 1),
+        ]))
+        ->all();
+}
+
+function heroFeedHtml(string $html): string
+{
+    return (string) str($html)->after('data-hero-feed')->before('</section>');
+}
+
+test('hero feed shows the five newest approved reports in order with masked data only', function () {
+    $reports = homeApprovedReports(6);
+    Report::factory()->create(['status' => 'pending', 'slug' => 'cho-duyet-1', 'approved_at' => now()]);
+
+    $feed = heroFeedHtml($this->get('/')->assertOk()->getContent());
+
+    expect(substr_count($feed, 'data-hero-feed-row'))->toBe(5);
+
+    preg_match_all('/href="([^"]*)"/', $feed, $matches);
+
+    expect($matches[1])->toBe([
+        ...array_map(fn (Report $report): string => route('scammer.show', $report->slug), array_slice($reports, 0, 5)),
+        route('warnings.index'),
+    ]);
+
+    expect($feed)->toContain('Xem tất cả cảnh báo', 'Tài khoản', '090***001', 'Đối Tượng S.')
+        ->not->toContain('0900000001', 'Đối Tượng Số1', 'doi-tuong-6', 'cho-duyet-1');
+});
+
+test('hero feed shows type, scam type and relative time from approved_at', function () {
+    homeApprovedReport([
+        'scam_type' => ScamType::Investment,
+        'approved_at' => now()->subMinutes(5),
+        'created_at' => now()->subDays(20),
+    ]);
+    homeApprovedReport([
+        'type' => 'website',
+        'target_id' => 'https://lua-dao.example',
+        'scam_type' => null,
+        'category' => 'Lừa đảo nạp thẻ game',
+        'approved_at' => now()->subHours(2),
+    ]);
+
+    $feed = heroFeedHtml($this->get('/')->assertOk()->getContent());
+
+    expect($feed)->toContain('data-hero-feed-updated', 'Cập nhật', '5 phút trước', '2 giờ trước')
+        ->toContain(ScamType::Investment->label(), 'Lừa đảo nạp thẻ game', 'Website')
+        ->not->toContain('20 ngày trước');
+
+    expect(strpos($feed, '5 phút trước'))->toBeLessThan(strpos($feed, '2 giờ trước'));
+});
+
+test('hero feed shows the empty state and no update pill without approved reports', function () {
+    Report::factory()->create(['status' => 'pending']);
+
+    $feed = heroFeedHtml($this->get('/')->assertOk()->getContent());
+
+    expect($feed)->toContain('Chưa có cảnh báo nào được duyệt', 'href="'.route('warnings.index').'"')
+        ->not->toContain('data-hero-feed-updated', 'Cập nhật', 'data-hero-feed-row');
+});
+
+test('hero feed and the lower table share one reports query', function () {
+    homeApprovedReports(8);
+
+    DB::enableQueryLog();
+    $this->get('/')->assertOk();
+
+    $feedQueries = collect(DB::getQueryLog())
+        ->pluck('query')
+        ->filter(fn (string $query): bool => str_contains($query, 'from `reports`') && str_contains($query, 'order by `approved_at` desc'));
+
+    expect($feedQueries)->toHaveCount(1)
+        ->and($feedQueries->first())->toContain('limit 15');
+});
+
+test('lower table is hidden when the hero already shows every approved report', function () {
+    homeApprovedReports(5);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertDontSee('Thêm cảnh báo gần đây')
+        ->assertDontSee('data-latest-reports', false);
+});
+
+test('lower table lists only the reports after the hero five, up to ten more', function () {
+    $reports = homeApprovedReports(16);
+
+    $html = $this->get('/')->assertOk()->assertSee('Thêm cảnh báo gần đây')->getContent();
+    $table = (string) str($html)->after('data-latest-reports')->before('</ul>');
+
+    preg_match_all('/href="([^"]*)"/', $table, $matches);
+
+    expect($matches[1])->toBe(
+        array_map(fn (Report $report): string => route('scammer.show', $report->slug), array_slice($reports, 5, 10)),
+    );
+});
+
+test('lower table shows scam type, evidence count and approval date', function () {
+    homeApprovedReports(5);
     homeApprovedReport([
         'scam_type' => ScamType::Investment,
         'evidence_images' => ['a.jpg', 'b.jpg', 'c.jpg'],
-        'approved_at' => '2026-11-14 08:00:00',
+        'approved_at' => '2026-11-10 08:00:00',
     ]);
     homeApprovedReport([
         'target_id' => '1903456789012',
         'scam_type' => null,
         'category' => 'Lừa đảo nạp thẻ game',
         'evidence_images' => [],
-        'approved_at' => '2026-11-10 08:00:00',
+        'approved_at' => '2026-11-08 08:00:00',
     ]);
 
     $html = $this->get('/')->assertOk()->getContent();
     $table = (string) str($html)->after('data-latest-reports')->before('</ul>');
 
-    expect($table)->toContain(ScamType::Investment->label(), 'Lừa đảo nạp thẻ game', '14/11/2026', '10/11/2026')
+    expect($table)->toContain(ScamType::Investment->label(), 'Lừa đảo nạp thẻ game', '10/11/2026', '08/11/2026')
         ->toContain('data-evidence-count="3"', '3 ảnh')
         ->not->toContain('data-evidence-count="0"');
 
-    expect(strpos($table, '14/11/2026'))->toBeLessThan(strpos($table, '10/11/2026'));
-});
-
-test('freshness line uses the newest approval time and is hidden without approved reports', function () {
-    $this->get('/')->assertOk()->assertDontSee('data-freshness', false)->assertDontSee('Cập nhật lần cuối');
-
-    Report::factory()->create(['status' => 'pending']);
-    homeApprovedReport(['approved_at' => now()->subMinutes(5)]);
-    homeApprovedReport(['approved_at' => now()->subDays(3)]);
-
-    $this->get('/')
-        ->assertOk()
-        ->assertSee('data-freshness', false)
-        ->assertSee('Cập nhật lần cuối')
-        ->assertSee('5 phút trước')
-        ->assertSee('Dữ liệu được kiểm duyệt thủ công');
+    expect(strpos($table, '10/11/2026'))->toBeLessThan(strpos($table, '08/11/2026'));
 });
 
 test('partner cards show deposit, validity, services and profile link without complaint counts', function () {
@@ -224,7 +320,7 @@ test('home hero shows hint chips that only change the placeholder', function () 
     expect($html)->toContain('aria-describedby="search-hint"', 'id="search-hint"');
 });
 
-test('home hero action cards link to real pages', function () {
+test('home hero shortcuts link to real pages', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
     $nav = str($html)->after('aria-label="Lối tắt"')->before('</nav>');
@@ -234,11 +330,12 @@ test('home hero action cards link to real pages', function () {
     expect($matches[1])->toBe([
         route('reports'),
         route('insurances.frontend.index'),
+        route('intermediary.verify'),
         route('newfeed.index'),
         url('/api-checkscam'),
     ])->not->toContain('#');
 
-    expect((string) $nav)->toContain('Tố cáo scam', 'Bảo hiểm CS', 'Chợ buôn bán', 'Bot check', 'fa-chevron-right');
+    expect((string) $nav)->toContain('Tố cáo scam', 'Bảo hiểm CS', 'Kiểm tra GDV', 'Chợ buôn bán', 'Bot check');
 
     expect($html)->not->toContain('aria-label="Dữ liệu trên hệ thống"');
 });
@@ -255,7 +352,8 @@ test('search results keep the compact search bar without the home hero', functio
         ->assertDontSee('id="hero-title"', false)
         ->assertDontSee('Thử tra cứu:')
         ->assertDontSee('aria-label="Dữ liệu trên hệ thống"', false)
-        ->assertDontSee('aria-label="Lối tắt"', false);
+        ->assertDontSee('aria-label="Lối tắt"', false)
+        ->assertDontSee('data-hero-feed', false);
 });
 
 test('scammer page shows only the compact search bar', function () {
@@ -267,7 +365,8 @@ test('scammer page shows only the compact search bar', function () {
         ->assertSee('action="'.route('search.index').'"', false)
         ->assertDontSee('id="hero-title"', false)
         ->assertDontSee('Thử tra cứu:')
-        ->assertDontSee('aria-label="Lối tắt"', false);
+        ->assertDontSee('aria-label="Lối tắt"', false)
+        ->assertDontSee('data-hero-feed', false);
 });
 
 test('weekly top searches only list reported targets searched in the last 7 days', function () {

@@ -13,7 +13,12 @@
       <x-hero :stats="$stats" :is-action="false" />
       @include('partials.search.results')
     @else
-      <x-hero :stats="$stats" :recent-searches="$recentSearches ?? collect()" />
+      <x-hero
+        :stats="$stats"
+        :recent-searches="$recentSearches ?? collect()"
+        :feed-reports="$feedReports ?? collect()"
+        :latest-approved-at="$latestApprovedAt ?? null"
+      />
 
       <x-ucs.container class="space-y-10 pb-8 md:space-y-12 lg:space-y-14 lg:pb-10">
         @include('partials.home.how-it-works')
@@ -22,13 +27,7 @@
 
         <div class="grid gap-8 lg:grid-cols-12">
           <div class="min-w-0 space-y-8 lg:col-span-8">
-            @include(
-              'partials.home.latest-reports',
-              [
-                'latestReports' => $latestReports ?? collect(),
-                'latestApprovedAt' => $latestApprovedAt ?? null,
-              ]
-            )
+            @include('partials.home.latest-reports', ['latestReports' => $moreReports ?? collect()])
             <x-banner-ads position="home_between" class="mb-0" />
           </div>
 

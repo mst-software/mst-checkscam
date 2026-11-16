@@ -1,6 +1,6 @@
 {{--
-  Latest approved reports as a table: masked target, type, scam type, evidence count and approval date.
-  Expects: $latestReports (Report models), $latestApprovedAt (?Carbon).
+  Approved reports after the five shown in the hero card: masked target, type, scam type, evidence count and approval date.
+  Expects: $latestReports (Report models). Renders nothing when there are none.
 --}}
 @use('App\Helpers\StringHelper')
 
@@ -8,15 +8,15 @@
   $columns = 'md:grid-cols-[minmax(0,1.5fr)_5.5rem_minmax(0,1fr)_6.5rem_6rem]';
 @endphp
 
-<section aria-label="Cảnh báo mới nhất">
-  <x-ucs.section-title
-    title="Cảnh báo mới nhất"
-    subtitle="Chỉ gồm tố cáo đã được kiểm duyệt."
-    action-label="Xem tất cả"
-    :action-url="route('warnings.index')"
-  />
+@if ($latestReports->isNotEmpty())
+  <section aria-label="Thêm cảnh báo gần đây">
+    <x-ucs.section-title
+      title="Thêm cảnh báo gần đây"
+      subtitle="Chỉ gồm tố cáo đã được kiểm duyệt."
+      action-label="Xem tất cả"
+      :action-url="route('warnings.index')"
+    />
 
-  @if ($latestReports->isNotEmpty())
     <x-ucs.card :padding="false" class="overflow-hidden">
       <div
         class="{{ $columns }} border-line text-ink-subtle bg-surface-muted hidden gap-4 border-b px-5 py-3 text-xs font-semibold tracking-wider uppercase md:grid"
@@ -87,18 +87,5 @@
         @endforeach
       </ul>
     </x-ucs.card>
-
-    @if ($latestApprovedAt)
-      <p class="text-ink-subtle mt-3 flex items-center gap-2 text-xs" data-freshness>
-        <span class="bg-success ring-success/15 ml-1 size-2 shrink-0 rounded-full ring-4" aria-hidden="true"></span>
-        <span>
-          Cập nhật lần cuối
-          <time datetime="{{ $latestApprovedAt->toIso8601String() }}">{{ $latestApprovedAt->diffForHumans() }}</time>
-          · Dữ liệu được kiểm duyệt thủ công
-        </span>
-      </p>
-    @endif
-  @else
-    <x-ucs.empty-state title="Chưa có cảnh báo nào được duyệt." class="bg-surface" />
-  @endif
-</section>
+  </section>
+@endif
