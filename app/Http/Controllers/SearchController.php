@@ -10,12 +10,21 @@ use App\Models\Report;
 use App\Models\SearchLog;
 use App\Services\ScamLookupService;
 use Artesaos\SEOTools\Facades\SEOTools;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter;
 
 class SearchController extends Controller
 {
+    private const AUTOCOMPLETE_MIN_LENGTH = 3;
+
+    private const AUTOCOMPLETE_MAX_LENGTH = 100;
+
+    /** Autocomplete requests allowed per IP per minute, so the endpoint cannot be used to enumerate targets. */
+    private const AUTOCOMPLETE_PER_MINUTE = 30;
+
     public function __construct(private ScamLookupService $scamLookup) {}
 
     public function index(Request $request)
@@ -126,58 +135,102 @@ class SearchController extends Controller
         ));
     }
 
-    public function autoComplete(Request $request)
+    /**
+     * Suggestions for the hero search box.
+     *
+     * Each item is {label, display, query, url, type, target_name}. Report identifiers are only
+     * returned masked (`display`, via StringHelper::mask_id), so partial typing never reveals someone's
+     * full phone, bank account or Facebook id. A report suggestion links to its public (masked) report
+     * page through `url`; `query` is the visitor's own text, used when there is no `url`. Insurance
+     * partners are public, so their `query` is the partner name and `url` is null.
+     */
+    public function autoComplete(Request $request): JsonResponse
     {
-        $query = trim((string) $request->get('q', ''));
+        $query = trim((string) $request->query('q', ''));
+        $length = mb_strlen($query);
 
-        if (strlen($query) < 2) {
+        if ($length < self::AUTOCOMPLETE_MIN_LENGTH || $length > self::AUTOCOMPLETE_MAX_LENGTH) {
             return response()->json([]);
         }
 
-        [$type, $formattedQuery] = StringHelper::detectQueryType($query);
+        $limiterKey = 'search-autocomplete:'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($limiterKey, self::AUTOCOMPLETE_PER_MINUTE)) {
+            return response()->json([], 429, ['Retry-After' => RateLimiter::availableIn($limiterKey)]);
+        }
+
+        RateLimiter::hit($limiterKey, 60);
+
+        [, $formattedQuery] = StringHelper::detectQueryType($query);
+        $isNumeric = preg_match('/^\d+$/', $formattedQuery) === 1;
+
+        if ($isNumeric && strlen($formattedQuery) < self::AUTOCOMPLETE_MIN_LENGTH) {
+            return response()->json([]);
+        }
+
+        $idPattern = '%'.$this->escapeLike($formattedQuery).'%';
+        $namePattern = '%'.$this->escapeLike($query).'%';
 
         $reportSuggestions = Report::where('status', 'approved')
-            ->where(function ($q) use ($query, $formattedQuery) {
-                $q->where('target_id', 'LIKE', "%{$formattedQuery}%")
-                    ->orWhere('target_name', 'LIKE', "%{$query}%");
+            ->where(function ($q) use ($isNumeric, $formattedQuery, $idPattern, $namePattern) {
+                if ($isNumeric) {
+                    // Match regardless of the separators stored in target_id (e.g. "0912.345.678").
+                    $q->whereRaw("REGEXP_REPLACE(target_id, '[^0-9]', '') LIKE ?", ['%'.$formattedQuery.'%']);
+                } else {
+                    $q->where('target_id', 'LIKE', $idPattern);
+                }
+
+                $q->orWhere('target_name', 'LIKE', $namePattern);
             })
             ->select('target_id', 'target_name', 'type', 'slug')
+            ->latest()
             ->limit(30)
             ->get()
-            ->unique('target_id')
-            ->take(8)
-            ->values()
-            ->map(fn ($r) => [
-                'label' => $r->target_id.($r->target_name ? ' - '.StringHelper::mask_name($r->target_name) : ''),
-                'value' => $r->target_id,
-                'type' => $r->type,
-                'target_name' => StringHelper::mask_name($r->target_name),
-                'slug' => $r->slug,
-            ]);
+            ->map(function (Report $report) use ($query) {
+                $display = StringHelper::mask_id($report->target_id, $report->type);
+                $maskedName = StringHelper::mask_name($report->target_name);
+
+                return [
+                    'label' => $display.' - '.$maskedName,
+                    'display' => $display,
+                    'query' => $query,
+                    'url' => route('scammer.show', $report->slug),
+                    'type' => $report->type,
+                    'target_name' => $maskedName,
+                ];
+            })
+            ->unique('label')
+            ->take(8);
 
         $insuranceSuggestions = Insurance::where('status', 1)
-            ->where(function ($q) use ($query, $formattedQuery) {
-                $q->where('contact_info', 'LIKE', "%{$formattedQuery}%")
-                    ->orWhere('payment_accounts', 'LIKE', "%{$formattedQuery}%")
-                    ->orWhere('full_name', 'LIKE', "%{$query}%");
+            ->where(function ($q) use ($idPattern, $namePattern) {
+                $q->where('contact_info', 'LIKE', $idPattern)
+                    ->orWhere('payment_accounts', 'LIKE', $idPattern)
+                    ->orWhere('full_name', 'LIKE', $namePattern);
             })
-            ->select('full_name', 'slug')
+            ->select('full_name')
             ->limit(30)
             ->get()
             ->unique('full_name')
             ->take(4)
-            ->values()
-            ->map(fn ($i) => [
-                'label' => 'Uy tín: '.$i->full_name,
-                'value' => $i->full_name,
+            ->map(fn (Insurance $insurance) => [
+                'label' => 'Uy tín: '.$insurance->full_name,
+                'display' => $insurance->full_name,
+                'query' => $insurance->full_name,
+                'url' => null,
                 'type' => 'insurance',
-                'target_name' => $i->full_name,
-                'slug' => $i->slug,
+                'target_name' => $insurance->full_name,
             ]);
 
-        $suggestions = $insuranceSuggestions->concat($reportSuggestions)->take(8)->values();
+        return response()->json($insuranceSuggestions->concat($reportSuggestions)->take(8)->values());
+    }
 
-        return response()->json($suggestions);
+    /**
+     * Escape LIKE wildcards so "%" or "_" typed by a visitor cannot match every row.
+     */
+    private function escapeLike(string $value): string
+    {
+        return addcslashes($value, '\\%_');
     }
 
     public function clearHistory(Request $request)

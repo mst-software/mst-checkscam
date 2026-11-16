@@ -160,7 +160,7 @@
         }
 
         // Builds an option with .text() so server values are never parsed as HTML.
-        function buildOption(index, mainText, subText, badge, value) {
+        function buildOption(index, mainText, subText, badge, value, url) {
           const $li = $('<li>', {
             id: 'search-option-' + index,
             role: 'option',
@@ -188,7 +188,9 @@
               .appendTo($li);
           }
 
-          $li.on('mousedown', (event) => event.preventDefault()).on('click', () => submitWith(value));
+          $li
+            .on('mousedown', (event) => event.preventDefault())
+            .on('click', () => (url ? window.location.assign(url) : submitWith(value)));
 
           return $li;
         }
@@ -201,7 +203,8 @@
             data.forEach((item, index) => {
               const badge = item.type ? { type: item.type, label: typeLabels[item.type] || item.type } : null;
               const subText = item.type === 'insurance' ? '' : item.target_name;
-              $results.append(buildOption(index, item.value, subText, badge, item.value));
+              // The API only returns masked identifiers (display); query/url never expose a full id.
+              $results.append(buildOption(index, item.display, subText, badge, item.query, item.url));
             });
           } else {
             $results.append(buildOption(0, 'Tra cứu "' + query + '"', '', null, query));
@@ -231,7 +234,7 @@
           clearTimeout(timeoutId);
           const query = $(this).val().trim();
 
-          if (query.length < 2) {
+          if (query.length < 3) {
             closeDropdown();
             return;
           }
