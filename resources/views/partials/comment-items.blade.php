@@ -1,34 +1,39 @@
-@foreach ($comments as $cmt)
-    <div class="dark:bg-dark_card rounded-2xl border border-gray-100 bg-white p-5 shadow-xs dark:border-gray-800">
-        <div class="mb-4 flex items-center gap-3">
-            <img src="https://ui-avatars.com/api/?name={{ urlencode($cmt->display_name) }}&background={{ substr(md5($cmt->display_name), 0, 6) }}&color=fff&size=40"
-                class="h-10 w-10 rounded-full border-2 border-gray-50 dark:border-gray-800" alt="User" />
-            <div>
-                <h4 class="text-sm font-bold text-gray-800 dark:text-gray-100">
-                    {{ $cmt->display_name }}
-                </h4>
-                <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">
-                    {{ $cmt->created_at->diffForHumans() }}
-                </span>
-            </div>
-        </div>
-        <p class="mb-4 line-clamp-2 text-xs leading-relaxed text-gray-600 italic dark:text-gray-400">
-            "{{ $cmt->content }}"
+{{-- Comment cards for the home feed; also returned alone for the "load more" AJAX request. --}}
+@use('App\Helpers\StringHelper')
+
+@foreach ($comments as $comment)
+  <article data-comment-item class="border-line bg-surface rounded-card flex flex-col border p-4">
+    <header class="flex items-center gap-3">
+      <span
+        class="bg-surface-muted text-ink-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
+        aria-hidden="true"
+      >
+        {{ mb_strtoupper(mb_substr($comment->display_name, 0, 1)) }}
+      </span>
+      <div class="min-w-0">
+        <p class="text-ink truncate text-sm font-medium">{{ $comment->display_name }}</p>
+        <p class="text-ink-subtle text-xs">
+          <time datetime="{{ $comment->created_at->toIso8601String() }}">
+            {{ $comment->created_at->locale('vi')->diffForHumans() }}
+          </time>
         </p>
-        <div class="flex items-center justify-between border-t border-gray-50 pt-3 dark:border-gray-800">
-            <span class="text-[10px] font-bold tracking-tighter text-gray-400 uppercase dark:text-gray-500">
-                Đối tượng:
-            </span>
-            @if ($cmt->report)
-                <a href="/{{ $cmt->report->slug }}"
-                    class="text-cs_red rounded bg-red-50 px-2 py-0.5 text-[10px] font-black transition-colors hover:bg-red-100 dark:bg-red-900/20">
-                    {{ $cmt->report->target_id }}
-                </a>
-            @else
-                <span class="text-cs_red rounded bg-red-50 px-2 py-0.5 text-[10px] font-black dark:bg-red-900/20">
-                    N/A
-                </span>
-            @endif
-        </div>
-    </div>
+      </div>
+    </header>
+
+    <p class="text-ink-muted mt-3 line-clamp-3 flex-1 text-sm leading-relaxed">{{ $comment->content }}</p>
+
+    <footer class="border-line mt-3 flex items-center justify-between gap-2 border-t pt-3 text-xs">
+      <span class="text-ink-subtle shrink-0">Đối tượng</span>
+      @if ($comment->report)
+        <a
+          href="{{ route('scammer.show', $comment->report->slug) }}"
+          class="text-ink hover:text-accent focus-visible:outline-accent truncate rounded-sm font-medium tabular-nums focus-visible:outline-2"
+        >
+          {{ StringHelper::mask_id($comment->report->target_id, $comment->report->type) }}
+        </a>
+      @else
+        <span class="text-ink-subtle">Không còn tồn tại</span>
+      @endif
+    </footer>
+  </article>
 @endforeach
