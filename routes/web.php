@@ -90,7 +90,7 @@ Route::post('/giai-quyet-khieu-nai', [ComplaintController::class, 'store'])->nam
 
 // --- Admin Panel ---
 Route::name('admin.')->prefix('admin')->group(function () {
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'staff'])->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
         // Reports
