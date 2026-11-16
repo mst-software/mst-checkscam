@@ -23,10 +23,9 @@
 
         <h1
           id="hero-title"
-          class="scanner-title text-ink mt-1 text-[2.125rem] leading-[1.08] font-black tracking-[-0.03em] text-balance uppercase sm:text-5xl md:mt-2 md:text-6xl lg:text-[3.875rem]"
+          class="scanner-title text-ink mt-1 text-[clamp(1.1rem,5.2vw,2.75rem)] leading-[1.15] font-black tracking-[-0.02em] whitespace-nowrap uppercase md:mt-2"
         >
-          Kiểm tra&nbsp;&amp; tố cáo
-          <br />
+          Kiểm tra &amp; tố cáo
           <span
             class="text-accent relative inline-block whitespace-nowrap after:absolute after:right-0 after:-bottom-1.5 after:left-[2%] after:h-2 after:rounded-full after:bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--color-accent)_25%,transparent),transparent)]"
           >
