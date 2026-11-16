@@ -62,6 +62,9 @@ function publicPageUrls(): array
         '/moderation-policy',
         '/giai-quyet-khieu-nai',
         '/warnings',
+        '/verify-intermediary',
+        '/verify-intermediary?q=0912345678',
+        '/insurance-claims/create',
         '/search',
         '/search?q=0912345678',
         route('scammer.show', $report->slug),
@@ -113,4 +116,6 @@ test('static pages use the "<page> - Scamproof" title format', function (string 
     ['/dieu-khoan', 'Điều khoản sử dụng - Scamproof'],
     ['/moderation-policy', 'Quy trình kiểm duyệt - Scamproof'],
     ['/lien-he-admin', 'Liên hệ Admin - Scamproof'],
+    ['/verify-intermediary', 'Kiểm tra giao dịch viên - Scamproof'],
+    ['/insurance-claims/create', 'Gửi yêu cầu bồi thường - Scamproof'],
 ]);

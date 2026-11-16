@@ -6,6 +6,7 @@
     ['label' => 'Cảnh báo', 'url' => route('warnings.index'), 'active' => request()->routeIs('warnings.index')],
     ['label' => 'Tố cáo', 'url' => route('reports'), 'active' => request()->is('to-cao-lua-dao*')],
     ['label' => 'Bảo hiểm CS', 'url' => route('insurances.frontend.index'), 'active' => request()->is('bao-hiem-cs*')],
+    ['label' => 'Kiểm tra GDV', 'url' => route('intermediary.verify'), 'active' => request()->routeIs('intermediary.verify')],
     ['label' => 'Khu mua bán', 'url' => route('newfeed.index'), 'active' => request()->is('newfeed*')],
     ['label' => 'Bài viết', 'url' => route('posts.frontend.index'), 'active' => request()->is('bai-viet*')],
     ['label' => 'API', 'url' => url('/api-checkscam'), 'active' => request()->is('api-checkscam')],

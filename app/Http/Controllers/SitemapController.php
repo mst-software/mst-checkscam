@@ -26,6 +26,7 @@ class SitemapController extends Controller
         ['/warnings', 0.9, Url::CHANGE_FREQUENCY_DAILY],
         ['/bai-viet', 0.8, Url::CHANGE_FREQUENCY_WEEKLY],
         ['/bao-hiem-cs', 0.8, Url::CHANGE_FREQUENCY_WEEKLY],
+        ['/verify-intermediary', 0.7, Url::CHANGE_FREQUENCY_MONTHLY],
         ['/newfeed', 0.6, Url::CHANGE_FREQUENCY_DAILY],
         ['/to-cao-lua-dao', 0.6, Url::CHANGE_FREQUENCY_MONTHLY],
         ['/huong-dan-to-cao', 0.5, Url::CHANGE_FREQUENCY_MONTHLY],
