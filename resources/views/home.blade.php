@@ -47,11 +47,7 @@
 
         @include('partials.home.commitments')
 
-        <div class="space-y-6">
-          @include('partials.home.official-channels')
-
-          @include('partials.home.operator')
-        </div>
+        @include('partials.home.official-channels')
 
         @include('partials.home.faq')
 

@@ -58,7 +58,6 @@ test('home renders hero and the trust sections in order', function () {
             'Trung gian đã ký quỹ',
             'Cam kết của chúng tôi',
             'Cảnh giác mạo danh Scamproof',
-            'Vận hành bởi MST Software',
             'Câu hỏi thường gặp',
         ], false)
         ->assertSee('Trần Bảo Hiểm')
@@ -152,9 +151,8 @@ test('official channels are built only from configured values', function () {
 
     expect(substr_count($box, 'data-official-channel'))->toBe(4);
 
-    $operator = (string) str($html)->after('aria-label="Đơn vị vận hành"')->before('</section>');
-
-    expect($operator)->toContain('Vận hành bởi MST Software', '0900.111.222', 'hotro@example.test');
+    expect($html)->not->toContain('aria-label="Đơn vị vận hành"')
+        ->not->toContain('Vận hành bởi MST Software');
 });
 
 test('commitments describe reporter privacy without claiming absolute anonymity', function () {
