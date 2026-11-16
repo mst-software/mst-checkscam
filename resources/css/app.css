@@ -5,7 +5,7 @@
 /*
  * Design tokens.
  * Light values live in @theme; dark overrides live on `.dark` (set on <html>).
- * Brand accent = warm deep red ("Cảnh Giác"). Green = primary action / verified only.
+ * Brand accent = warm deep red ("Scamproof"). Green = primary action / verified only.
  * Semantic `--color-danger` is a separate, slightly orange shade of red for scam alerts.
  */
 @theme static {

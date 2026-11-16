@@ -1,10 +1,10 @@
 @extends('admin.layouts.master')
-@section('title', 'Nâng cấp MST CheckScam PRO')
+@section('title', 'Nâng cấp Scamproof PRO')
 @section('content')
   <div class="page-header">
     <div class="page-title">
       <h4>Nâng cấp hệ thống</h4>
-      <h6>Mở khóa toàn bộ sức mạnh công cụ quản lý CheckScam</h6>
+      <h6>Mở khóa toàn bộ sức mạnh công cụ quản lý Scamproof</h6>
     </div>
   </div>
 

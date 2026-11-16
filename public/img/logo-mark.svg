@@ -1,10 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-labelledby="canhgiac-mark-title">
-  <title id="canhgiac-mark-title">Cảnh Giác</title>
-  <!-- Shield: alertness/watchfulness; transparent fill so it sits on any surface -->
-  <path d="M24 4.5L41 10.5V23.5C41 34 33.5 41.5 24 43.5C14.5 41.5 7 34 7 23.5V10.5Z" fill="none" stroke="#b91c1c" stroke-width="2" stroke-linejoin="round"/>
-  <!-- Magnifying glass: look things up before you transact -->
-  <g stroke="#b91c1c" stroke-width="2" stroke-linecap="round" fill="none">
-    <circle cx="22" cy="21.5" r="7"/>
-    <path d="M27.3 26.8L33 32.5"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 72" width="64" height="72" role="img" aria-labelledby="scamproof-mark-title">
+  <title id="scamproof-mark-title">Scamproof</title>
+  <defs>
+    <linearGradient id="sp-body" x1="8" y1="2" x2="58" y2="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f05252"/>
+      <stop offset=".5" stop-color="#c81e1e"/>
+      <stop offset="1" stop-color="#8b1515"/>
+    </linearGradient>
+    <linearGradient id="sp-gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="sp-clip"><path d="M32 2C40 6 50 8 58 8.6c1.2.1 2 1 2 2.2V34c0 16-11 28-28 36C15 62 4 50 4 34V10.8c0-1.2.8-2.1 2-2.2C14 8 24 6 32 2Z"/></clipPath>
+  </defs>
+  <path d="M32 2C40 6 50 8 58 8.6c1.2.1 2 1 2 2.2V34c0 16-11 28-28 36C15 62 4 50 4 34V10.8c0-1.2.8-2.1 2-2.2C14 8 24 6 32 2Z" fill="url(#sp-body)"/>
+  <g clip-path="url(#sp-clip)"><rect width="64" height="38" fill="url(#sp-gloss)"/></g>
+  <circle cx="30" cy="31" r="14.5" fill="#fff" fill-opacity=".14" stroke="#fff" stroke-width="4.2"/>
+  <path d="M40.6 41.6l9.6 9.6" stroke="#fff" stroke-width="5.2" stroke-linecap="round"/>
+  <path d="M23.4 31.4l5 5 9.4-10" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

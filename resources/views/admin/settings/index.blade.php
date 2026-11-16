@@ -31,7 +31,7 @@
                 type="text"
                 name="site_title"
                 class="form-control"
-                placeholder="CheckScam.vn - Tra cứu lừa đảo"
+                placeholder="Scamproof - Tra cứu lừa đảo"
                 value="{{ $settings['site_title'] ?? '' }}"
               />
             </div>
@@ -95,7 +95,7 @@
                 type="text"
                 name="support_email"
                 class="form-control"
-                placeholder="support@checkscam.vn"
+                placeholder="support@scamproof.vn"
                 value="{{ $settings['support_email'] ?? '' }}"
               />
             </div>
@@ -466,7 +466,7 @@
                 type="text"
                 name="og_site_name"
                 class="form-control"
-                placeholder="CheckScam.vn"
+                placeholder="Scamproof"
                 value="{{ $settings['og_site_name'] ?? '' }}"
               />
             </div>

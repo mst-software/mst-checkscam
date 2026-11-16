@@ -33,13 +33,13 @@ class SearchController extends Controller
 
         if ($query !== '') {
             $metaTitle = "Kết quả check scam: {$query} | Tra cứu lừa đảo";
-            $metaDesc = "Dữ liệu mới nhất về {$query}. Xem đối tượng này có trong danh sách đen lừa đảo hay không. Tra cứu STK, SĐT, Link FB tại CheckScam.vn.";
+            $metaDesc = "Dữ liệu mới nhất về {$query}. Xem đối tượng này có trong danh sách đen lừa đảo hay không. Tra cứu STK, SĐT, Link FB tại Scamproof.";
             SEOTools::setTitle($metaTitle);
             SEOTools::setDescription($metaDesc);
             SEOTools::opengraph()->setUrl(url()->current());
             SEOTools::metatags()->setCanonical(url()->current());
         } else {
-            SEOTools::setTitle('Tìm kiếm đối tượng lừa đảo - CheckScam.vn');
+            SEOTools::setTitle('Tìm kiếm đối tượng lừa đảo - Scamproof');
             SEOTools::metatags()->setRobots('noindex, follow');
         }
 

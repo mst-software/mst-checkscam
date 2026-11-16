@@ -230,7 +230,7 @@ class ReportController extends Controller
 
     private function setReportSeo(Report $report, string $maskedTarget, string $maskedName, ?string $scamTypeLabel, string $description, int $reportsCount): void
     {
-        $siteTitle = ConfigHelper::getConfig('site_title', 'CheckScam');
+        $siteTitle = ConfigHelper::getConfig('site_title', 'Scamproof');
         $reportedOn = $report->created_at->format('d/m/Y');
         $scamLabel = $scamTypeLabel ?? 'Lừa đảo';
         $targetLabel = $report->type === 'website' ? 'website' : 'tài khoản';
