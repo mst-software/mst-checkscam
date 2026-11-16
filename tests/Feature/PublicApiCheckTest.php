@@ -1,6 +1,9 @@
 <?php
 
+use App\Enums\ChannelType;
 use App\Models\ApiKey;
+use App\Models\Insurance;
+use App\Models\InsuranceChannel;
 use App\Models\Report;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
@@ -52,8 +55,10 @@ test('a valid bearer key returns the masked lookup payload and records usage', f
             'total_reports',
             'reports' => [['slug', 'url', 'target_name_masked', 'type', 'reported_at', 'comments_count']],
             'insurance',
+            'verified_intermediary',
         ])
         ->assertJson([
+            'verified_intermediary' => false,
             'query' => ['type' => 'phone', 'value' => '0912345678'],
             'risk' => 'medium',
             'total_reports' => 1,
@@ -74,6 +79,17 @@ test('the x-api-key header is accepted', function () {
     $this->getJson('/api/v1/check?q=0912345678', ['X-Api-Key' => TEST_API_KEY])
         ->assertOk()
         ->assertJson(['risk' => 'low', 'total_reports' => 0, 'reports' => [], 'insurance' => []]);
+});
+
+test('an official channel of a trusted partner is flagged as a verified intermediary', function () {
+    $partner = Insurance::factory()->trusted()->create(['full_name' => 'GDV Hùng']);
+    InsuranceChannel::factory()->for($partner)->ofType(ChannelType::Telegram, '@gdv_hung')->create();
+
+    $this->getJson('/api/v1/check?q=%40gdv_hung', ['X-Api-Key' => TEST_API_KEY])
+        ->assertOk()
+        ->assertJsonPath('verified_intermediary', true)
+        ->assertJsonPath('insurance.0.name', 'GDV Hùng')
+        ->assertJsonPath('total_reports', 0);
 });
 
 test('a missing or too short query returns a json 422', function (string $url) {

@@ -2,7 +2,9 @@
 
 namespace App\Helpers;
 
+use App\Enums\ChannelType;
 use App\Models\Insurance;
+use App\Models\InsuranceChannel;
 use App\Models\Post;
 use Illuminate\Support\Str;
 
@@ -70,6 +72,63 @@ class StringHelper
         }
 
         return ['name', $formattedQuery];
+    }
+
+    /**
+     * Which intermediary channel types a free-form input can be, and its normalized lookup key.
+     * Explicit links/handles (facebook.com, t.me, @handle, zalo.me, other URLs) map to one type;
+     * a phone number may also be a Zalo number or bank account; a bare handle may be Facebook, Telegram or Zalo.
+     *
+     * @return array{0: list<ChannelType>, 1: string} [[], ''] when the input cannot be a channel.
+     */
+    public static function detectChannelQuery(string $input): array
+    {
+        $input = trim($input);
+
+        // Free text with spaces (a person's name) is never a channel; spaced phone/bank numbers are.
+        if ($input === '' || (preg_match('/\s/', $input) === 1 && preg_match('/^[\s\+\-\.()\d]+$/', $input) !== 1)) {
+            return [[], ''];
+        }
+
+        $explicitType = match (true) {
+            preg_match('~^(?:https?://)?(?:www\.)?(?:t|telegram)\.(?:me|dog)/~i', $input) === 1,
+            preg_match('/^@\w{3,}$/u', $input) === 1 => ChannelType::Telegram,
+            preg_match('~^(?:https?://)?(?:www\.|chat\.)?zalo\.me/~i', $input) === 1 => ChannelType::Zalo,
+            default => null,
+        };
+
+        if ($explicitType) {
+            return self::channelCandidates([$explicitType], $input);
+        }
+
+        [$type] = self::detectQueryType($input);
+
+        return match (true) {
+            $type === 'facebook' => self::channelCandidates([ChannelType::Facebook], $input),
+            $type === 'phone' => self::channelCandidates([ChannelType::Phone, ChannelType::Zalo, ChannelType::BankAccount], $input),
+            $type === 'bank' => self::channelCandidates([ChannelType::BankAccount], $input),
+            $type === 'uuid' => [[], ''],
+            preg_match('~^[a-z][a-z0-9+.-]*://|/~i', $input) === 1 => self::channelCandidates([ChannelType::Website], $input),
+            // "shop.vn" or "le.hoang": a bare domain and a dotted username look the same.
+            preg_match('/^[\w.\-]{3,64}$/u', $input) === 1 => self::channelCandidates(
+                str_contains($input, '.')
+                    ? [ChannelType::Website, ChannelType::Facebook, ChannelType::Telegram, ChannelType::Zalo]
+                    : [ChannelType::Facebook, ChannelType::Telegram, ChannelType::Zalo],
+                $input,
+            ),
+            default => [[], ''],
+        };
+    }
+
+    /**
+     * @param  list<ChannelType>  $types
+     * @return array{0: list<ChannelType>, 1: string}
+     */
+    private static function channelCandidates(array $types, string $input): array
+    {
+        $value = InsuranceChannel::normalize($types[0], $input);
+
+        return $value === '' ? [[], ''] : [$types, $value];
     }
 
     /**

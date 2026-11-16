@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -27,8 +28,13 @@ class Insurance extends Model implements HasMedia
         'services',
         'status',
         'slug',
+        'verified_at',
     ];
 
+    /**
+     * `amount` is a cached copy of the latest ledger balance; change it only through InsuranceLedgerService.
+     * `suspended_at` / `suspension_reason` are set only through InsuranceSuspensionService.
+     */
     protected $casts = [
         'contact_info' => 'array',
         'payment_accounts' => 'array',
@@ -36,7 +42,38 @@ class Insurance extends Model implements HasMedia
         'amount' => 'decimal:2',
         'insurance_date' => 'date',
         'expired_at' => 'date',
+        'verified_at' => 'date',
+        'suspended_at' => 'datetime',
     ];
+
+    /**
+     * ------------------------------------------------------
+     * Relationships
+     * ------------------------------------------------------
+     */
+
+    /** Official contact/payment channels (phone, Facebook, Telegram, Zalo, bank account, website). */
+    public function channels(): HasMany
+    {
+        return $this->hasMany(InsuranceChannel::class);
+    }
+
+    /** Append-only deposit ledger, oldest first. */
+    public function ledgerEntries(): HasMany
+    {
+        return $this->hasMany(InsuranceLedgerEntry::class)->orderBy('id');
+    }
+
+    public function claims(): HasMany
+    {
+        return $this->hasMany(InsuranceClaim::class);
+    }
+
+    /** Suspension / reinstatement / expiry audit trail, oldest first. */
+    public function statusEvents(): HasMany
+    {
+        return $this->hasMany(InsuranceStatusEvent::class)->orderBy('id');
+    }
 
     /**
      * ------------------------------------------------------
@@ -49,14 +86,28 @@ class Insurance extends Model implements HasMedia
     }
 
     /**
-     * Active (status 1) partners whose guarantee has not expired.
+     * Active (status 1), not suspended partners whose guarantee has not expired.
      */
     public function scopeTrusted(Builder $query): Builder
     {
         return $query->where('status', 1)
+            ->whereNull('suspended_at')
             ->where(function (Builder $query) {
                 $query->whereNull('expired_at')->orWhere('expired_at', '>', now());
             });
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
+    /**
+     * Same rule as scopeTrusted, for a loaded model.
+     */
+    public function isTrusted(): bool
+    {
+        return $this->isActive() && ! $this->isSuspended() && ! $this->isExpired();
     }
 
     public function isExpired(): bool
@@ -73,6 +124,10 @@ class Insurance extends Model implements HasMedia
 
     public function getStatusLabelAttribute(): string
     {
+        if ($this->isSuspended()) {
+            return 'Tạm đình chỉ';
+        }
+
         if (! $this->isActive()) {
             return 'Tạm dừng';
         }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Helpers\StringHelper;
 use App\Models\Insurance;
+use App\Models\InsuranceChannel;
 use App\Models\Report;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -61,7 +62,7 @@ class ScamLookupService
     }
 
     /**
-     * Active insurance partners matching the query, best match first.
+     * Active insurance partners matching the query by name, slug or an official channel, best match first.
      *
      * @return Collection<int, Insurance>
      */
@@ -69,26 +70,28 @@ class ScamLookupService
     {
         [, $formattedQuery] = StringHelper::detectQueryType($query);
         $normalizedQuery = StringHelper::normalizeString($formattedQuery);
+        $channelInsuranceIds = InsuranceChannel::query()
+            ->official()
+            ->matchingInput($query)
+            ->pluck('insurance_id')
+            ->unique()
+            ->all();
 
         return Insurance::where('status', 1)
-            ->where(function ($q) use ($query, $formattedQuery, $normalizedQuery) {
+            ->where(function ($q) use ($query, $formattedQuery, $normalizedQuery, $channelInsuranceIds) {
                 $q->where('full_name', 'LIKE', "%{$query}%")
                     ->orWhereRaw("LOWER(TRIM(REGEXP_REPLACE(full_name, '\\\\s+', ' '))) LIKE ?", ["%{$normalizedQuery}%"])
-                    ->orWhere('contact_info', 'LIKE', "%{$formattedQuery}%")
-                    ->orWhere('payment_accounts', 'LIKE', "%{$formattedQuery}%")
+                    ->orWhereIn('id', $channelInsuranceIds)
                     ->orWhere('slug', 'LIKE', "%{$formattedQuery}%");
             })
             ->get()
-            ->sortByDesc(function ($insurance) use ($normalizedQuery, $query, $formattedQuery) {
+            ->sortByDesc(function ($insurance) use ($normalizedQuery, $query, $channelInsuranceIds) {
                 $normalizedName = StringHelper::normalizeString($insurance->full_name);
                 if ($normalizedName === $normalizedQuery || strcasecmp($insurance->full_name, $query) === 0) {
                     return 3;
                 }
 
-                if (
-                    str_contains(json_encode($insurance->contact_info), '"'.$formattedQuery.'"') ||
-                    str_contains(json_encode($insurance->payment_accounts), '"'.$formattedQuery.'"')
-                ) {
+                if (in_array($insurance->id, $channelInsuranceIds)) {
                     return 2;
                 }
 
@@ -116,6 +119,7 @@ class ScamLookupService
             totalReports: $totalReports,
             risk: $this->riskLevel($totalReports, $reports->first()?->created_at),
             insurances: $this->matchingInsurances($query),
+            verification: (new IntermediaryVerifier($this))->verify($query, $totalReports),
         );
     }
 

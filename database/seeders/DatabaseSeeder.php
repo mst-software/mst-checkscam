@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
         // Demo data is only generated on an empty database so repeated runs do not multiply it.
         if (Report::query()->doesntExist()) {
             Report::factory()->count(50)->create();
-            Insurance::factory()->count(200)->create();
+            Insurance::factory()->count(200)->withChannels()->create();
             Post::factory()->count(30)->create();
             User::factory()->count(2)->create();
         }

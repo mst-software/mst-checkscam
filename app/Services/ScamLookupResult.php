@@ -20,7 +20,16 @@ final class ScamLookupResult
         public readonly int $totalReports,
         public readonly string $risk,
         public readonly Collection $insurances,
+        public readonly ?IntermediaryVerification $verification = null,
     ) {}
+
+    /**
+     * Whether the query is an official channel of a currently trusted intermediary.
+     */
+    public function isVerifiedIntermediary(): bool
+    {
+        return $this->verification?->isVerified() ?? false;
+    }
 
     /**
      * Public, PII-safe representation: masked names only, no reporter data, no raw target ids.
@@ -51,6 +60,7 @@ final class ScamLookupResult
                 'status' => $insurance->status_label,
                 'expired_at' => $insurance->expired_at?->toDateString(),
             ])->values()->all(),
+            'verified_intermediary' => $this->isVerifiedIntermediary(),
         ];
     }
 }

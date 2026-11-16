@@ -95,6 +95,11 @@ class TelegramWebhookController extends Controller
             'Số tố cáo đã duyệt: <b>'.$result->totalReports.'</b>',
         ];
 
+        if ($result->verification && $result->verification->insurance) {
+            $lines[] = ($result->verification->isVerified() ? '<b>Kênh GDV chính thức:</b> ' : '<b>Lưu ý:</b> ')
+                .e($result->verification->message());
+        }
+
         if ($result->totalReports === 0) {
             $lines[] = 'Chưa có tố cáo nào khớp. Hãy luôn cẩn trọng và dùng trung gian uy tín khi giao dịch.';
         }

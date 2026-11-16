@@ -6,8 +6,11 @@ use App\Enums\ScamType;
 use App\Helpers\FileHelper;
 use App\Http\Controllers\Controller;
 use App\Jobs\NotifyWatchersOfApprovedReport;
+use App\Models\Insurance;
 use App\Models\Report;
+use App\Services\InsuranceSuspensionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 class AdminReportController extends Controller
@@ -76,7 +79,7 @@ class AdminReportController extends Controller
         ));
     }
 
-    public function approve(string $id)
+    public function approve(string $id, InsuranceSuspensionService $suspensions)
     {
         $report = Report::findOrFail($id);
 
@@ -92,8 +95,19 @@ class AdminReportController extends Controller
         ]);
 
         NotifyWatchersOfApprovedReport::dispatch($report);
+        $suspended = $suspensions->suspendForApprovedReport($report, auth()->user());
 
-        return back()->with('success', 'Báo cáo đã được duyệt thành công.');
+        return back()->with('success', 'Báo cáo đã được duyệt thành công.'.$this->suspensionNotice($suspended));
+    }
+
+    /**
+     * @param  Collection<int, Insurance>  $suspended
+     */
+    private function suspensionNotice(Collection $suspended): string
+    {
+        return $suspended->isEmpty()
+            ? ''
+            : ' Đã tạm đình chỉ đối tác bảo hiểm: '.$suspended->pluck('full_name')->join(', ').' (chờ xem xét).';
     }
 
     public function reject(Request $request, string $id)
@@ -119,7 +133,7 @@ class AdminReportController extends Controller
         return back()->with('success', 'Báo cáo đã bị từ chối.');
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id, InsuranceSuspensionService $suspensions)
     {
         $report = Report::findOrFail($id);
 
@@ -175,11 +189,13 @@ class AdminReportController extends Controller
             'moderator_id' => auth()->id() ?? null,
         ]);
 
+        $suspended = collect();
         if (! $wasApproved && $report->isApproved()) {
             NotifyWatchersOfApprovedReport::dispatch($report);
+            $suspended = $suspensions->suspendForApprovedReport($report, auth()->user());
         }
 
-        return back()->with('success', 'Đã cập nhật toàn bộ thông tin báo cáo thành công.');
+        return back()->with('success', 'Đã cập nhật toàn bộ thông tin báo cáo thành công.'.$this->suspensionNotice($suspended));
     }
 
     public function destroy(string $id)
