@@ -1,7 +1,4 @@
 @php
-  $logoFooterLight = ! empty($siteConfig['logo_footer_light']) ? asset('uploads/' . $siteConfig['logo_footer_light']) : 'https://i.ibb.co/wFZsnJBR/white.png';
-  $logoFooterDark = ! empty($siteConfig['logo_footer_dark']) ? asset('uploads/' . $siteConfig['logo_footer_dark']) : 'https://i.ibb.co/wFZsnJBR/white.png';
-
   $systemLinks = [
     ['label' => 'Kiểm tra scam', 'url' => route('home')],
     ['label' => 'Danh sách cảnh báo', 'url' => route('warnings.index')],
@@ -26,16 +23,8 @@
       {{-- Brand --}}
       <div class="space-y-4 lg:col-span-4">
         <a href="{{ route('home') }}" class="inline-block">
-          <img
-            src="{{ $logoFooterLight }}"
-            alt="{{ $siteConfig['title'] ?? 'MST CheckScam' }}"
-            class="h-12 w-auto dark:hidden"
-          />
-          <img
-            src="{{ $logoFooterDark }}"
-            alt="{{ $siteConfig['title'] ?? 'MST CheckScam' }}"
-            class="hidden h-12 w-auto dark:block"
-          />
+          <img src="{{ asset('img/logo-light.svg') }}" alt="Cảnh Giác" class="h-12 w-auto dark:hidden" />
+          <img src="{{ asset('img/logo-dark.svg') }}" alt="Cảnh Giác" class="hidden h-12 w-auto dark:block" />
         </a>
         <p class="max-w-sm text-sm leading-relaxed text-slate-400">
           {{ $siteConfig['description'] ?? 'Nền tảng kiểm tra độ tín nhiệm dữ liệu lớn nhất Việt Nam.' }}
