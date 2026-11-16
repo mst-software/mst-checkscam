@@ -59,6 +59,7 @@ function publicPageUrls(): array
         '/huong-dan-to-cao',
         '/lien-he-admin',
         '/dieu-khoan',
+        '/moderation-policy',
         '/giai-quyet-khieu-nai',
         '/warnings',
         '/search',
@@ -110,5 +111,6 @@ test('static pages use the "<page> - Scamproof" title format', function (string 
     ['/doi-tac-uy-tin', 'Đối tác uy tín - Scamproof'],
     ['/huong-dan-to-cao', 'Hướng dẫn tố cáo - Scamproof'],
     ['/dieu-khoan', 'Điều khoản sử dụng - Scamproof'],
+    ['/moderation-policy', 'Quy trình kiểm duyệt - Scamproof'],
     ['/lien-he-admin', 'Liên hệ Admin - Scamproof'],
 ]);

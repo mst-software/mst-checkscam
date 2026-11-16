@@ -34,6 +34,7 @@ class SitemapController extends Controller
         ['/doi-tac-uy-tin', 0.4, Url::CHANGE_FREQUENCY_MONTHLY],
         ['/lien-he-admin', 0.3, Url::CHANGE_FREQUENCY_YEARLY],
         ['/dieu-khoan', 0.3, Url::CHANGE_FREQUENCY_YEARLY],
+        ['/moderation-policy', 0.4, Url::CHANGE_FREQUENCY_YEARLY],
     ];
 
     public function index(): Response
