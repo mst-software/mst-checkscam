@@ -34,6 +34,14 @@
   --color-warning: #8a6a1f;
   --color-warning-soft: #f7f1e3;
 
+  /* Hero band (stays navy in both themes) and its primary search action */
+  --color-hero: #0b1f3a;
+  --color-hero-2: #10294d;
+  --color-on-hero: #ffffff;
+  --color-on-hero-muted: #cbd5e1;
+  --color-hero-action: #15803d;
+  --color-hero-action-hover: #166534;
+
   /* Legacy names kept for existing views, remapped to the new palette */
   --color-cs_blue: var(--color-accent);
   --color-cs_red: var(--color-danger);
@@ -69,6 +77,9 @@
     --color-success-soft: #13261c;
     --color-warning: #c9a35a;
     --color-warning-soft: #262013;
+
+    --color-hero: #0d1d36;
+    --color-hero-2: #112747;
   }
 
   html {
