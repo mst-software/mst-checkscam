@@ -5,7 +5,8 @@
 /*
  * Design tokens.
  * Light values live in @theme; dark overrides live on `.dark` (set on <html>).
- * One accent (ink navy). Red = danger/scam only. Green = verified/trusted only.
+ * Brand accent = warm deep red ("Cảnh Giác"). Green = primary action / verified only.
+ * Semantic `--color-danger` is a separate, slightly orange shade of red for scam alerts.
  */
 @theme static {
   --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
@@ -20,10 +21,10 @@
   --color-ink-muted: #475569;
   --color-ink-subtle: #64748b;
 
-  /* Accent (ink navy) */
-  --color-accent: #1e3a6e;
-  --color-accent-hover: #172e58;
-  --color-accent-soft: #e8eef8;
+  /* Accent (brand red) */
+  --color-accent: #b91c1c;
+  --color-accent-hover: #991b1b;
+  --color-accent-soft: #fee2e2;
   --color-on-accent: #ffffff;
 
   /* Semantic */
@@ -34,9 +35,9 @@
   --color-warning: #8a6a1f;
   --color-warning-soft: #f7f1e3;
 
-  /* Hero band (stays navy in both themes) and its primary search action */
-  --color-hero: #0b1f3a;
-  --color-hero-2: #10294d;
+  /* Hero band (brand red) and its primary search action */
+  --color-hero: #b91c1c;
+  --color-hero-2: #991b1b;
   --color-on-hero: #ffffff;
   --color-on-hero-muted: #cbd5e1;
   --color-hero-action: #15803d;
@@ -66,9 +67,9 @@
     --color-ink-muted: #a8b3c4;
     --color-ink-subtle: #8593a8;
 
-    --color-accent: #5a83c2;
-    --color-accent-hover: #6f93cc;
-    --color-accent-soft: #16243c;
+    --color-accent: #ef4444;
+    --color-accent-hover: #f87171;
+    --color-accent-soft: #450a0a;
     --color-on-accent: #ffffff;
 
     --color-danger: #e5534b;
@@ -78,8 +79,10 @@
     --color-warning: #c9a35a;
     --color-warning-soft: #262013;
 
-    --color-hero: #0d1d36;
-    --color-hero-2: #112747;
+    --color-hero: #7f1d1d;
+    --color-hero-2: #991b1b;
+    /* Slightly brighter than the light-theme muted so it holds contrast on deep red */
+    --color-on-hero-muted: #fecaca;
   }
 
   html {

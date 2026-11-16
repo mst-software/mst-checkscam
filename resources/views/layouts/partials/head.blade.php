@@ -33,7 +33,7 @@
   @if (! empty($siteConfig['favicon']))
     <link rel="icon" type="image/png" href="{{ asset('uploads/' . $siteConfig['favicon']) }}" />
   @else
-    <link rel="icon" type="image/png" href="https://i.ibb.co/fV1xYHVS/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
   @endif
   <meta name="csrf-token" content="{{ csrf_token() }}" />
 

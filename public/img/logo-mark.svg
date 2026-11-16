@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-labelledby="canhgiac-mark-title">
+  <title id="canhgiac-mark-title">Cảnh Giác</title>
+  <!-- Shield: alertness/watchfulness; transparent fill so it sits on any surface -->
+  <path d="M24 4.5L41 10.5V23.5C41 34 33.5 41.5 24 43.5C14.5 41.5 7 34 7 23.5V10.5Z" fill="none" stroke="#b91c1c" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Magnifying glass: look things up before you transact -->
+  <g stroke="#b91c1c" stroke-width="2" stroke-linecap="round" fill="none">
+    <circle cx="22" cy="21.5" r="7"/>
+    <path d="M27.3 26.8L33 32.5"/>
+  </g>
+</svg>
