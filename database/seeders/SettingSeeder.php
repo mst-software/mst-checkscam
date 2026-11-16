@@ -39,6 +39,9 @@ class SettingSeeder extends Seeder
             'enable_comments' => '1',
             'maintenance_mode' => '0',
 
+            // Insurance partners: minimum deposit (VND) before automatic suspension, "0" = disabled
+            'insurance_min_balance' => '0',
+
             // Scripts
             'header_scripts' => null,
 
