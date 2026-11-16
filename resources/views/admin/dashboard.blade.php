@@ -139,6 +139,32 @@
     </div>
   </div>
 
+  {{-- Bảo hiểm: việc cần xử lý --}}
+  <div class="row">
+    <div class="col-lg-3 col-sm-6 d-flex col-12">
+      <a href="{{ route('admin.insurance-claims.index') }}" class="dash-count das1 text-decoration-none">
+        <div class="dash-counts">
+          <h4>{{ Helpers::formatCurrency($metrics['open_claims']) }}</h4>
+          <h5>Yêu cầu bồi thường chờ xử lý</h5>
+        </div>
+        <div class="dash-imgs">
+          <i data-feather="inbox"></i>
+        </div>
+      </a>
+    </div>
+    <div class="col-lg-3 col-sm-6 d-flex col-12">
+      <a href="{{ route('admin.insurances.index') }}" class="dash-count das3 text-decoration-none">
+        <div class="dash-counts">
+          <h4>{{ Helpers::formatCurrency($metrics['suspended_insurances']) }}</h4>
+          <h5>Thành viên bảo hiểm bị đình chỉ</h5>
+        </div>
+        <div class="dash-imgs">
+          <i data-feather="pause-circle"></i>
+        </div>
+      </a>
+    </div>
+  </div>
+
   {{-- Row 3: Chart + Top tra cứu --}}
   <div class="row">
     <div class="col-lg-7 col-sm-12 d-flex col-12">

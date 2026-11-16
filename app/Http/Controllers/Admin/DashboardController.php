@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Insurance;
+use App\Models\InsuranceClaim;
 use App\Models\Post;
 use App\Models\Report;
 use App\Models\SearchLog;
@@ -65,6 +66,9 @@ class DashboardController extends Controller
             'total_reports' => Report::where('status', 'approved')->count(),
             'total_comments' => Comment::count(),
             'total_posts' => Post::count(),
+
+            'open_claims' => InsuranceClaim::query()->awaitingAction()->count(),
+            'suspended_insurances' => Insurance::query()->whereNotNull('suspended_at')->count(),
         ];
     }
 
