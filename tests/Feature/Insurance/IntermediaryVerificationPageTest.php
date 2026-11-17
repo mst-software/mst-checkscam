@@ -64,7 +64,6 @@ test('an official channel of a trusted partner is shown as verified', function (
         ->assertSee('15/01/2026')
         ->assertSee(ChannelType::Phone->label())
         ->assertSee(route('insurances.frontend.show', $partner->slug))
-        ->assertSee(route('insurance-claims.create', ['partner' => $partner->slug]), false)
         ->getContent();
 
     $resultSection = str($html)->after('data-verify-state')->before('</section>')->lower()->toString();

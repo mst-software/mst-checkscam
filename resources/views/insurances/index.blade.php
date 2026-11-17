@@ -4,7 +4,7 @@
   <main class="flex-1 pb-20">
     <x-ucs.page-header
       title="Quỹ bảo hiểm"
-      description="Trung gian đã ký quỹ với Scamproof. Giao dịch qua các thành viên trong danh sách để được bảo lãnh khi xảy ra rủi ro."
+      description="Giao dịch viên đã ký quỹ với Scamproof. Số dư ký quỹ do quản trị viên ghi nhận; Scamproof xác minh danh tính và kênh liên hệ chính thức của từng thành viên."
       :breadcrumbs="[['name' => 'Quỹ bảo hiểm', 'url' => route('insurances.frontend.index')]]"
     >
       <a
@@ -14,13 +14,6 @@
         <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
         Kiểm tra GDV
       </a>
-      <x-ucs.button
-        :href="route('insurance-claims.create')"
-        variant="secondary"
-        icon="fa-solid fa-file-circle-exclamation"
-      >
-        Yêu cầu bồi thường
-      </x-ucs.button>
     </x-ucs.page-header>
 
     <x-ucs.container>
@@ -80,8 +73,9 @@
 
       <x-ucs.card class="mt-10" title="Quy định về quỹ bảo hiểm">
         <p class="text-ink-muted max-w-3xl text-sm leading-relaxed">
-          Scamproof chỉ bảo lãnh các giao dịch có sự tham gia của thành viên trong danh sách trên. Tiền ký quỹ của thành
-          viên được ban quản trị giữ để bồi thường trong trường hợp có rủi ro từ phía thành viên đó.
+          Thành viên trong danh sách đã đóng một khoản ký quỹ. Số dư ký quỹ do quản trị viên ghi nhận; Scamproof xác
+          minh danh tính và kênh liên hệ chính thức của thành viên. Trước khi giao dịch, hãy mở hồ sơ của thành viên và
+          chỉ liên hệ, chuyển tiền qua đúng các kênh được liệt kê tại đó.
         </p>
         <div class="mt-4 flex flex-wrap gap-2">
           <x-ucs.button href="/lien-he-admin" icon="fa-solid fa-envelope">Liên hệ admin để đóng quỹ</x-ucs.button>

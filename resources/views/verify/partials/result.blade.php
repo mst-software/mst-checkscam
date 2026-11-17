@@ -11,10 +11,6 @@
     $insurance && $insurance->isActive() && $insurance->slug
       ? route('insurances.frontend.show', $insurance->slug)
       : null;
-  $claimUrl =
-    $insurance && $insurance->isActive() && $insurance->slug
-      ? route('insurance-claims.create', ['partner' => $insurance->slug])
-      : route('insurance-claims.create');
 @endphp
 
 <section class="space-y-4" aria-labelledby="verify-result-title" data-verify-state="{{ $result->state->value }}">
@@ -103,10 +99,6 @@
               Xem hồ sơ GDV
             </x-ucs.button>
           @endif
-
-          <x-ucs.button :href="$claimUrl" variant="ghost" icon="fa-solid fa-file-circle-exclamation">
-            Gửi yêu cầu bồi thường
-          </x-ucs.button>
         </div>
 
         <p class="text-ink-subtle mt-4 text-xs leading-relaxed">

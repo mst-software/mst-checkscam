@@ -10,7 +10,7 @@
     ],
     [
       'question' => 'Quỹ bảo hiểm hoạt động thế nào?',
-      'answer' => 'Trung gian đóng một khoản ký quỹ cho ban quản trị. Nếu họ lừa đảo, khoản ký quỹ được dùng để đền bù cho người bị hại.',
+      'answer' => 'Trung gian đóng một khoản ký quỹ, số dư do ban quản trị ghi nhận. Scamproof xác minh danh tính và kênh liên hệ chính thức của trung gian; hãy mở hồ sơ của họ trên Scamproof và chỉ giao dịch qua các kênh được liệt kê.',
     ],
     [
       'question' => 'Tôi có thể xin gỡ bài tố cáo không?',
