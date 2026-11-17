@@ -21,10 +21,8 @@
       'sold_account',
       'damage_amount',
       'description',
-      'reporter_email',
-      'reporter_contact',
-      'reporter_name',
     ];
+    // Reporter email, contact and name are personal data and never stored in the browser draft.
     const DRAFT_RADIO_FIELDS = ['type', 'scam_type', 'reporter_role'];
     // Order used to pick the first invalid field to focus.
     const FIELD_ORDER = [
@@ -179,6 +177,8 @@
     $form.on('input change', '[data-field]', function () {
       const field = $(this).attr('data-field');
       dirty[field] = true;
+      // addFiles() owns the evidence error, so its specific reason (type, size, count) is not overwritten.
+      if (field === 'evidence_images') return;
       if ($(this).attr('aria-invalid') === 'true' && validators[field]) validateField(field);
     });
 
@@ -252,8 +252,21 @@
     const $amount = $('#damage_amount');
 
     function formatAmount() {
-      const raw = digits($amount.val()).replace(/^0+(?=\d)/, '');
-      $amount.val(raw ? Number(raw).toLocaleString('vi-VN') : '');
+      const input = $amount.get(0);
+      const allDigits = digits(input.value);
+      const raw = allDigits.replace(/^0+(?=\d)/, '');
+      // Keep the caret after the same digit it followed, so editing in the middle does not jump to the end.
+      const caret = input.selectionStart === null ? input.value.length : input.selectionStart;
+      const digitsBefore = Math.max(0, digits(input.value.slice(0, caret)).length - (allDigits.length - raw.length));
+
+      input.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+      if (document.activeElement !== input) return;
+      let position = 0;
+      for (let seen = 0; position < input.value.length && seen < digitsBefore; position++) {
+        if (/\d/.test(input.value[position])) seen++;
+      }
+      input.setSelectionRange(position, position);
     }
 
     $amount.on('input', formatAmount);
@@ -289,7 +302,7 @@
       });
 
       syncFiles();
-      setError('evidence_images', problems[0] || '');
+      setError('evidence_images', [...new Set(problems)].join(' '));
     }
 
     function removeFile(index) {
