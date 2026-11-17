@@ -27,6 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Destructive: reporter_email, reporter_role, target_socials and sold_account are dropped with their data.
         // The old enum has no "back" value; those reports fall back to plain account reports.
         DB::table('reports')->whereNotIn('type', ['account', 'website'])->update(['type' => 'account']);
 
