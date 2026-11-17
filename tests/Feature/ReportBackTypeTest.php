@@ -3,6 +3,7 @@
 use App\Enums\ChannelType;
 use App\Enums\ScamType;
 use App\Mail\ReportModeratedMail;
+use App\Models\Comment;
 use App\Models\Insurance;
 use App\Models\InsuranceChannel;
 use App\Models\Report;
@@ -112,6 +113,24 @@ describe('public page', function () {
             ->assertSee('097***999')
             ->assertDontSee('0977888999')
             ->assertDontSee('doituong.rieng');
+    });
+
+    it('redacts the sold account and its nick in the description, comments and head', function () {
+        $report = Report::factory()->back()->create([
+            'status' => 'approved',
+            'description' => 'Tôi mua Liên Quân Mobile - nick ThanhLongVIP99 giá 2 triệu, hôm sau nick ThanhLongVIP99 bị lấy lại.',
+        ]);
+        Comment::factory()->create([
+            'report_id' => $report->id,
+            'content' => 'Acc Liên Quân Mobile - nick ThanhLongVIP99 này từng bán cho tôi.',
+        ]);
+
+        $html = $this->get(route('scammer.show', $report->slug))
+            ->assertOk()
+            ->assertSee('nick T. giá 2 triệu')
+            ->getContent();
+
+        expect($html)->not->toContain('ThanhLongVIP99');
     });
 
     it('counts back reports together with other reports of the same target', function () {

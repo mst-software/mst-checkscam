@@ -257,7 +257,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Replace the raw target id, secondary channels and name inside free text with their masked forms.
+     * Replace the raw target id, secondary channels, sold account and name inside free text with their masked forms.
      */
     private function redactTarget(string $text, Report $report): string
     {
@@ -282,6 +282,18 @@ class ReportController extends Controller
             $digits = preg_replace('/\D/', '', $raw);
             if ($type !== 'website' && strlen($digits) >= 6) {
                 $replacements[$digits] = StringHelper::mask_id($digits, $type);
+            }
+        }
+
+        // The sold account is masked like a link or a name; its nick (last word or link segment) is often quoted alone.
+        $soldAccount = trim((string) $report->sold_account);
+        if (mb_strlen($soldAccount) >= 4) {
+            $replacements[$soldAccount] = StringHelper::mask_id($soldAccount, 'website');
+
+            $parts = preg_split('/[\s\/]+/u', $soldAccount, -1, PREG_SPLIT_NO_EMPTY);
+            $nick = (string) end($parts);
+            if (mb_strlen($nick) >= 4 && $nick !== $soldAccount) {
+                $replacements[$nick] = StringHelper::mask_name($nick);
             }
         }
 
