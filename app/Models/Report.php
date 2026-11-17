@@ -17,16 +17,25 @@ class Report extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
+    /** back: the seller took a sold game/social account back with its original credentials. */
+    public const TYPES = ['account', 'website', 'back'];
+
+    public const REPORTER_ROLES = ['victim', 'proxy'];
+
     protected $table = 'reports';
 
     protected $fillable = [
         'type',
         'reporter_name',
         'reporter_contact',
+        'reporter_email',
+        'reporter_role',
 
         'target_id',
         'target_name',
         'target_bank',
+        'target_socials',
+        'sold_account',
         'category',
         'scam_type',
         'damage_amount',
@@ -110,6 +119,15 @@ class Report extends Model implements HasMedia
     public function isRejected(): bool
     {
         return $this->status == 'rejected';
+    }
+
+    public function typeLabel(): string
+    {
+        return match ($this->type) {
+            'website' => 'Web scam',
+            'back' => 'Acc bị back',
+            default => 'STK scam',
+        };
     }
 
     public function registerMediaConversions(?Media $media = null): void
