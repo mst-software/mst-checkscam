@@ -365,6 +365,7 @@ class AdminInsuranceController extends Controller
 
     /**
      * Rows left in the orphaned insurance_claims table by the removed claims feature.
+     * shortcut: this guard must be removed in the same change that drops the table.
      * Their foreign key restricts deleting the partner, so they still count as history.
      */
     private function legacyClaimsQuery(): Builder

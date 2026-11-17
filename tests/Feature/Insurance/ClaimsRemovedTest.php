@@ -21,7 +21,7 @@ test('the public and admin claim routes are gone', function () {
     $this->get('/insurance-claims/create')->assertNotFound();
     $this->get('/insurance-claims/create?partner='.$this->partner->slug)->assertNotFound();
 
-    $admin = User::factory()->create(['role' => 'admin']);
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 1]);
     $this->actingAs($admin)->get('/admin/insurance-claims')->assertNotFound();
     $this->actingAs($admin)->get('/admin/insurance-claims/1')->assertNotFound();
 });
@@ -42,7 +42,7 @@ test('no public page mentions compensation or guarantees', function (Closure $ur
 ]);
 
 test('the admin partner page, dashboard and sidebar have no claim ui', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 1]);
 
     foreach ([route('admin.insurances.show', $this->partner), route('admin.dashboard')] as $url) {
         $html = mb_strtolower($this->actingAs($admin)->get($url)->assertOk()->getContent());
