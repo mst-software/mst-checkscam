@@ -62,6 +62,40 @@ class ScamLookupService
     }
 
     /**
+     * Approved report count for each input (same matching as reportsQuery), in a single query.
+     *
+     * Example: $lookup->approvedReportCounts(['0912345678', '@gdv']) === ['0912345678' => 2, '@gdv' => 0]
+     *
+     * @param  list<string>  $inputs
+     * @return array<string, int>
+     */
+    public function approvedReportCounts(array $inputs): array
+    {
+        $inputs = array_values(array_unique(array_filter(array_map('trim', $inputs), fn (string $input) => $input !== '')));
+
+        if ($inputs === []) {
+            return [];
+        }
+
+        $union = null;
+        foreach ($inputs as $index => $input) {
+            $countQuery = $this->reportsQuery($input)
+                ->reorder()
+                ->toBase()
+                ->selectRaw('? AS input_index, COUNT(*) AS aggregate', [$index]);
+
+            $union = $union ? $union->unionAll($countQuery) : $countQuery;
+        }
+
+        $counts = array_fill_keys($inputs, 0);
+        foreach ($union->get() as $row) {
+            $counts[$inputs[(int) $row->input_index]] = (int) $row->aggregate;
+        }
+
+        return $counts;
+    }
+
+    /**
      * Active insurance partners matching the query by name, slug or an official channel, best match first.
      *
      * @return Collection<int, Insurance>

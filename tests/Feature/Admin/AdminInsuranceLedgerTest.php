@@ -67,7 +67,7 @@ describe('ledger form', function () {
 
         expect($this->insurance->ledgerEntries()->count())->toBe(1);
     })->with([
-        'payout by hand' => [['type' => 'payout'], 'type', 'Loại bút toán không hợp lệ. Chi trả bồi thường chỉ ghi nhận từ yêu cầu bồi thường.'],
+        'payout by hand' => [['type' => 'payout'], 'type', 'Loại bút toán không hợp lệ.'],
         'zero amount' => [['amount' => '0'], 'amount', 'Số tiền phải lớn hơn 0.'],
         'decimal amount' => [['amount' => '10.5'], 'amount', 'Số tiền phải là số nguyên (VND).'],
         'missing reference' => [['reference' => ''], 'reference', 'Vui lòng nhập mã giao dịch ngân hàng.'],
@@ -124,7 +124,7 @@ describe('ledger form', function () {
 });
 
 describe('partner page', function () {
-    it('shows the ledger, reconciliation status, claims and status history', function () {
+    it('shows the ledger and reconciliation status without any claim ui', function () {
         $this->actingAs($this->admin)->post(route('admin.insurances.ledger.store', $this->insurance), ledgerFormData());
 
         $this->actingAs($this->admin)->get(route('admin.insurances.show', $this->insurance))
@@ -135,7 +135,10 @@ describe('partner page', function () {
             ->assertSee('Số dư khớp với sổ quỹ')
             ->assertSee('Bút toán không thể sửa hoặc xóa')
             ->assertSee('Đã xác thực')
-            ->assertDontSee('Lệch sổ quỹ');
+            ->assertDontSee('Lệch sổ quỹ')
+            ->assertDontSee('<option value="payout"', false)
+            ->assertDontSee('bồi thường')
+            ->assertDontSee('bảo lãnh');
     });
 
     it('warns when the cached balance does not match the ledger', function () {

@@ -197,7 +197,7 @@
                   <a class="me-3" href="{{ route('admin.insurances.edit', $insurance) }}" title="Sửa">
                     <img src="/assets/img/icons/edit.svg" alt="sửa" />
                   </a>
-                  @if ($insurance->ledger_entries_exists || $insurance->claims_exists || $insurance->status_events_exists)
+                  @if ($insurance->ledger_entries_exists || $insurance->legacy_claims_exists || $insurance->status_events_exists)
                     <span
                       class="text-muted"
                       title="Đã có sổ quỹ hoặc lịch sử: không thể xóa, hãy tạm đình chỉ"

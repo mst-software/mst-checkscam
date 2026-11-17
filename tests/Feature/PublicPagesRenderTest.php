@@ -54,7 +54,8 @@ test('the insurance list shows active members with their deposit', function () {
 });
 
 test('the insurance detail shows deposit, services, contacts and payment accounts', function () {
-    $insurance = Insurance::factory()->create([
+    // The profile lists official channels; withChannels() derives them from the legacy JSON like the backfill.
+    $insurance = Insurance::factory()->withChannels()->create([
         'full_name' => 'Trung Gian A',
         'amount' => 20000000,
         'status' => 1,

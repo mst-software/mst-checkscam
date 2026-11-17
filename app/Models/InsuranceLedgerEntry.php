@@ -29,7 +29,6 @@ class InsuranceLedgerEntry extends Model
         'type',
         'amount',
         'balance_after',
-        'claim_id',
         'reference',
         'note',
         'recorded_by',
@@ -58,11 +57,6 @@ class InsuranceLedgerEntry extends Model
     public function insurance(): BelongsTo
     {
         return $this->belongsTo(Insurance::class);
-    }
-
-    public function claim(): BelongsTo
-    {
-        return $this->belongsTo(InsuranceClaim::class, 'claim_id');
     }
 
     public function recorder(): BelongsTo

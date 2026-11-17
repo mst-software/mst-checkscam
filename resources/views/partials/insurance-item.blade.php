@@ -45,7 +45,7 @@
       @endif
     </span>
     <span class="text-ink-muted block text-xs">
-      Quỹ bảo hiểm:
+      Ký quỹ:
       <span class="text-ink font-medium tabular-nums">
         {{ number_format((int) $insurance->amount, 0, ',', '.') }} đ
       </span>

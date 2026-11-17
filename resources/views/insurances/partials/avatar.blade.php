@@ -1,16 +1,19 @@
-{{-- Round partner avatar with an initial as fallback. Expects: $insurance; optional $size ('md' 48px | 'lg' 64px). --}}
+{{-- Round partner avatar with an initial as fallback. Expects: $insurance; optional $size ('md' 48px | 'lg' 64px | 'xl' 96px). --}}
 @php
-  $isLarge = ($size ?? 'md') === 'lg';
-  $sizeClass = $isLarge ? 'h-16 w-16 text-xl' : 'h-12 w-12 text-base';
+  [$sizeClass, $pixels] = match ($size ?? 'md') {
+    'xl' => ['h-20 w-20 text-3xl sm:h-24 sm:w-24', 96],
+    'lg' => ['h-16 w-16 text-xl', 64],
+    default => ['h-12 w-12 text-base', 48],
+  };
 @endphp
 
 @if ($insurance->avatar_url)
   <img
     src="{{ $insurance->avatar_url }}"
     alt="Ảnh đại diện của {{ $insurance->full_name }}"
-    width="{{ $isLarge ? 64 : 48 }}"
-    height="{{ $isLarge ? 64 : 48 }}"
-    loading="lazy"
+    width="{{ $pixels }}"
+    height="{{ $pixels }}"
+    @if (($size ?? 'md') !== 'xl') loading="lazy" @endif
     class="{{ $sizeClass }} border-line bg-surface-muted shrink-0 rounded-full border object-cover"
   />
 @else

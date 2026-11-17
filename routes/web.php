@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\AdminApiKeyController;
 use App\Http\Controllers\Admin\AdminBannerController;
 use App\Http\Controllers\Admin\AdminCommentController;
 use App\Http\Controllers\Admin\AdminComplaintController;
-use App\Http\Controllers\Admin\AdminInsuranceClaimController;
 use App\Http\Controllers\Admin\AdminInsuranceController;
 use App\Http\Controllers\Admin\AdminNewfeedController;
 use App\Http\Controllers\Admin\AdminPostController;
@@ -18,7 +17,6 @@ use App\Http\Controllers\Api\ScamCheckController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\InsuranceClaimController;
 use App\Http\Controllers\InsuranceController;
 use App\Http\Controllers\IntermediaryVerificationController;
 use App\Http\Controllers\NewfeedController;
@@ -112,18 +110,6 @@ Route::name('admin.')->prefix('admin')->group(function () {
             Route::post('/{insurance}/ledger', [AdminInsuranceController::class, 'storeLedgerEntry'])->name('ledger.store');
             Route::post('/{insurance}/suspend', [AdminInsuranceController::class, 'suspend'])->name('suspend');
             Route::post('/{insurance}/reinstate', [AdminInsuranceController::class, 'reinstate'])->name('reinstate');
-        });
-
-        // Insurance claims
-        Route::name('insurance-claims.')->prefix('insurance-claims')->group(function () {
-            Route::get('/', [AdminInsuranceClaimController::class, 'index'])->name('index');
-            Route::get('/{claim}', [AdminInsuranceClaimController::class, 'show'])->name('show');
-            Route::post('/{claim}/review', [AdminInsuranceClaimController::class, 'startReview'])->name('review');
-            Route::post('/{claim}/request-info', [AdminInsuranceClaimController::class, 'requestInfo'])->name('request-info');
-            Route::post('/{claim}/approve', [AdminInsuranceClaimController::class, 'approve'])->name('approve');
-            Route::post('/{claim}/reject', [AdminInsuranceClaimController::class, 'reject'])->name('reject');
-            Route::post('/{claim}/mark-paid', [AdminInsuranceClaimController::class, 'markPaid'])->name('mark-paid');
-            Route::post('/{claim}/summary', [AdminInsuranceClaimController::class, 'updateSummary'])->name('summary');
         });
 
         // Posts
@@ -223,10 +209,8 @@ Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('co
 // --- Warnings List ---
 Route::get('/warnings', [WarningController::class, 'index'])->name('warnings.index');
 
-// --- Intermediaries (GDV): channel verification and compensation claims ---
+// --- Intermediaries (GDV): channel verification ---
 Route::get('/verify-intermediary', [IntermediaryVerificationController::class, 'show'])->name('intermediary.verify');
-Route::get('/insurance-claims/create', [InsuranceClaimController::class, 'create'])->name('insurance-claims.create');
-Route::post('/insurance-claims', [InsuranceClaimController::class, 'store'])->name('insurance-claims.store');
 
 // --- Sitemap & robots (generated per request, cached; no files written to public/) ---
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');

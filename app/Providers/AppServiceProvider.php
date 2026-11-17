@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Helpers\ConfigHelper;
+use App\Helpers\SeoHelper;
 use Artesaos\SEOTools\Facades\SEOTools;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Blade;
@@ -115,7 +116,8 @@ class AppServiceProvider extends ServiceProvider
             // OpenGraph Global
             SEOTools::opengraph()->setSiteName($siteConfig['og_site_name']);
 
-            if ($siteConfig['og_image']) {
+            // Pages with their own share image (e.g. a partner profile) must not get a second og:image.
+            if ($siteConfig['og_image'] && ! SeoHelper::hasShareImage()) {
                 $og_img = filter_var($siteConfig['og_image'], FILTER_VALIDATE_URL)
                             ? $siteConfig['og_image']
                             : asset('uploads/'.$siteConfig['og_image']);

@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Enums\LedgerEntryType;
 use App\Exceptions\InsuranceLedgerException;
 use App\Models\Insurance;
-use App\Models\InsuranceClaim;
 use App\Models\InsuranceLedgerEntry;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +22,7 @@ class InsuranceLedgerService
     /**
      * Append one entry and update the cached balance, atomically and with the partner row locked.
      *
-     * The amount is SIGNED as stored: deposit > 0, payout < 0, refund < 0 (money returned to the
+     * The amount is SIGNED as stored: deposit > 0, payout < 0 (legacy), refund < 0 (money returned to the
      * partner), adjustment != 0. Max two decimals.
      *
      * Example: $ledger->record($insurance, LedgerEntryType::Deposit, '5000000', $admin, 'VCB FT123', 'Nạp thêm quỹ');
@@ -37,7 +36,6 @@ class InsuranceLedgerService
         ?User $by = null,
         ?string $reference = null,
         ?string $note = null,
-        ?InsuranceClaim $claim = null,
     ): InsuranceLedgerEntry {
         $cents = self::toCents($amount);
 
@@ -45,7 +43,7 @@ class InsuranceLedgerService
             throw InsuranceLedgerException::wrongSign($type->label());
         }
 
-        $entry = DB::transaction(function () use ($insurance, $type, $cents, $by, $reference, $note, $claim) {
+        $entry = DB::transaction(function () use ($insurance, $type, $cents, $by, $reference, $note) {
             $locked = Insurance::query()->lockForUpdate()->findOrFail($insurance->getKey());
             $balance = self::toCents((string) $locked->amount) + $cents;
 
@@ -62,7 +60,6 @@ class InsuranceLedgerService
                 'type' => $type,
                 'amount' => self::fromCents($cents),
                 'balance_after' => self::fromCents($balance),
-                'claim_id' => $claim?->id,
                 'reference' => $reference,
                 'note' => $note,
                 'recorded_by' => $by?->id,

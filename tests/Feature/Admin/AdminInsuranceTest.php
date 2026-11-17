@@ -5,7 +5,6 @@ use App\Enums\LedgerEntryType;
 use App\Helpers\ConfigHelper;
 use App\Models\Insurance;
 use App\Models\InsuranceChannel;
-use App\Models\InsuranceClaim;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\QueryException;
@@ -247,11 +246,21 @@ describe('delete protection', function () {
         expect(Insurance::query()->find($insurance->id))->not->toBeNull();
     });
 
-    it('refuses to delete a partner with claims', function () {
+    it('refuses to delete a partner with legacy claim rows', function () {
         $insurance = Insurance::factory()->create(['amount' => 0]);
-        InsuranceClaim::factory()->for($insurance)->create();
+        DB::table('insurance_claims')->insert([
+            'insurance_id' => $insurance->id,
+            'claimant_name' => 'Người mua cũ',
+            'contact_email' => 'legacy@example.com',
+            'amount_claimed' => 1000000,
+            'description' => 'Dữ liệu từ tính năng đã gỡ bỏ.',
+        ]);
 
         $this->actingAs($this->admin)->deleteJson(route('admin.insurances.destroy', $insurance))->assertStatus(422);
+
+        $this->actingAs($this->admin)->get(route('admin.insurances.index'))
+            ->assertOk()
+            ->assertSee('Không thể xóa');
 
         expect(Insurance::query()->find($insurance->id))->not->toBeNull();
     });

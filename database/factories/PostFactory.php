@@ -259,7 +259,7 @@ class PostFactory extends Factory
                 'title' => 'Quy trình đóng bảo hiểm tại Scamproof đảm bảo uy tín',
                 'description' => 'Tìm hiểu về hệ thống quỹ bảo hiểm tại Scamproof và cách nó bảo vệ quyền lợi cho cả người mua và người bán.',
                 'content' => '<h3>Xây dựng lòng tin bằng quỹ bảo hiểm Scamproof</h3>
-                <p>Hệ thống Đóng Bảo Hiểm tại Scamproof giúp định danh những người làm dịch vụ uy tín. Khi một cá nhân đóng bảo hiểm, số tiền đó sẽ được hệ thống giữ lại để bồi thường nếu có sự cố gian lận xảy ra.</p>
+                <p>Hệ thống Đóng Bảo Hiểm tại Scamproof giúp định danh những người làm dịch vụ uy tín. Khi một cá nhân đóng bảo hiểm, số tiền đó được ghi nhận công khai làm ký quỹ trên hồ sơ của họ.</p>
                 <p>Ưu điểm cho người đóng bảo hiểm:</p>
                 <ul>
                     <li>Tăng độ uy tín trong mắt khách hàng.</li>

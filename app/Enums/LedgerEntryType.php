@@ -5,6 +5,7 @@ namespace App\Enums;
 /**
  * Kind of movement on an insurance partner's deposit ledger.
  * Amounts are signed: deposit is positive, payout and refund are negative, adjustment is either.
+ * Payout is kept only for entries written before compensation claims were removed; admins no longer record it.
  */
 enum LedgerEntryType: string
 {
@@ -17,7 +18,7 @@ enum LedgerEntryType: string
     {
         return match ($this) {
             self::Deposit => 'Nạp quỹ',
-            self::Payout => 'Chi trả bồi thường',
+            self::Payout => 'Chi trả (dữ liệu cũ)',
             self::Refund => 'Hoàn quỹ cho đối tác',
             self::Adjustment => 'Điều chỉnh',
         };
