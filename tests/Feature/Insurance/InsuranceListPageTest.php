@@ -53,3 +53,13 @@ test('an expired partner keeps its public profile page with the expired status',
         ->assertSee('GDV Đã Hết Hạn')
         ->assertSee('Hết hạn');
 });
+
+test('the search suggestions only call current members trusted', function () {
+    Insurance::factory()->trusted()->create(['full_name' => 'Gợi Ý Còn Hạn']);
+    Insurance::factory()->trusted()->create(['full_name' => 'Gợi Ý Hết Hạn', 'expired_at' => now()->subDay()]);
+
+    $labels = collect($this->getJson(route('search.autocomplete', ['q' => 'Gợi Ý']))->assertOk()->json())->pluck('label');
+
+    expect($labels)->toContain('Uy tín: Gợi Ý Còn Hạn')
+        ->not->toContain('Uy tín: Gợi Ý Hết Hạn');
+});
