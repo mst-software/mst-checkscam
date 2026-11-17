@@ -86,6 +86,14 @@ class Insurance extends Model implements HasMedia
     }
 
     /**
+     * Stable public member code shown on the profile, e.g. "GDV-000123".
+     */
+    public function memberCode(): string
+    {
+        return 'GDV-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
      * Active (status 1), not suspended partners whose guarantee has not expired.
      */
     public function scopeTrusted(Builder $query): Builder
@@ -141,6 +149,19 @@ class Insurance extends Model implements HasMedia
         }
 
         return 'Hoạt động';
+    }
+
+    /**
+     * Status for the public profile: never includes the internal suspension reason.
+     */
+    public function publicStatusLabel(): string
+    {
+        return match (true) {
+            $this->isTrusted() => 'Giao dịch viên đã xác thực',
+            $this->isSuspended() => 'Tạm đình chỉ',
+            ! $this->isActive() => 'Tạm dừng',
+            default => 'Hết hạn',
+        };
     }
 
     public function registerMediaConversions(?Media $media = null): void

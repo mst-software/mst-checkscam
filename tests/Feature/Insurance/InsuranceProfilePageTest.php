@@ -1,25 +1,24 @@
 <?php
 
 use App\Enums\ChannelType;
-use App\Enums\ClaimStatus;
-use App\Enums\LedgerEntryType;
 use App\Models\Insurance;
 use App\Models\InsuranceChannel;
-use App\Models\InsuranceClaim;
-use App\Models\InsuranceLedgerEntry;
-use App\Models\User;
-use App\Services\InsuranceClaimService;
-use App\Services\InsuranceLedgerService;
+use App\Models\Report;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    Mail::fake();
     $this->withoutVite();
-    $this->partner = Insurance::factory()->trusted()->create(['full_name' => 'GDV Quang', 'amount' => 10000000]);
+    $this->partner = Insurance::factory()->trusted()->create([
+        'full_name' => 'GDV Quang',
+        'amount' => 10000000,
+        'verified_at' => '2025-03-12',
+        'insurance_date' => '2025-03-01',
+        'avatar' => 'https://cdn.example.test/avatars/quang.jpg',
+        'payment_accounts' => [['bank' => 'Vietcombank', 'number' => '0123456789', 'name' => 'NGUYEN VAN QUANG']],
+    ]);
 });
 
 function profileUrl(Insurance $partner): string
@@ -27,151 +26,181 @@ function profileUrl(Insurance $partner): string
     return route('insurances.frontend.show', $partner->slug);
 }
 
-test('a trusted partner shows the verified badge, deposit and reconciliation line', function () {
+/**
+ * The <head> of a rendered page.
+ */
+function profileHead(string $html): string
+{
+    return str($html)->after('<head>')->before('</head>')->toString();
+}
+
+test('a trusted partner shows the verified badge, member code and key facts', function () {
+    $code = 'GDV-'.str_pad((string) $this->partner->id, 6, '0', STR_PAD_LEFT);
+
     $this->get(profileUrl($this->partner))
         ->assertOk()
-        ->assertSee('Đã xác thực')
-        ->assertSee('10.000.000 đ')
-        ->assertSee($this->partner->expired_at->format('d/m/Y'))
-        ->assertSee('Số dư hiện tại khớp sổ quỹ')
+        ->assertHeader('Cache-Control')
+        ->assertSee('Giao dịch viên đã xác thực')
+        ->assertSee($code)
+        ->assertSee('data-copy="'.$code.'"', false)
+        ->assertSeeInOrder(['Ký quỹ', '10.000.000 đ', 'Xác thực từ', '12/03/2025', 'Hiệu lực đến', $this->partner->expired_at->format('d/m/Y')])
+        ->assertSee('Trạng thái được kiểm tra lúc')
+        ->assertSee(now()->format('d/m/Y'))
         ->assertDontSee('data-lapsed-notice', false);
+
+    expect($this->get(profileUrl($this->partner))->headers->get('Cache-Control'))->toContain('no-store');
 });
 
-test('a suspended or expired partner is never shown as verified', function (Closure $makePartner, string $label) {
-    $partner = $makePartner();
+test('a partner without expiry shows "Không thời hạn"', function () {
+    $this->partner->update(['expired_at' => null]);
 
-    $this->get(profileUrl($partner))
-        ->assertOk()
-        ->assertSee($label)
-        ->assertSee('data-lapsed-notice', false)
-        ->assertDontSee('Đã xác thực')
-        ->assertDontSee('Liên hệ thành viên');
-})->with([
-    'suspended' => [fn () => Insurance::factory()->trusted()->suspended()->create(), 'Tạm đình chỉ'],
-    'expired' => [fn () => Insurance::factory()->expired()->create(), 'Đã hết hạn'],
-]);
+    $this->get(profileUrl($this->partner))->assertOk()->assertSee('Không thời hạn');
+});
 
-test('the reconciliation line is omitted when the balance does not match the ledger', function () {
-    $this->partner->forceFill(['amount' => 9000000])->save();
+test('the checklist only lists checks that are true from the data', function () {
+    InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::Phone, '0912345678')->create();
 
     $this->get(profileUrl($this->partner))
         ->assertOk()
-        ->assertDontSee('Số dư hiện tại khớp sổ quỹ');
+        ->assertSee('Scamproof đã kiểm tra')
+        ->assertSee('Danh tính đã được quản trị viên xác thực')
+        ->assertSee('Kênh liên hệ chính thức đã được ghi nhận')
+        ->assertSee('1 kênh')
+        ->assertSee('Số dư ký quỹ khớp sổ quỹ')
+        ->assertSee('Chưa có tố cáo được duyệt nhắm vào các kênh chính thức');
+
+    $this->partner->forceFill(['verified_at' => null, 'amount' => 9000000])->save();
+
+    $this->get(profileUrl($this->partner))
+        ->assertOk()
+        ->assertDontSee('Danh tính đã được quản trị viên xác thực')
+        ->assertDontSee('khớp sổ quỹ')
+        ->assertSee('Kênh liên hệ chính thức đã được ghi nhận');
 });
 
-test('official channels are grouped by type with their verification date', function () {
+test('approved reports on an official channel show a red notice linking to the search', function () {
+    InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::Phone, '0912345678')->create();
+    InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::Telegram, '@gdv_quang')->create();
+    Report::factory()->count(2)->create(['status' => 'approved', 'type' => 'account', 'target_id' => '0912.345.678']);
+    Report::factory()->create(['status' => 'pending', 'type' => 'account', 'target_id' => '0912345678']);
+
+    $this->get(profileUrl($this->partner))
+        ->assertOk()
+        ->assertSee('data-reports-notice', false)
+        ->assertSee('Có 2 tố cáo đã được duyệt liên quan đến kênh của thành viên này')
+        ->assertSee(route('search.index', ['q' => '0912345678']), false)
+        ->assertDontSee('Chưa có tố cáo được duyệt nhắm vào các kênh chính thức');
+});
+
+test('official channels are grouped by type with verify links and copy buttons', function () {
     InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::Telegram, '@gdv_quang')->create(['verified_at' => '2026-03-02 10:00:00']);
     InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::Phone, '0912345678')->create();
     InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::Phone, '0987654321')->unofficial()->create();
+    InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::BankAccount, '0123456789')->create();
 
     $this->get(profileUrl($this->partner))
         ->assertOk()
         ->assertSee('Kênh liên hệ chính thức')
         ->assertSeeInOrder([ChannelType::Phone->label(), '0912345678', ChannelType::Telegram->label(), '@gdv_quang'])
         ->assertSee('Xác minh ngày 02/03/2026')
+        ->assertSee(route('intermediary.verify', ['q' => '@gdv_quang']), false)
+        ->assertSee(route('intermediary.verify', ['q' => '0912345678']), false)
+        ->assertSee('data-copy="@gdv_quang"', false)
+        ->assertSeeInOrder(['Tài khoản thanh toán', 'Vietcombank', '0123456789', 'NGUYEN VAN QUANG'])
+        ->assertSee(route('intermediary.verify', ['q' => '0123456789']), false)
         ->assertDontSee('0987654321');
 });
 
-test('the claim history shows only decided claims with masked names and public summaries', function () {
-    InsuranceClaim::factory()->for($this->partner)->approved()->create([
-        'claimant_name' => 'Nguyễn Văn Approved',
-        'amount_claimed' => 3000000,
-        'approved_amount' => 2000000,
-        'public_summary' => 'Tóm tắt công khai đã duyệt',
-    ]);
-    InsuranceClaim::factory()->for($this->partner)->rejected()->create([
-        'claimant_name' => 'Lê Thị Rejected',
-        'public_summary' => null,
-        'decision_note' => 'GHI CHÚ NỘI BỘ',
-    ]);
-    InsuranceClaim::factory()->for($this->partner)->submitted()->create(['claimant_name' => 'Phạm Pending', 'public_summary' => 'KHÔNG ĐƯỢC HIỆN']);
-    InsuranceClaim::factory()->for($this->partner)->reviewing()->create(['claimant_name' => 'Hồ Reviewing']);
+test('the anti-impersonation callout shows the official profile address', function () {
+    $url = profileUrl($this->partner);
 
-    $approved = InsuranceClaim::where('claimant_name', 'Nguyễn Văn Approved')->sole();
-
-    $response = $this->get(profileUrl($this->partner))->assertOk();
-
-    $response->assertSee('Lịch sử bồi thường & quỹ', false)
-        ->assertSee($approved->maskedClaimantName())
-        ->assertDontSee('Nguyễn Văn Approved')
-        ->assertDontSee('Lê Thị Rejected')
-        ->assertDontSee('Phạm Pending')
-        ->assertDontSee('KHÔNG ĐƯỢC HIỆN')
-        ->assertDontSee('GHI CHÚ NỘI BỘ')
-        ->assertDontSee($approved->contact_email)
-        ->assertDontSee($approved->contact_phone)
-        ->assertDontSee($approved->ip_address)
-        ->assertSee('Tóm tắt công khai đã duyệt')
-        ->assertSee('3.000.000 đ')
-        ->assertSee('2.000.000 đ');
-
-    $html = $response->getContent();
-    expect(substr_count($html, 'data-public-claim'))->toBe(2)
-        ->and(claimStat($html, 'total'))->toBe('4')
-        ->and(claimStat($html, 'approved'))->toBe('1')
-        ->and(claimStat($html, 'rejected'))->toBe('1')
-        ->and(claimStat($html, 'in_progress'))->toBe('2');
-});
-
-function claimStat(string $html, string $key): string
-{
-    preg_match('/data-claim-stat="'.$key.'">\s*([^<]+?)\s*</', $html, $matches);
-
-    return $matches[1] ?? '';
-}
-
-test('paid claims show the payout and the ledger without internal notes or references', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
-    $claims = app(InsuranceClaimService::class);
-
-    $claim = $claims->submit($this->partner, [
-        'claimant_name' => 'Đỗ Văn Paid',
-        'contact_email' => 'paid@example.com',
-        'contact_phone' => '0901234567',
-        'amount_claimed' => '4000000',
-        'description' => 'Mô tả nội bộ của người yêu cầu.',
-    ], '198.51.100.9');
-    $claims->transition($claim, ClaimStatus::Reviewing, $admin);
-    $claims->transition($claim, ClaimStatus::Approved, $admin, 'Ghi chú sự kiện', ['approved_amount' => '3000000', 'public_summary' => 'Đã chi trả cho người mua.']);
-    $claims->markPaid($claim, $admin, '2500000', 'VCB-REF-SECRET');
-    app(InsuranceLedgerService::class)->record($this->partner, LedgerEntryType::Deposit, '1000000', $admin, 'DEPOSIT-REF', 'Ghi chú nạp quỹ nội bộ');
-
-    $html = $this->get(profileUrl($this->partner))
+    $this->get($url)
         ->assertOk()
-        ->assertSee('Đã chi trả cho người mua.')
-        ->assertSee('2.500.000 đ')
-        ->assertSee(LedgerEntryType::Payout->label())
-        ->assertSee(LedgerEntryType::Deposit->label())
-        ->assertSee('Số dư hiện tại khớp sổ quỹ')
-        ->assertDontSee('VCB-REF-SECRET')
-        ->assertDontSee('DEPOSIT-REF')
-        ->assertDontSee('Ghi chú nạp quỹ nội bộ')
-        ->assertDontSee('Chi trả yêu cầu bồi thường #')
-        ->assertDontSee('Ghi chú sự kiện')
-        ->assertDontSee('Mô tả nội bộ của người yêu cầu.')
-        ->assertDontSee('paid@example.com')
-        ->assertDontSee('0901234567')
-        ->assertDontSee('198.51.100.9')
-        ->getContent();
-
-    expect(claimStat($html, 'total_paid'))->toBe('2.500.000 đ')
-        ->and(substr_count($html, 'data-ledger-entry'))->toBe(3);
+        ->assertSee('Chỉ giao dịch qua các kênh liệt kê trên trang này. Mọi tài khoản, số điện thoại hoặc link khác đều không phải')
+        ->assertSee(preg_replace('~^https?://~', '', $url))
+        ->assertSee('data-copy="'.$url.'"', false);
 });
 
-test('history lists are limited to the latest ten rows', function () {
-    InsuranceClaim::factory()->count(12)->for($this->partner)->rejected()->create();
-    foreach (range(1, 12) as $i) {
-        app(InsuranceLedgerService::class)->record($this->partner, LedgerEntryType::Deposit, '1000');
-    }
+test('the share box links to facebook and telegram with the encoded profile url', function () {
+    $url = profileUrl($this->partner);
+    $code = $this->partner->memberCode();
 
-    $html = $this->get(profileUrl($this->partner))->assertOk()->getContent();
-
-    expect(substr_count($html, 'data-public-claim'))->toBe(10)
-        ->and(substr_count($html, 'data-ledger-entry'))->toBe(10)
-        ->and(claimStat($html, 'total'))->toBe('12');
+    $this->get($url)
+        ->assertOk()
+        ->assertSee('Chia sẻ hồ sơ xác thực')
+        ->assertSee('https://www.facebook.com/sharer/sharer.php?u='.urlencode($url), false)
+        ->assertSee('https://t.me/share/url?url='.urlencode($url), false)
+        ->assertSee('data-share="zalo"', false)
+        ->assertSee("Giao dịch viên đã xác thực bởi Scamproof · Mã {$code} · Xem hồ sơ: {$url}");
 });
 
-test('the profile runs a bounded number of queries regardless of history size', function () {
+test('the head carries title, canonical, robots, open graph, twitter and json-ld tags', function () {
+    InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::Phone, '0912345678')->create();
+    InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::BankAccount, '0123456789')->create();
+    $url = profileUrl($this->partner);
+
+    $head = profileHead($this->get($url)->assertOk()->getContent());
+
+    expect($head)
+        ->toContain('<title>GDV Quang - Giao dịch viên xác thực | Scamproof</title>')
+        ->toContain('<link rel="canonical" href="'.$url.'">')
+        ->toContain('<meta property="og:type" content="profile">')
+        ->toContain('<meta property="og:url" content="'.$url.'">')
+        ->toContain('<meta property="og:image" content="https://cdn.example.test/avatars/quang.jpg">')
+        ->toContain('<meta property="og:image:alt" content="Ảnh đại diện của GDV Quang">')
+        ->toContain('<meta name="twitter:card" content="summary_large_image">')
+        ->toContain('<meta name="twitter:image" content="https://cdn.example.test/avatars/quang.jpg">')
+        ->toContain('"@type":"ProfilePage"')
+        ->toContain('"@type":"Person"')
+        ->toContain($this->partner->memberCode())
+        ->not->toContain('0912345678')
+        ->not->toContain('0123456789');
+
+    expect(substr_count($head, 'name="robots"'))->toBe(1)
+        ->and($head)->toContain('<meta name="robots" content="index, follow">')
+        ->and(substr_count($head, 'property="og:image"'))->toBe(1);
+});
+
+test('a partner without avatar uses the brand logo as absolute share image', function () {
+    $this->partner->update(['avatar' => null]);
+
+    $head = profileHead($this->get(profileUrl($this->partner))->assertOk()->getContent());
+
+    expect($head)
+        ->toContain('<meta property="og:image" content="'.asset('img/scamproof-logo.png').'">')
+        ->toContain('<meta property="og:image:width" content="900">')
+        ->toContain('<meta property="og:image:height" content="300">');
+});
+
+test('a suspended or expired partner shows a neutral status without the reason and is noindex', function (Closure $makePartner, string $label) {
+    $partner = $makePartner();
+
+    $response = $this->get(profileUrl($partner))
+        ->assertOk()
+        ->assertSee($label)
+        ->assertSee('data-lapsed-notice', false)
+        ->assertDontSee('Giao dịch viên đã xác thực')
+        ->assertDontSee('Scamproof đã kiểm tra')
+        ->assertDontSee('Chia sẻ hồ sơ xác thực')
+        ->assertDontSee('LÝ DO NỘI BỘ BÍ MẬT');
+
+    $head = profileHead($response->getContent());
+
+    expect($head)->toContain('<meta name="robots" content="noindex, follow">')
+        ->toContain($partner->full_name.' - Hồ sơ giao dịch viên | Scamproof')
+        ->and(substr_count($head, 'name="robots"'))->toBe(1);
+})->with([
+    'suspended' => [fn () => Insurance::factory()->trusted()->suspended('LÝ DO NỘI BỘ BÍ MẬT')->create(), 'Tạm đình chỉ'],
+    'expired' => [fn () => Insurance::factory()->expired()->create(), 'Hết hạn'],
+]);
+
+test('an inactive partner has no public profile', function () {
+    $this->partner->update(['status' => 0]);
+
+    $this->get(profileUrl($this->partner))->assertNotFound();
+});
+
+test('the profile runs a bounded number of queries regardless of channel count', function () {
     $countQueries = function (): int {
         DB::flushQueryLog();
         DB::enableQueryLog();
@@ -182,33 +211,15 @@ test('the profile runs a bounded number of queries regardless of history size', 
         return $count;
     };
 
-    InsuranceClaim::factory()->for($this->partner)->paid()->create();
+    InsuranceChannel::factory()->for($this->partner)->create();
     $countQueries(); // warm up settings and other per-process caches
     $small = $countQueries();
 
-    InsuranceClaim::factory()->count(9)->for($this->partner)->paid()->create();
-    InsuranceClaim::factory()->count(5)->for($this->partner)->approved()->create();
-    InsuranceChannel::factory()->count(5)->for($this->partner)->create();
+    InsuranceChannel::factory()->count(6)->for($this->partner)->create();
+    InsuranceChannel::factory()->for($this->partner)->ofType(ChannelType::BankAccount, '0123456789')->create();
     $large = $countQueries();
 
-    expect($large)->toBe($small)->toBeLessThanOrEqual(15);
-});
-
-test('empty history shows the empty states', function () {
-    InsuranceLedgerEntry::query()->where('insurance_id', $this->partner->id)->delete();
-
-    $this->get(profileUrl($this->partner))
-        ->assertOk()
-        ->assertSee('Chưa có yêu cầu bồi thường nào')
-        ->assertSee('Chưa có biến động quỹ')
-        ->assertDontSee('Số dư hiện tại khớp sổ quỹ');
-});
-
-test('the profile links to the prefilled claim form and the verify page', function () {
-    $this->get(profileUrl($this->partner))
-        ->assertOk()
-        ->assertSee(route('insurance-claims.create', ['partner' => $this->partner->slug]), false)
-        ->assertSee(route('intermediary.verify'));
+    expect($large)->toBe($small)->toBeLessThanOrEqual(12);
 });
 
 test('the partner list never shows a suspended partner as trusted', function () {
