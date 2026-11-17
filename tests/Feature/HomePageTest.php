@@ -34,7 +34,7 @@ test('home renders hero and the trust sections in order', function () {
 
     $html = $this->get('/')
         ->assertOk()
-        ->assertSee('Dữ liệu cộng đồng, được kiểm duyệt')
+        ->assertDontSee('Dữ liệu cộng đồng, được kiểm duyệt')
         ->assertSee('Hệ thống dữ liệu lớn nhất Việt Nam giúp bạn kiểm tra độ tín nhiệm của đối tác')
         ->assertSee('id="searchInput"', false)
         ->assertSee('action="'.route('search.index').'"', false)
