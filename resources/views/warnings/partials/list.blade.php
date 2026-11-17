@@ -1,11 +1,12 @@
 @use('App\Helpers\StringHelper')
 
 @php
-  $typeBadges = [
-    'bank' => ['label' => 'Ngân hàng', 'icon' => 'fa-solid fa-building-columns'],
-    'phone' => ['label' => 'SĐT', 'icon' => 'fa-solid fa-phone'],
-    'facebook' => ['label' => 'Facebook', 'icon' => 'fa-brands fa-facebook'],
-    'website' => ['label' => 'Website', 'icon' => 'fa-solid fa-globe'],
+  // The badge reads the report type (STK scam / Web scam / Acc bị back); the icon shows the channel the filter tabs use.
+  $channelIcons = [
+    'bank' => 'fa-solid fa-building-columns',
+    'phone' => 'fa-solid fa-phone',
+    'facebook' => 'fa-brands fa-facebook',
+    'website' => 'fa-solid fa-globe',
   ];
 @endphp
 
@@ -26,7 +27,7 @@
     </thead>
     <tbody class="divide-line divide-y">
       @foreach ($reports as $report)
-        @php($badge = $typeBadges[$report->warning_type] ?? $typeBadges['website'])
+        @php($icon = $channelIcons[$report->warning_type] ?? $channelIcons['website'])
         <tr class="hover:bg-surface-muted/60 transition-colors">
           <td class="px-4 py-3">
             <p class="text-ink font-semibold tabular-nums">
@@ -35,7 +36,7 @@
             <p class="text-ink-subtle mt-0.5 text-xs">{{ StringHelper::mask_name($report->target_name) }}</p>
           </td>
           <td class="px-4 py-3">
-            <x-ucs.badge :icon="$badge['icon']">{{ $badge['label'] }}</x-ucs.badge>
+            <x-ucs.badge :icon="$icon">{{ $report->typeLabel() }}</x-ucs.badge>
           </td>
           <td class="text-ink-muted px-4 py-3">{{ $report->target_bank ?: '—' }}</td>
           <td class="text-ink-muted px-4 py-3 whitespace-nowrap tabular-nums">
@@ -68,7 +69,7 @@
 {{-- Mobile and tablet: stacked rows --}}
 <ul class="border-line bg-surface rounded-card divide-line divide-y border lg:hidden">
   @foreach ($reports as $report)
-    @php($badge = $typeBadges[$report->warning_type] ?? $typeBadges['website'])
+    @php($icon = $channelIcons[$report->warning_type] ?? $channelIcons['website'])
     <li>
       <a
         href="{{ route('scammer.show', $report->slug) }}"
@@ -86,7 +87,7 @@
               @endif
             </p>
           </div>
-          <x-ucs.badge :icon="$badge['icon']" class="shrink-0">{{ $badge['label'] }}</x-ucs.badge>
+          <x-ucs.badge :icon="$icon" class="shrink-0">{{ $report->typeLabel() }}</x-ucs.badge>
         </div>
         <div class="text-ink-subtle mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs tabular-nums">
           <span>

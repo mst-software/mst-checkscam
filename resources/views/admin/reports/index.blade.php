@@ -72,10 +72,8 @@
                 <label class="form-label fw-bold small text-muted mb-2">Phân loại</label>
                 <select name="type" class="form-select select2-basic">
                   <option value="">Tất cả loại</option>
-                  <option value="account" {{ request('type') == 'account' ? 'selected' : '' }}>
-                    Tài khoản (STK/SĐT)
-                  </option>
-                  <option value="website" {{ request('type') == 'website' ? 'selected' : '' }}>Website (URL)</option>
+                  <option value="account" @selected(request('type') === 'account')>STK scam</option>
+                  <option value="website" @selected(request('type') === 'website')>Web scam</option>
                   <option value="back" @selected(request('type') === 'back')>Acc bị back</option>
                 </select>
               </div>
@@ -161,13 +159,15 @@
                   </label>
                 </td>
                 <td>
-                  @if ($report->type === 'account')
-                    <span class="badges" style="background: #e0f0ff; color: #1a6fb5">STK/SĐT</span>
-                  @elseif ($report->type === 'back')
-                    <span class="badges" style="background: #fff4e0; color: #b56a1a">Acc bị back</span>
-                  @else
-                    <span class="badges" style="background: #f0e0ff; color: #6a1ab5">Website</span>
-                  @endif
+                  @php
+                    $badgeStyle = match ($report->type) {
+                      'website' => 'background: #f0e0ff; color: #6a1ab5',
+                      'back' => 'background: #fff4e0; color: #b56a1a',
+                      default => 'background: #e0f0ff; color: #1a6fb5',
+                    };
+                  @endphp
+
+                  <span class="badges" style="{{ $badgeStyle }}">{{ $report->typeLabel() }}</span>
                 </td>
                 <td>
                   <strong>{{ $report->target_id }}</strong>

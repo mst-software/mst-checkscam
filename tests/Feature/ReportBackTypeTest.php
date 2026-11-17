@@ -152,9 +152,15 @@ describe('public page', function () {
 
         $this->get(route('warnings.index', ['type' => 'phone']))
             ->assertOk()
-            ->assertSee('093***890');
+            ->assertSee('093***890')
+            ->assertSee('Acc bị back')
+            ->assertDontSee('STK scam');
 
         $this->get('/')->assertOk()->assertSee('Acc bị back');
+
+        Report::factory()->create(['status' => 'approved', 'type' => 'website', 'target_id' => 'https://shop-lua.vn']);
+
+        $this->get(route('warnings.index'))->assertOk()->assertSee('Web scam')->assertSee('Acc bị back');
     });
 });
 
@@ -176,6 +182,20 @@ describe('admin', function () {
             ->assertSee('BACK-TARGET')
             ->assertSee('Acc bị back')
             ->assertDontSee('ACCOUNT-TARGET');
+    });
+
+    it('labels the type filter and badges with the public type wording', function () {
+        Report::factory()->create(['type' => 'account']);
+        Report::factory()->create(['type' => 'website', 'target_id' => 'https://shop-lua.vn']);
+
+        $this->actingAs($this->moderator)
+            ->get(route('admin.reports.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['STK scam', 'Web scam', 'Acc bị back'])
+            ->assertSee('>STK scam</span>', false)
+            ->assertSee('>Web scam</span>', false)
+            ->assertDontSee('Tài khoản (STK/SĐT)')
+            ->assertDontSee('Website (URL)');
     });
 
     it('shows the private fields on the detail page', function () {
