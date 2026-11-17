@@ -13,6 +13,7 @@ use App\Models\Insurance;
 use App\Services\InsuranceChannelService;
 use App\Services\InsuranceLedgerService;
 use App\Services\InsuranceSuspensionService;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ use Illuminate\View\View;
 
 class AdminInsuranceController extends Controller
 {
-    /** Ledger entry types an admin may record by hand; payouts only come from paying a claim. */
+    /** Ledger entry types an admin may record; Payout only exists on entries written before claims were removed. */
     public const MANUAL_LEDGER_TYPES = [LedgerEntryType::Deposit, LedgerEntryType::Refund, LedgerEntryType::Adjustment];
 
     public function __construct(
@@ -36,7 +37,8 @@ class AdminInsuranceController extends Controller
         Gate::authorize('viewAny', Insurance::class);
 
         $query = Insurance::query()
-            ->withExists(['ledgerEntries', 'claims', 'statusEvents'])
+            ->withExists(['ledgerEntries', 'statusEvents'])
+            ->addSelect(['legacy_claims_exists' => $this->legacyClaimsQuery()->whereColumn('insurance_id', 'insurances.id')->selectRaw('1')->limit(1)])
             ->latest();
 
         if ($request->filled('status')) {
@@ -131,15 +133,13 @@ class AdminInsuranceController extends Controller
 
         $ledgerEntries = $insurance->ledgerEntries()
             ->reorder('id', 'desc')
-            ->with(['recorder', 'claim'])
+            ->with('recorder')
             ->paginate(15, ['*'], 'ledger_page')
             ->withQueryString();
 
         $ledgerBalance = $this->ledger->balanceFromLedger($insurance);
         $isReconciled = InsuranceLedgerService::toCents($ledgerBalance) === InsuranceLedgerService::toCents((string) $insurance->amount);
 
-        $claims = $insurance->claims()->latest()->limit(20)->get();
-        $claimsCount = $insurance->claims()->count();
         $statusEvents = $insurance->statusEvents()->reorder('id', 'desc')->with('actor')->get();
         $channels = $insurance->channels()->orderBy('id')->get();
         $hasHistory = $this->hasHistory($insurance);
@@ -150,8 +150,6 @@ class AdminInsuranceController extends Controller
             'ledgerEntries',
             'ledgerBalance',
             'isReconciled',
-            'claims',
-            'claimsCount',
             'statusEvents',
             'channels',
             'hasHistory',
@@ -210,14 +208,14 @@ class AdminInsuranceController extends Controller
     }
 
     /**
-     * Partners with ledger, claims or status history cannot be deleted (suspend them instead).
+     * Partners with ledger, legacy claim rows or status history cannot be deleted (suspend them instead).
      */
     public function destroy(Request $request, Insurance $insurance): RedirectResponse|JsonResponse
     {
         Gate::authorize('delete', $insurance);
 
         if ($this->hasHistory($insurance)) {
-            $message = 'Không thể xóa "'.$insurance->full_name.'" vì đã có sổ quỹ, yêu cầu bồi thường hoặc lịch sử trạng thái. Hãy tạm đình chỉ thành viên thay vì xóa.';
+            $message = 'Không thể xóa "'.$insurance->full_name.'" vì đã có sổ quỹ hoặc lịch sử. Hãy tạm đình chỉ thành viên thay vì xóa.';
 
             return $request->expectsJson()
                 ? response()->json(['success' => false, 'message' => $message], 422)
@@ -279,7 +277,7 @@ class AdminInsuranceController extends Controller
             'submission_token' => ['required', 'string', 'max:64'],
         ], [
             'type.required' => 'Vui lòng chọn loại bút toán.',
-            'type.in' => 'Loại bút toán không hợp lệ. Chi trả bồi thường chỉ ghi nhận từ yêu cầu bồi thường.',
+            'type.in' => 'Loại bút toán không hợp lệ.',
             'direction.required_if' => 'Vui lòng chọn điều chỉnh tăng hay giảm quỹ.',
             'direction.in' => 'Chiều điều chỉnh không hợp lệ.',
             'amount.required' => 'Vui lòng nhập số tiền.',
@@ -361,8 +359,17 @@ class AdminInsuranceController extends Controller
     private function hasHistory(Insurance $insurance): bool
     {
         return $insurance->ledgerEntries()->exists()
-            || $insurance->claims()->exists()
+            || $this->legacyClaimsQuery()->where('insurance_id', $insurance->id)->exists()
             || $insurance->statusEvents()->exists();
+    }
+
+    /**
+     * Rows left in the orphaned insurance_claims table by the removed claims feature.
+     * Their foreign key restricts deleting the partner, so they still count as history.
+     */
+    private function legacyClaimsQuery(): Builder
+    {
+        return DB::table('insurance_claims');
     }
 
     private function deletePartner(Insurance $insurance): void

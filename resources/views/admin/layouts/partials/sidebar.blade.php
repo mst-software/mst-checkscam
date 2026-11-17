@@ -80,29 +80,6 @@
             @endcan
           </ul>
         </li>
-        @php
-          $openClaimsCount = \App\Models\InsuranceClaim::query()
-            ->awaitingAction()
-            ->count();
-        @endphp
-
-        <li class="{{ request()->is('admin/insurance-claims*') ? 'active' : '' }}">
-          <a href="{{ route('admin.insurance-claims.index') }}">
-            <i data-feather="inbox"></i>
-            <span>Yêu cầu bồi thường</span>
-            @if ($openClaimsCount > 0)
-              <span
-                class="badge rounded-pill ms-2"
-                style="background: #dc3545; color: #fff"
-                data-testid="open-claims-badge"
-                title="{{ $openClaimsCount }} yêu cầu đang chờ xử lý"
-              >
-                {{ $openClaimsCount }}
-              </span>
-            @endif
-          </a>
-        </li>
-
         <li class="submenu">
           <a href="javascript:void(0);">
             <img src="/assets/img/icons/users1.svg" alt="img" />

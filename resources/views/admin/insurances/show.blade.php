@@ -5,7 +5,7 @@
     'admin.components.page-header',
     [
       'title' => $insurance->full_name,
-      'subtitle' => 'Hồ sơ, sổ quỹ và yêu cầu bồi thường của thành viên bảo hiểm',
+      'subtitle' => 'Hồ sơ, kênh chính thức, sổ quỹ ký quỹ và trạng thái của thành viên',
     ]
   )
 
@@ -16,12 +16,6 @@
       ! $insurance->isActive() => ['bg-lightgrey', 'Tạm dừng'],
       $insurance->isExpired() => ['bg-lightred', 'Hết hạn'],
       default => ['bg-lightgreen', 'Đã xác thực'],
-    };
-    $claimBadge = fn (\App\Enums\ClaimStatus $status) => match ($status) {
-      \App\Enums\ClaimStatus::Submitted => 'bg-lightyellow',
-      \App\Enums\ClaimStatus::Reviewing, \App\Enums\ClaimStatus::NeedInfo => 'bg-lightyellow',
-      \App\Enums\ClaimStatus::Approved, \App\Enums\ClaimStatus::Paid => 'bg-lightgreen',
-      \App\Enums\ClaimStatus::Rejected => 'bg-lightred',
     };
     $staffName = fn ($user) => $user ? $user->full_name ?? $user->username : 'Hệ thống';
   @endphp
@@ -169,7 +163,6 @@
                   <th>Mã giao dịch</th>
                   <th>Ghi chú</th>
                   <th>Người ghi</th>
-                  <th>Yêu cầu</th>
                 </tr>
               </thead>
               <tbody>
@@ -184,19 +177,10 @@
                     <td>{{ $entry->reference ?: '-' }}</td>
                     <td style="min-width: 160px">{{ $entry->note ?: '-' }}</td>
                     <td>{{ $staffName($entry->recorder) }}</td>
-                    <td>
-                      @if ($entry->claim)
-                        <a href="{{ route('admin.insurance-claims.show', $entry->claim) }}">
-                          #{{ $entry->claim->id }}
-                        </a>
-                      @else
-                        -
-                      @endif
-                    </td>
                   </tr>
                 @empty
                   <tr>
-                    <td colspan="8" class="text-muted text-center py-3">Chưa có bút toán nào.</td>
+                    <td colspan="7" class="text-muted text-center py-3">Chưa có bút toán nào.</td>
                   </tr>
                 @endforelse
               </tbody>
@@ -204,53 +188,6 @@
           </div>
           <div class="mt-3">
             {{ $ledgerEntries->fragment('ledger')->links('pagination::bootstrap-5') }}
-          </div>
-        </div>
-      </div>
-
-      {{-- Yêu cầu bồi thường --}}
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
-            <h5 class="card-title mb-0">Yêu cầu bồi thường ({{ $claimsCount }})</h5>
-            @if ($claimsCount > 0)
-              <a
-                href="{{ route('admin.insurance-claims.index', ['insurance_id' => $insurance->id]) }}"
-                class="btn btn-light btn-sm"
-              >
-                Xem tất cả trong hộp thư
-              </a>
-            @endif
-          </div>
-          <div class="table-responsive">
-            <table class="table hover-table mb-0">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Người yêu cầu</th>
-                  <th class="text-end">Số tiền yêu cầu</th>
-                  <th>Trạng thái</th>
-                  <th>Ngày gửi</th>
-                </tr>
-              </thead>
-              <tbody>
-                @forelse ($claims as $claim)
-                  <tr>
-                    <td><a href="{{ route('admin.insurance-claims.show', $claim) }}">#{{ $claim->id }}</a></td>
-                    <td>{{ $claim->claimant_name }}</td>
-                    <td class="text-end text-nowrap">{{ $money($claim->amount_claimed) }}</td>
-                    <td>
-                      <span class="badges {{ $claimBadge($claim->status) }}">{{ $claim->status->label() }}</span>
-                    </td>
-                    <td class="text-nowrap">{{ $claim->created_at->format('d/m/Y H:i') }}</td>
-                  </tr>
-                @empty
-                  <tr>
-                    <td colspan="5" class="text-muted text-center py-3">Chưa có yêu cầu bồi thường nào.</td>
-                  </tr>
-                @endforelse
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
@@ -362,7 +299,7 @@
                     </option>
                   @endforeach
                 </select>
-                <small class="text-muted">Chi trả bồi thường chỉ ghi nhận từ trang yêu cầu bồi thường.</small>
+                <small class="text-muted">Nạp quỹ, hoàn quỹ cho thành viên hoặc điều chỉnh số dư.</small>
               </div>
               <div class="form-group mb-2" id="ledger-direction" style="display: none">
                 <label for="ledger_direction">Chiều điều chỉnh</label>
