@@ -9,12 +9,7 @@
 @endphp
 
 <section aria-label="Cảnh báo mới nhất">
-  <x-ucs.section-title
-    title="Cảnh báo mới nhất"
-    subtitle="Chỉ gồm tố cáo đã được kiểm duyệt."
-    action-label="Xem tất cả"
-    :action-url="route('warnings.index')"
-  />
+  <x-ucs.section-title title="Cảnh báo mới nhất" subtitle="Chỉ gồm tố cáo đã được kiểm duyệt." />
 
   @if ($latestReports->isNotEmpty())
     <x-ucs.card :padding="false" class="overflow-hidden">
@@ -86,6 +81,14 @@
           </li>
         @endforeach
       </ul>
+
+      <a
+        href="{{ route('warnings.index') }}"
+        class="border-line text-accent hover:bg-surface-muted hover:text-accent-hover focus-visible:outline-accent flex items-center justify-center gap-1.5 border-t px-4 py-3 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2"
+      >
+        Xem thêm
+        <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+      </a>
     </x-ucs.card>
 
     @if ($latestApprovedAt)
