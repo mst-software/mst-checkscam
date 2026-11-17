@@ -11,13 +11,16 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Carbon;
 
 class HomeController extends Controller
 {
     private const FIRST_COMMENT_PAGE_SIZE = 8;
 
     private const NEXT_COMMENT_PAGE_SIZE = 16;
+
+    private const HERO_FEED_SIZE = 5;
+
+    private const MORE_REPORTS_SIZE = 10;
 
     public function index(Request $request): View|string
     {
@@ -28,8 +31,12 @@ class HomeController extends Controller
         }
 
         $stats = $this->getHomeStats();
+
+        // One query feeds both the hero card (newest 5) and the "more warnings" table below (the next 10).
         $latestReports = $this->getLatestReports();
-        $latestApprovedAt = $this->getLatestApprovedAt();
+        $feedReports = $latestReports->take(self::HERO_FEED_SIZE);
+        $moreReports = $latestReports->slice(self::HERO_FEED_SIZE)->values();
+        $latestApprovedAt = $feedReports->first()?->approved_at;
         $topWeeklySearches = StatsHelper::getTopWeeklySearches();
         $trustedInsurances = $this->getTrustedInsurances();
 
@@ -42,7 +49,8 @@ class HomeController extends Controller
 
         return view('home', compact(
             'stats',
-            'latestReports',
+            'feedReports',
+            'moreReports',
             'latestApprovedAt',
             'topWeeklySearches',
             'trustedInsurances',
@@ -96,18 +104,8 @@ class HomeController extends Controller
             ->select(['id', 'slug', 'type', 'target_id', 'target_name', 'category', 'scam_type', 'evidence_images', 'approved_at', 'created_at'])
             ->orderByDesc('approved_at')
             ->latest()
-            ->limit(6)
+            ->limit(self::HERO_FEED_SIZE + self::MORE_REPORTS_SIZE)
             ->get();
-    }
-
-    /**
-     * Time of the most recent approval, shown as the data freshness line.
-     */
-    private function getLatestApprovedAt(): ?Carbon
-    {
-        $latest = Report::query()->approved()->max('approved_at');
-
-        return $latest ? Carbon::parse($latest) : null;
     }
 
     private function getTrustedInsurances(): Collection
