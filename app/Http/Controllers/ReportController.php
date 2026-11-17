@@ -44,44 +44,79 @@ class ReportController extends Controller
             return back()->withInput()->with('error', 'Bạn đã gửi quá nhiều lần hôm nay.');
         }
 
+        // The form shows the amount with thousand separators ("1.500.000"); VND has no decimals.
+        if (is_string($request->input('damage_amount'))) {
+            $request->merge(['damage_amount' => preg_replace('/[\s.,]/', '', $request->input('damage_amount'))]);
+        }
+
         $validated = $request->validate([
-            'type' => 'required|in:account,website',
+            'type' => ['required', Rule::in(Report::TYPES)],
             'target_id' => 'required|string|max:255',
             'target_name' => 'nullable|string|max:255',
             'target_bank' => 'nullable|string|max:255',
+            'target_socials' => 'nullable|string|max:255',
+            'sold_account' => 'exclude_unless:type,back|nullable|string|max:255',
             'category' => 'nullable|string|max:255',
             'scam_type' => ['nullable', Rule::enum(ScamType::class)],
-            'damage_amount' => 'nullable|numeric|min:0',
-            'description' => 'required|string|min:50',
+            'damage_amount' => 'required|numeric|min:0',
+            'description' => 'required|string|min:20',
             'reporter_name' => 'nullable|string|max:255',
-            'reporter_contact' => 'nullable|string|max:255',
+            'reporter_contact' => 'required|string|max:255',
+            'reporter_email' => 'required|email|max:255',
+            'reporter_role' => ['required', Rule::in(Report::REPORTER_ROLES)],
 
-            'evidence_images' => 'required|array|min:1',
-            'evidence_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
+            'evidence_images' => 'required|array|min:1|max:10',
+            'evidence_images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ], [
+            'type.required' => 'Vui lòng chọn loại tố cáo.',
+            'type.in' => 'Loại tố cáo không hợp lệ.',
+            'target_id.required' => 'Vui lòng nhập số tài khoản, số điện thoại hoặc link của đối tượng.',
+            'target_id.max' => 'Thông tin đối tượng không được dài quá 255 ký tự.',
+            'target_socials.max' => 'Kênh liên hệ khác không được dài quá 255 ký tự.',
+            'sold_account.max' => 'Tài khoản đã mua không được dài quá 255 ký tự.',
             'scam_type.enum' => 'Hình thức lừa đảo không hợp lệ.',
+            'damage_amount.required' => 'Vui lòng nhập số tiền thiệt hại (nhập 0 nếu chưa mất tiền).',
             'damage_amount.numeric' => 'Số tiền thiệt hại phải là chữ số.',
             'damage_amount.min' => 'Số tiền không được nhỏ hơn 0.',
-            'description.min' => 'Vui lòng mô tả hành vi lừa đảo với ít nhất 50 ký tự.',
+            'description.required' => 'Vui lòng kể lại sự việc.',
+            'description.min' => 'Vui lòng mô tả sự việc với ít nhất 20 ký tự.',
+            'reporter_contact.required' => 'Vui lòng nhập số Zalo hoặc SĐT để kiểm duyệt viên liên hệ khi cần.',
+            'reporter_contact.max' => 'Thông tin liên hệ không được dài quá 255 ký tự.',
+            'reporter_email.required' => 'Vui lòng nhập email để nhận kết quả kiểm duyệt.',
+            'reporter_email.email' => 'Email không đúng định dạng.',
+            'reporter_role.required' => 'Vui lòng chọn vai trò của bạn.',
+            'reporter_role.in' => 'Vai trò người báo cáo không hợp lệ.',
             'evidence_images.required' => 'Bắt buộc phải tải lên ít nhất 1 ảnh bằng chứng.',
             'evidence_images.min' => 'Bắt buộc phải tải lên ít nhất 1 ảnh bằng chứng.',
+            'evidence_images.max' => 'Chỉ được tải lên tối đa 10 ảnh.',
             'evidence_images.*.image' => 'File tải lên phải là hình ảnh.',
+            'evidence_images.*.mimes' => 'Ảnh phải có định dạng JPG, PNG, GIF hoặc WEBP.',
             'evidence_images.*.max' => 'Mỗi hình ảnh không được vượt quá 5MB.',
         ]);
+
+        // Acc bị back always has the same scam type, so the form does not ask for it.
+        if ($validated['type'] === 'back') {
+            $validated['scam_type'] = ScamType::AccountBack->value;
+            $validated['category'] = ScamType::AccountBack->label();
+        }
 
         $slug = Str::slug(($validated['target_name'] ?? 'scammer').'-'.Str::random(8));
 
         $report = Report::create([
             'type' => $validated['type'],
             'reporter_name' => $validated['reporter_name'] ?? 'Người dùng',
-            'reporter_contact' => $validated['reporter_contact'] ?? '',
+            'reporter_contact' => $validated['reporter_contact'],
+            'reporter_email' => $validated['reporter_email'],
+            'reporter_role' => $validated['reporter_role'],
 
             'target_id' => $validated['target_id'],
             'target_name' => $validated['target_name'] ?? null,
             'target_bank' => $validated['target_bank'] ?? null,
+            'target_socials' => $validated['target_socials'] ?? null,
+            'sold_account' => $validated['sold_account'] ?? null,
             'category' => $validated['category'] ?? null,
             'scam_type' => $validated['scam_type'] ?? null,
-            'damage_amount' => $validated['damage_amount'] ?? null,
+            'damage_amount' => $validated['damage_amount'],
             'description' => $validated['description'],
             'status' => 'pending',
             'ip_address' => $ip,

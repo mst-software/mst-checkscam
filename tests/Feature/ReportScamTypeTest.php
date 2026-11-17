@@ -20,8 +20,11 @@ function validReportPayload(array $overrides = []): array
         'target_id' => '0912345678',
         'target_name' => 'Nguyen Van A',
         'description' => str_repeat('Đối tượng nhận tiền rồi chặn liên lạc. ', 3),
+        'damage_amount' => '500000',
         'reporter_name' => 'Tran B',
         'reporter_contact' => '0987654321',
+        'reporter_email' => 'nan.nhan@example.com',
+        'reporter_role' => 'victim',
         'evidence_images' => [UploadedFile::fake()->image('proof.jpg')],
     ], $overrides);
 }
