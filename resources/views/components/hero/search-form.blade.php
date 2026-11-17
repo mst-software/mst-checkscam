@@ -131,6 +131,7 @@
           phone: 'SĐT',
           facebook: 'Facebook',
           website: 'Website',
+          back: 'Acc bị back',
           insurance: 'Bảo hiểm',
         };
         let activeIndex = -1;

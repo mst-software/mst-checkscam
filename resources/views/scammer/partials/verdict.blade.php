@@ -3,7 +3,11 @@
   Expects: $report, $maskedTarget, $maskedName, $scamTypeLabel, $reportsCount, $comments, $firstReportedAt, $lastReportedAt.
 --}}
 @php
-  $isWebsite = $report->type === 'website';
+  $targetKind = match ($report->type) {
+    'website' => 'Website / mạng xã hội',
+    'back' => 'Bán tài khoản rồi lấy lại',
+    default => 'Tài khoản ngân hàng / SĐT',
+  };
   $stats = [
     ['label' => 'Tố cáo', 'value' => number_format($reportsCount, 0, ',', '.'), 'danger' => true],
     ['label' => 'Bình luận', 'value' => number_format($comments->count(), 0, ',', '.'), 'danger' => false],
@@ -22,9 +26,7 @@
         <i class="fa-solid fa-triangle-exclamation"></i>
       </span>
       <div class="min-w-0">
-        <p class="text-ink-subtle text-sm">
-          Cảnh báo lừa đảo · {{ $isWebsite ? 'Website / mạng xã hội' : 'Tài khoản ngân hàng / SĐT' }}
-        </p>
+        <p class="text-ink-subtle text-sm">Cảnh báo lừa đảo · {{ $targetKind }}</p>
         <h1 class="text-ink mt-1 text-2xl font-semibold tracking-tight break-all tabular-nums sm:text-3xl">
           {{ $maskedTarget }}
         </h1>
@@ -42,7 +44,7 @@
             <x-ucs.badge icon="fa-solid fa-tag">{{ $scamTypeLabel }}</x-ucs.badge>
           @endif
 
-          <x-ucs.badge>{{ $isWebsite ? 'Website' : 'Tài khoản' }}</x-ucs.badge>
+          <x-ucs.badge>{{ $report->typeLabel() }}</x-ucs.badge>
           <x-ucs.badge variant="success" data-verified-badge>
             <svg
               class="h-3.5 w-3.5"

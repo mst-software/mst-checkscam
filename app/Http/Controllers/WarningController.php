@@ -36,13 +36,13 @@ class WarningController extends Controller
 
     /**
      * Derives the displayed warning type from existing columns: `reports.type` only stores
-     * account|website, so phone vs bank and Facebook links are told apart by their values.
+     * account|website|back, so phone vs bank and Facebook links are told apart by their values.
      */
     private const WARNING_TYPE_SQL = "CASE
         WHEN target_id LIKE '%facebook.com%' OR target_id LIKE '%fb.com%' THEN 'facebook'
-        WHEN type = 'account' AND COALESCE(target_bank, '') = ''
+        WHEN type IN ('account', 'back') AND COALESCE(target_bank, '') = ''
             AND REGEXP_REPLACE(target_id, '[^0-9]', '') REGEXP '^(0|84)[0-9]{9}$' THEN 'phone'
-        WHEN type = 'account' THEN 'bank'
+        WHEN type IN ('account', 'back') THEN 'bank'
         ELSE 'website'
     END";
 

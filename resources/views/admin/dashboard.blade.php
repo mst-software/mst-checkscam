@@ -228,7 +228,7 @@
             @forelse ($latestReports as $report)
               <tr>
                 <td>#RPT{{ str_pad($report->id, 3, '0', STR_PAD_LEFT) }}</td>
-                <td>{{ $report->type === 'account' ? 'STK' : 'Website' }}</td>
+                <td>{{ $report->typeLabel() }}</td>
                 <td>
                   {{ $report->target_id }}
                   @if ($report->target_name)

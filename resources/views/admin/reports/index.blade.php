@@ -76,6 +76,7 @@
                     Tài khoản (STK/SĐT)
                   </option>
                   <option value="website" {{ request('type') == 'website' ? 'selected' : '' }}>Website (URL)</option>
+                  <option value="back" @selected(request('type') === 'back')>Acc bị back</option>
                 </select>
               </div>
               <div class="col-lg-2 col-md-6">
@@ -162,6 +163,8 @@
                 <td>
                   @if ($report->type === 'account')
                     <span class="badges" style="background: #e0f0ff; color: #1a6fb5">STK/SĐT</span>
+                  @elseif ($report->type === 'back')
+                    <span class="badges" style="background: #fff4e0; color: #b56a1a">Acc bị back</span>
                   @else
                     <span class="badges" style="background: #f0e0ff; color: #6a1ab5">Website</span>
                   @endif
