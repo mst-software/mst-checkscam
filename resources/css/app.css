@@ -176,3 +176,22 @@
     line-height: 2rem;
   }
 }
+
+/* Printing a long-form document (<x-ucs.document>): drop site chrome and print dark-theme text in light colors */
+@media print {
+  body:has([data-document]) > header,
+  body:has([data-document]) > footer,
+  body:has([data-document]) #back-to-top {
+    display: none !important;
+  }
+
+  html.dark:has([data-document]) {
+    --color-page: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f1f5f9;
+    --color-line: #e2e8f0;
+    --color-ink: #0f172a;
+    --color-ink-muted: #334155;
+    --color-ink-subtle: #64748b;
+  }
+}
