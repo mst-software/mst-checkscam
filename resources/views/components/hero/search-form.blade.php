@@ -76,9 +76,8 @@
   </form>
 
   @if ($hints)
-    {{-- Desktop only: the home hero keeps small screens short so the live warnings stay in view. --}}
     <div
-      class="text-ink-subtle mt-3.5 hidden flex-wrap items-center gap-2 text-[13px] lg:flex"
+      class="text-ink-subtle mt-4 flex flex-wrap items-center justify-center gap-2 text-[13px]"
       role="group"
       aria-label="Loại thông tin cần kiểm tra"
     >
@@ -101,7 +100,7 @@
   @endif
 
   @if ($recentSearches->isNotEmpty())
-    <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+    <div class="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs">
       <span class="text-ink-subtle">Bạn đã tra cứu:</span>
       @foreach ($recentSearches as $search)
         <a
