@@ -50,10 +50,10 @@ test('layout no longer loads the prebuilt tailwind stylesheet', function () {
         ->assertDontSee('/css/tailwind.css', false);
 });
 
-test('layout uses the scamproof brand mark, wordmark and favicon', function () {
+test('layout uses the scamproof logo image and favicon', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('/img/logo-mark.svg', false)
+        ->assertSee('/img/scamproof-logo-tight.png', false)
         ->assertSee('/favicon.svg', false)
         ->assertSee('aria-label="Scamproof"', false)
         ->assertDontSee('Cảnh Giác');
