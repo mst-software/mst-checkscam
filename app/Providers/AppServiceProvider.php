@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Helpers\ConfigHelper;
 use App\Helpers\SeoHelper;
+use App\Services\SafeJsonLdMulti;
 use Artesaos\SEOTools\Facades\SEOTools;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Blade;
@@ -18,7 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // extend() survives the package's deferred provider registering the original binding later.
+        $this->app->extend('seotools.json-ld-multi', fn () => new SafeJsonLdMulti(config('seotools.json-ld.defaults', [])));
     }
 
     /**
