@@ -54,8 +54,6 @@
           <x-ucs.button :href="route('reports')" icon="fa-solid fa-flag">Gửi tố cáo</x-ucs.button>
         </x-ucs.empty-state>
       @endif
-
-      <x-banner-ads position="home_between" class="mb-0" />
     </div>
 
     <aside class="min-w-0 space-y-6 lg:col-span-4" aria-label="Thông tin thêm">

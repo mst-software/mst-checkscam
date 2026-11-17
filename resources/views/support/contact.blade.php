@@ -107,7 +107,6 @@
                 >
                   <option value="report">Cần gỡ bài phốt / Giải quyết khiếu nại</option>
                   <option value="partner">Hợp tác làm đối tác / API</option>
-                  <option value="ads">Liên hệ quảng cáo banner</option>
                   <option value="other">Vấn đề khác</option>
                 </select>
               </div>

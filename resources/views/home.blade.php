@@ -21,7 +21,7 @@
         @include('partials.home.moderation')
 
         <div class="grid gap-8 lg:grid-cols-12">
-          <div class="min-w-0 space-y-8 lg:col-span-8">
+          <div class="min-w-0 lg:col-span-8">
             @include(
               'partials.home.latest-reports',
               [
@@ -29,19 +29,15 @@
                 'latestApprovedAt' => $latestApprovedAt ?? null,
               ]
             )
-            <x-banner-ads position="home_between" class="mb-0" />
           </div>
 
           <aside class="min-w-0 space-y-6 lg:col-span-4" aria-label="Thông tin thêm">
             @include('partials.home.top-searches', ['topWeeklySearches' => $topWeeklySearches ?? collect()])
             @include('partials.report-cta')
-            <x-banner-ads position="home_sidebar" :limit="3" class="mb-4" />
           </aside>
         </div>
 
         @include('partials.home.comments')
-
-        <x-banner-ads position="home_between" :skip="1" class="mb-0" />
 
         @include('partials.home.trusted-insurances', ['trustedInsurances' => $trustedInsurances ?? collect()])
 
@@ -50,8 +46,6 @@
         @include('partials.home.official-channels')
 
         @include('partials.home.faq')
-
-        <x-banner-ads position="home_top" class="mb-0" />
       </x-ucs.container>
     @endif
   </main>
