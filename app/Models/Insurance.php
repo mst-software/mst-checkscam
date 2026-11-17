@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -14,6 +15,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class Insurance extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
+
+    /** Setting holding the next public GDV number; numbers are never reused, even after a delete. */
+    public const NEXT_GDV_NUMBER_SETTING = 'gdv_next_number';
 
     protected $table = 'insurances';
 
@@ -34,17 +38,42 @@ class Insurance extends Model implements HasMedia
     /**
      * `amount` is a cached copy of the latest ledger balance; change it only through InsuranceLedgerService.
      * `suspended_at` / `suspension_reason` are set only through InsuranceSuspensionService.
+     * `gdv_number` is assigned once on create (see booted) and is not fillable.
      */
     protected $casts = [
         'contact_info' => 'array',
         'payment_accounts' => 'array',
         'services' => 'array',
+        'gdv_number' => 'integer',
         'amount' => 'decimal:2',
         'insurance_date' => 'date',
         'expired_at' => 'date',
         'verified_at' => 'date',
         'suspended_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Insurance $insurance) {
+            $insurance->gdv_number ??= static::claimNextGdvNumber();
+        });
+    }
+
+    /**
+     * Takes the next GDV number from the locked counter row, so concurrent creates never get the same one
+     * (the unique index is the backstop). Never below the highest existing number.
+     */
+    public static function claimNextGdvNumber(): int
+    {
+        return DB::transaction(function () {
+            $counter = Setting::query()->lockForUpdate()->find(self::NEXT_GDV_NUMBER_SETTING);
+            $number = max((int) $counter?->value, (int) static::query()->max('gdv_number') + 1);
+
+            Setting::setValue(self::NEXT_GDV_NUMBER_SETTING, (string) ($number + 1));
+
+            return $number;
+        });
+    }
 
     /**
      * ------------------------------------------------------
@@ -81,11 +110,19 @@ class Insurance extends Model implements HasMedia
     }
 
     /**
-     * Stable public member code shown on the profile, e.g. "GDV-000123".
+     * Short public label of the partner's sequential number, e.g. "GDV số 5".
      */
     public function memberCode(): string
     {
-        return 'GDV-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+        return 'GDV số '.$this->gdv_number;
+    }
+
+    /**
+     * Long public label, e.g. "Giao dịch viên số 5".
+     */
+    public function memberTitle(): string
+    {
+        return 'Giao dịch viên số '.$this->gdv_number;
     }
 
     /**

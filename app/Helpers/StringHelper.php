@@ -22,6 +22,23 @@ class StringHelper
     }
 
     /**
+     * GDV number asked for by "5", "gdv 5", "GDV số 5" or "giao dịch viên số 5"; null for anything else.
+     * A bare number counts only up to 5 digits so phone numbers and bank accounts never read as one;
+     * with an explicit "gdv" / "giao dịch viên" prefix up to 9 digits are accepted.
+     */
+    public static function parseGdvNumber(string $input): ?int
+    {
+        if (! preg_match('/^(?:(gdv|giao dịch viên|giao dich vien) ?(?:số|so)? ?)?(\d+)$/u', self::normalizeString($input), $matches)) {
+            return null;
+        }
+
+        $maxDigits = $matches[1] === '' ? 5 : 9;
+        $number = (int) $matches[2];
+
+        return strlen($matches[2]) <= $maxDigits && $number > 0 ? $number : null;
+    }
+
+    /**
      * Nhận diện loại Query
      */
     public static function detectQueryType(string $query): array
