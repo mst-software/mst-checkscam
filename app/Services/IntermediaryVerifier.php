@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\IntermediaryVerificationState;
+use App\Helpers\StringHelper;
 use App\Models\Insurance;
 use App\Models\InsuranceChannel;
 
@@ -32,6 +33,16 @@ class IntermediaryVerifier
             ->filter(fn (InsuranceChannel $channel) => $channel->insurance !== null);
 
         $reportedCount ??= $input === '' ? 0 : $this->scamLookup->reportsQuery($input)->count();
+
+        // A GDV number ("5", "gdv 5") is only tried when no channel matched, so it never shadows a phone or account.
+        $gdvNumber = $channels->isEmpty() ? StringHelper::parseGdvNumber($input) : null;
+        $numbered = $gdvNumber ? Insurance::query()->where('gdv_number', $gdvNumber)->first() : null;
+
+        if ($numbered) {
+            return $numbered->isTrusted()
+                ? new IntermediaryVerification(IntermediaryVerificationState::Verified, $input, $numbered, null, null, $reportedCount)
+                : new IntermediaryVerification(IntermediaryVerificationState::Lapsed, $input, $numbered, null, $this->lapsedReason($numbered), $reportedCount);
+        }
 
         $trusted = $channels->first(fn (InsuranceChannel $channel) => $channel->insurance->isTrusted());
 

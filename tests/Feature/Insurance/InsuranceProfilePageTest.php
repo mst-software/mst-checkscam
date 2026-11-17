@@ -34,15 +34,15 @@ function profileHead(string $html): string
     return str($html)->after('<head>')->before('</head>')->toString();
 }
 
-test('a trusted partner shows the verified badge, member code and key facts', function () {
-    $code = 'GDV-'.str_pad((string) $this->partner->id, 6, '0', STR_PAD_LEFT);
+test('a trusted partner shows the verified badge, gdv number and key facts', function () {
+    $number = $this->partner->gdv_number;
 
     $this->get(profileUrl($this->partner))
         ->assertOk()
         ->assertHeader('Cache-Control')
         ->assertSee('Giao dịch viên đã xác thực')
-        ->assertSee($code)
-        ->assertSee('data-copy="'.$code.'"', false)
+        ->assertSee("Giao dịch viên số {$number}")
+        ->assertSee('data-copy="GDV số '.$number.'"', false)
         ->assertSeeInOrder(['Ký quỹ', '10.000.000 đ', 'Xác thực từ', '12/03/2025', 'Hiệu lực đến', $this->partner->expired_at->format('d/m/Y')])
         ->assertSee('Trạng thái được kiểm tra lúc')
         ->assertSee(now()->format('d/m/Y'))
@@ -123,15 +123,13 @@ test('the anti-impersonation callout shows the official profile address', functi
 
 test('the share box links to facebook and telegram with the encoded profile url', function () {
     $url = profileUrl($this->partner);
-    $code = $this->partner->memberCode();
-
     $this->get($url)
         ->assertOk()
         ->assertSee('Chia sẻ hồ sơ xác thực')
         ->assertSee('https://www.facebook.com/sharer/sharer.php?u='.urlencode($url), false)
         ->assertSee('https://t.me/share/url?url='.urlencode($url), false)
         ->assertSee('data-share="zalo"', false)
-        ->assertSee("Giao dịch viên đã xác thực bởi Scamproof · Mã {$code} · Xem hồ sơ: {$url}");
+        ->assertSee("Giao dịch viên số {$this->partner->gdv_number} đã xác thực bởi Scamproof · Xem hồ sơ: {$url}");
 });
 
 test('the head carries title, canonical, robots, open graph, twitter and json-ld tags', function () {
@@ -142,7 +140,7 @@ test('the head carries title, canonical, robots, open graph, twitter and json-ld
     $head = profileHead($this->get($url)->assertOk()->getContent());
 
     expect($head)
-        ->toContain('<title>GDV Quang - Giao dịch viên xác thực | Scamproof</title>')
+        ->toContain("<title>GDV Quang - Giao dịch viên số {$this->partner->gdv_number} đã xác thực | Scamproof</title>")
         ->toContain('<link rel="canonical" href="'.$url.'">')
         ->toContain('<meta property="og:type" content="profile">')
         ->toContain('<meta property="og:url" content="'.$url.'">')
@@ -152,7 +150,7 @@ test('the head carries title, canonical, robots, open graph, twitter and json-ld
         ->toContain('<meta name="twitter:image" content="https://cdn.example.test/avatars/quang.jpg">')
         ->toContain('"@type":"ProfilePage"')
         ->toContain('"@type":"Person"')
-        ->toContain($this->partner->memberCode())
+        ->toContain('"identifier":"GDV số '.$this->partner->gdv_number.'"')
         ->not->toContain('0912345678')
         ->not->toContain('0123456789');
 
@@ -187,7 +185,7 @@ test('a suspended or expired partner shows a neutral status without the reason a
     $head = profileHead($response->getContent());
 
     expect($head)->toContain('<meta name="robots" content="noindex, follow">')
-        ->toContain($partner->full_name.' - Hồ sơ giao dịch viên | Scamproof')
+        ->toContain($partner->full_name." - Hồ sơ giao dịch viên số {$partner->gdv_number} | Scamproof")
         ->and(substr_count($head, 'name="robots"'))->toBe(1);
 })->with([
     'suspended' => [fn () => Insurance::factory()->trusted()->suspended('LÝ DO NỘI BỘ BÍ MẬT')->create(), 'Tạm đình chỉ'],

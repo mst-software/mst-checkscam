@@ -113,7 +113,7 @@ class TelegramWebhookController extends Controller
         }
 
         foreach (array_slice($payload['insurance'], 0, 3) as $insurance) {
-            $label = 'Đối tác bảo hiểm: '.e($insurance['name']).' ('.e($insurance['status']).')';
+            $label = 'Đối tác bảo hiểm: '.e($insurance['code']).' '.e($insurance['name']).' ('.e($insurance['status']).')';
             $lines[] = $insurance['url'] ? '<a href="'.e($insurance['url'])."\">{$label}</a>" : $label;
         }
 

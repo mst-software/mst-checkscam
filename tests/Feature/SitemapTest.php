@@ -13,7 +13,7 @@ beforeEach(function () {
     Cache::forget(SitemapController::CACHE_KEY);
 });
 
-test('the sitemap is valid xml listing pages, posts, insurances and approved reports by slug only', function () {
+test('the sitemap is valid xml listing pages, posts, trusted insurances and approved reports by slug only', function () {
     $approved = Report::factory()->create([
         'status' => 'approved',
         'target_id' => '0912345678',
@@ -21,8 +21,9 @@ test('the sitemap is valid xml listing pages, posts, insurances and approved rep
     ]);
     $pending = Report::factory()->create(['status' => 'pending']);
     $post = Post::factory()->create();
-    $insurance = Insurance::factory()->create(['status' => 1]);
+    $insurance = Insurance::factory()->trusted()->create();
     $lockedInsurance = Insurance::factory()->create(['status' => 0]);
+    $expiredInsurance = Insurance::factory()->trusted()->expired()->create();
 
     $response = $this->get('/sitemap.xml')->assertOk();
 
@@ -47,6 +48,7 @@ test('the sitemap is valid xml listing pages, posts, insurances and approved rep
     )->not->toContain(
         route('scammer.show', $pending->slug),
         route('insurances.frontend.show', $lockedInsurance->slug),
+        route('insurances.frontend.show', $expiredInsurance->slug),
     );
 
     expect($response->getContent())

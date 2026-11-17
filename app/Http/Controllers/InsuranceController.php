@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ChannelType;
 use App\Helpers\SeoHelper;
+use App\Helpers\StringHelper;
 use App\Models\Insurance;
 use App\Models\InsuranceChannel;
 use App\Services\InsuranceLedgerService;
@@ -27,19 +28,27 @@ class InsuranceController extends Controller
         SEOTools::setTitle('Quỹ bảo hiểm uy tín - Tra cứu lừa đảo');
         SEOTools::setDescription('Danh sách giao dịch viên đã ký quỹ với Scamproof, kèm trạng thái xác thực, số dư ký quỹ và kênh liên hệ chính thức.');
 
-        $query = Insurance::where('status', 1);
-        // ... rest of index ...
+        // Expired partners keep their profile page but leave the public list; suspended ones stay listed with their badge.
+        $listed = fn () => Insurance::query()->where('status', 1)->notExpired();
+
+        $query = $listed();
         if ($request->has('search') && ! empty($request->search)) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('slug', 'like', "%{$search}%");
-            });
+            $gdvNumber = StringHelper::parseGdvNumber($search);
+
+            if ($gdvNumber !== null) {
+                $query->where('gdv_number', $gdvNumber);
+            } else {
+                $query->where(function ($q) use ($search) {
+                    $q->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%");
+                });
+            }
         }
 
-        $insurances = $query->orderBy('id', 'asc')->get();
+        $insurances = $query->orderBy('gdv_number')->get();
 
-        $total_fund = Insurance::where('status', 1)->sum('amount');
+        $total_fund = $listed()->sum('amount');
         $total_members = Insurance::trusted()->count();
 
         return view('insurances.index', compact('insurances', 'total_fund', 'total_members'));
@@ -129,11 +138,11 @@ class InsuranceController extends Controller
         $isTrusted = $insurance->isTrusted();
 
         $title = $isTrusted
-            ? "{$name} - Giao dịch viên xác thực | ".SeoHelper::BRAND
-            : "{$name} - Hồ sơ giao dịch viên | ".SeoHelper::BRAND;
+            ? "{$name} - {$insurance->memberTitle()} đã xác thực | ".SeoHelper::BRAND
+            : "{$name} - Hồ sơ giao dịch viên số {$insurance->gdv_number} | ".SeoHelper::BRAND;
 
-        $description = "Hồ sơ giao dịch viên {$name} trên ".SeoHelper::BRAND
-            .". Mã {$insurance->memberCode()} · Trạng thái: ".($isTrusted ? 'Đã xác thực' : $insurance->publicStatusLabel());
+        $description = "Hồ sơ giao dịch viên số {$insurance->gdv_number} {$name} trên ".SeoHelper::BRAND
+            .'. Trạng thái: '.($isTrusted ? 'Đã xác thực' : $insurance->publicStatusLabel());
         if ($insurance->verified_at) {
             $description .= ' · Xác thực từ '.$insurance->verified_at->format('d/m/Y');
         }

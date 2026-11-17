@@ -17,7 +17,7 @@ test('channels are backfilled from the legacy json idempotently', function () {
         'payment_accounts' => [['bank' => 'VCB', 'number' => '0011 0022 33', 'name' => 'X']],
     ]);
     DB::table('insurances')->insert([
-        'full_name' => 'Hỏng JSON', 'amount' => 0, 'insurance_date' => now(), 'slug' => 'hong-json',
+        'full_name' => 'Hỏng JSON', 'amount' => 0, 'insurance_date' => now(), 'slug' => 'hong-json', 'gdv_number' => 999,
         'contact_info' => '"just a string"', 'payment_accounts' => null,
     ]);
 

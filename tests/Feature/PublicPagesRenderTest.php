@@ -43,7 +43,7 @@ test('static public pages render their page header', function (string $uri, stri
 ]);
 
 test('the insurance list shows active members with their deposit', function () {
-    Insurance::factory()->create(['full_name' => 'Thành Viên Uy Tín', 'amount' => 50000000, 'status' => 1]);
+    Insurance::factory()->create(['full_name' => 'Thành Viên Uy Tín', 'amount' => 50000000, 'status' => 1, 'expired_at' => now()->addMonth()]);
     Insurance::factory()->create(['full_name' => 'Thành Viên Đã Khoá', 'status' => 0]);
 
     $this->get(route('insurances.frontend.index'))

@@ -88,8 +88,8 @@ test('the reply says whether the query is an official or lapsed intermediary cha
     $this->postJson('/telegram/webhook/hook-secret', telegramUpdate('/check 0922222222'))->assertOk();
     $this->postJson('/telegram/webhook/hook-secret', telegramUpdate('/check 0933333333'))->assertOk();
 
-    Http::assertSent(fn (Request $request) => str_contains($request['text'], '<b>Kênh GDV chính thức:</b> Đây là kênh chính thức của GDV GDV Hùng'));
-    Http::assertSent(fn (Request $request) => str_contains($request['text'], '<b>Lưu ý:</b> Kênh này thuộc GDV GDV Nam')
+    Http::assertSent(fn (Request $request) => str_contains($request['text'], '<b>Kênh GDV chính thức:</b> Đây là kênh chính thức của '.$verified->memberCode().' GDV Hùng'));
+    Http::assertSent(fn (Request $request) => str_contains($request['text'], '<b>Lưu ý:</b> Kênh này thuộc '.$lapsed->memberCode().' GDV Nam')
         && str_contains($request['text'], 'tạm đình chỉ'));
     Http::assertSent(fn (Request $request) => str_contains($request['text'], '0933333333')
         && ! str_contains($request['text'], 'Kênh GDV chính thức')

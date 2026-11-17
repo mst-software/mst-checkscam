@@ -53,7 +53,7 @@
         </div>
         <p id="verify-q-hint" class="text-ink-subtle mt-2 text-xs leading-relaxed">
           Hệ thống so khớp với các kênh chính thức mà ban quản trị đã xác minh cho từng GDV. Số điện thoại có thể nhập
-          dạng +84 hoặc 0.
+          dạng +84 hoặc 0. Có thể tra theo số thứ tự, ví dụ "GDV số 5".
         </p>
       </form>
 

@@ -54,6 +54,8 @@ final class ScamLookupResult
                 'comments_count' => (int) $report->comments_count,
             ])->values()->all(),
             'insurance' => $this->insurances->map(fn (Insurance $insurance) => [
+                'number' => $insurance->gdv_number,
+                'code' => $insurance->memberCode(),
                 'name' => $insurance->full_name,
                 'slug' => $insurance->slug,
                 'url' => $insurance->slug ? route('insurances.frontend.show', $insurance->slug) : null,

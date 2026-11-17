@@ -33,6 +33,7 @@
   @endif
 
   <span class="min-w-0 flex-1">
+    <span class="text-ink-subtle block text-xs font-medium" data-gdv-number>{{ $insurance->memberCode() }}</span>
     <span class="text-ink flex items-center gap-1.5 text-sm font-medium">
       <span class="truncate">{{ $insurance->full_name }}</span>
       @if ($insurance->isTrusted())

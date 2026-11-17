@@ -210,7 +210,7 @@ class SearchController extends Controller
             ->unique('label')
             ->take(8);
 
-        $insuranceSuggestions = Insurance::where('status', 1)
+        $insuranceSuggestions = Insurance::trusted()
             ->where(function ($q) use ($idPattern, $namePattern) {
                 $q->where('contact_info', 'LIKE', $idPattern)
                     ->orWhere('payment_accounts', 'LIKE', $idPattern)

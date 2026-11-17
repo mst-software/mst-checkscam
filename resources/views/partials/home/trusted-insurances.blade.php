@@ -44,6 +44,7 @@
             @endif
 
             <div class="min-w-0">
+              <p class="text-ink-subtle text-xs font-medium" data-gdv-number>{{ $insurance->memberCode() }}</p>
               <p class="text-ink flex items-center gap-1.5 text-[15px] font-bold">
                 <span class="truncate">{{ $insurance->full_name }}</span>
                 <i class="fa-solid fa-circle-check text-success text-sm" aria-hidden="true"></i>
