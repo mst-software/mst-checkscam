@@ -210,10 +210,12 @@ describe('store', function () {
         expect(Report::sole()->sold_account)->toBeNull();
     });
 
-    it('accepts the largest amount the column can hold', function () {
-        $this->post(route('report.store'), reportFormPayload(['damage_amount' => '99.999.999']))->assertSessionHasNoErrors();
+    it('accepts amounts above ten billion up to the cap', function () {
+        $this->post(route('report.store'), reportFormPayload(['damage_amount' => '12.500.000.000']))->assertSessionHasNoErrors();
+        $this->post(route('report.store'), reportFormPayload(['damage_amount' => '99.999.999.999']))->assertSessionHasNoErrors();
 
-        expect((float) Report::sole()->damage_amount)->toBe(99999999.0);
+        expect(Report::orderBy('id')->pluck('damage_amount')->map(fn ($amount) => (float) $amount)->all())
+            ->toBe([12500000000.0, 99999999999.0]);
     });
 
     it('drops the bank and channels of a website report', function () {
@@ -257,7 +259,7 @@ describe('store', function () {
         'invalid email' => [['reporter_email' => 'not-an-email'], 'reporter_email', 'Email không đúng định dạng.'],
         'email without a dot in the domain' => [['reporter_email' => 'nan.nhan@localhost'], 'reporter_email', 'Email không đúng định dạng, ví dụ: ten@gmail.com'],
         'exponent amount' => [['damage_amount' => '1e3'], 'damage_amount', 'Số tiền thiệt hại phải là chữ số.'],
-        'amount over the column capacity' => [['damage_amount' => '999.999.999.999'], 'damage_amount', 'Số tiền tối đa là 99.999.999 VNĐ. Nếu thiệt hại lớn hơn, hãy ghi rõ số tiền trong phần kể lại sự việc.'],
+        'amount over the cap' => [['damage_amount' => '100.000.000.000'], 'damage_amount', 'Số tiền tối đa là 99.999.999.999 VNĐ. Nếu thiệt hại lớn hơn, hãy ghi rõ số tiền trong phần kể lại sự việc.'],
         'too long description' => [['description' => str_repeat('a', 5001)], 'description', 'Phần kể lại sự việc không được dài quá 5000 ký tự.'],
         'back scam type on an account report' => [['scam_type' => 'account_back'], 'scam_type', 'Hình thức lừa đảo không hợp lệ.'],
         'missing role' => [['reporter_role' => ''], 'reporter_role', 'Vui lòng chọn vai trò của bạn.'],

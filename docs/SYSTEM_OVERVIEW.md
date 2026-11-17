@@ -272,7 +272,7 @@ Tổng cộng **16 migration files**, tạo ra **16+ tables** (3 standard Larave
 | ip_address | varchar(45) nullable | IP khi gửi |
 | target_name | varchar nullable | Tên đối tượng |
 | target_bank | varchar nullable | Tên ngân hàng |
-| damage_amount | decimal(10,2) nullable | Số tiền thiệt hại |
+| damage_amount | decimal(15,2) nullable | Số tiền thiệt hại |
 | category | varchar nullable INDEX | Hình thức lừa đảo |
 | description | text | Mô tả (min 50 ký tự) |
 | evidence_images | json nullable | Mảng đường dẫn ảnh |

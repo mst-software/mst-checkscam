@@ -39,7 +39,7 @@ routes/web.php → Http/Controllers/ → Models → resources/views/
 
 Three controller groups:
 - **Public** (`app/Http/Controllers/`): Home, Search, Report, Comment, Insurance, Post, Newfeed/NewfeedPost/NewfeedPostReport, Socialite, Sitemap
-- **Admin** (`app/Http/Controllers/Admin/`): Full CRUD for reports, insurances, posts, comments, banners, users, settings, plus Auth, Dashboard, SearchAnalytics, and Newfeed moderation
+- **Admin** (`app/Http/Controllers/Admin/`): Full CRUD for reports, insurances, posts, comments, users, settings, plus Auth, Dashboard, SearchAnalytics, and Newfeed moderation
 - All routes for both groups live in the single `routes/web.php` (no separate admin routes file); the admin group is nested under `Route::prefix('admin')` with a `web` `auth` guard
 
 ### Core Domain: Scam Reports
@@ -62,14 +62,13 @@ A lightweight, Facebook-group-style marketplace bolted onto the scam-checking si
 | `Comment` | BelongsTo Report |
 | `Post` | BelongsTo User (`author_id`) |
 | `Insurance` | standalone, has expiry logic (`isActive`/`isExpired`/`isExpiringSoon`) |
-| `Banner` | standalone, time-window activation via `scopeActive` |
 | `NewfeedPost` | BelongsTo User, HasMany NewfeedPostReport, `scopeVisible` |
 | `NewfeedPostReport` | BelongsTo NewfeedPost (`post_id`), BelongsTo User (`reporter_id`) |
 | `User` | roles: `admin` / `moderator`; HasMany NewfeedPost; `isAdmin()`/`isModerator()`/`isActive()`; Google OAuth via `google_id` |
 | `SearchLog` | append-only (query + IP), `isFound()` |
 | `Setting` | key-value app config, `getValue`/`setValue` |
 
-`Report`, `Post`, `Insurance`, `Banner`, and `User` implement `HasMedia` (Spatie MediaLibrary) with synchronous conversions (`thumb`, `optimized`) registered in `registerMediaConversions()`.
+`Report`, `Post`, `Insurance`, and `User` implement `HasMedia` (Spatie MediaLibrary) with synchronous conversions (`thumb`, `optimized`) registered in `registerMediaConversions()`.
 
 `Insurance` and `Post` share a single global slug namespace — `StringHelper::generateGlobalUniqueSlug()` checks both tables before assigning a slug.
 
