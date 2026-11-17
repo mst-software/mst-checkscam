@@ -6,7 +6,6 @@ Bộ dữ liệu mẫu để demo toàn bộ site (trang chủ, Khu mua bán, c�
 
 ```bash
 php artisan migrate
-php artisan storage:link        # ảnh Khu mua bán nằm ở storage/app/public/posts
 php artisan db:seed --class=DemoDataSeeder
 ```
 
