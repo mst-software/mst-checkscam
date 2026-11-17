@@ -10,9 +10,9 @@
 ])
 @php
   $height = match ($size) {
-    'sm' => 'h-10',
-    'lg' => 'h-16',
-    default => 'h-11 sm:h-14',
+    'sm' => 'h-8',
+    'lg' => 'h-14',
+    default => 'h-9 sm:h-12',
   };
 @endphp
 
