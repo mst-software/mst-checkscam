@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(SettingSeeder::class);
-        $this->call(BannerSeeder::class);
         // Idempotent: re-running `db:seed` must not fail on the unique admin username.
         $admin = User::updateOrCreate(
             ['username' => 'admin'],

@@ -47,7 +47,6 @@
         </div>
 
         <aside class="min-w-0 space-y-6" aria-label="Thông tin thêm">
-          <x-banner-ads position="scammer" class="mb-4" />
           @include('scammer.partials.safety-tips')
           @include('scammer.partials.related')
         </aside>

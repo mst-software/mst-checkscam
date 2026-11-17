@@ -124,7 +124,6 @@
         </article>
 
         <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          <x-banner-ads position="blog" />
           @include('posts.partials.popular', ['popularPosts' => $popularPosts])
         </aside>
       </div>

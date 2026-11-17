@@ -3,7 +3,6 @@
 use App\Enums\ScamType;
 use App\Helpers\ConfigHelper;
 use App\Helpers\StatsHelper;
-use App\Models\Banner;
 use App\Models\Comment;
 use App\Models\Insurance;
 use App\Models\Report;
@@ -169,20 +168,6 @@ test('commitments describe reporter privacy without claiming absolute anonymity'
         'href="'.url('/dieu-khoan').'"',
         'href="'.route('moderation.policy').'"',
     )->not->toContain('tuyệt đối', 'bên thứ ba');
-});
-
-test('the home_top banner is rendered at the end, after the faq', function () {
-    Banner::factory()->create([
-        'title' => 'Banner Cuối Trang',
-        'image_path' => 'https://example.test/home-top.png',
-        'position' => 'home_top',
-        'type' => 'horizontal',
-    ]);
-
-    $this->get('/')
-        ->assertOk()
-        ->assertSeeInOrder(['Câu hỏi thường gặp', 'https://example.test/home-top.png', '<footer'], false)
-        ->assertDontSee('Quảng cáo');
 });
 
 test('home html never prints raw target identifiers', function () {

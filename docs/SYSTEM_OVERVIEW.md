@@ -35,7 +35,6 @@ MST-CheckScam là web tra cứu lừa đảo cộng đồng dành cho thị trư
 | **Quỹ bảo hiểm (Insurance)** | Badge uy tín hiển thị kèm kết quả tìm kiếm |
 | **Bài viết (Post)** | Blog/tin tức do admin tạo |
 | **Khu Mua Bán (Newfeed)** | Marketplace dạng Facebook Group, đăng tin cần Google OAuth |
-| **Banner quảng cáo** | Cho thuê vị trí banner theo thời hạn |
 | **Admin Panel** | Duyệt tố cáo, CRUD toàn bộ nội dung |
 
 **Đặc điểm kỹ thuật nổi bật:**
@@ -145,7 +144,7 @@ mst-checkscam/
 │       ├── home.blade.php         # Trang chủ + search results (dùng chung)
 │       ├── maintenance.blade.php  # Trang bảo trì
 │       ├── admin/                 # Admin panel views
-│       ├── components/            # Blade components (ads, hero, breadcrumb)
+│       ├── components/            # Blade components (hero, breadcrumb)
 │       ├── insurances/            # Trang bảo hiểm public
 │       ├── layouts/               # app.blade.php (public), admin/layouts/
 │       ├── legal/                 # terms, dispute
@@ -213,8 +212,6 @@ mst-checkscam/
 | GET /admin/comments + DELETE /{id} | AdminCommentController | Xem + xóa comment |
 | GET/POST /admin/users/* | AdminUserController | CRUD users |
 | PATCH /admin/users/{user}/verify | AdminUserController@toggleVerify | Bật/tắt badge |
-| GET/POST /admin/banners/* | AdminBannerController | CRUD banners |
-| POST /admin/banners/{id}/toggle | AdminBannerController@toggleStatus | Bật/tắt banner |
 | GET/POST /admin/settings | AdminSettingController | Cài đặt hệ thống |
 | GET /admin/search-analytics | AdminSearchAnalyticsController@index | Phân tích tìm kiếm |
 | GET /admin/newfeed/hidden | AdminNewfeedController@hidden | Bài Newfeed bị ẩn |
@@ -340,15 +337,7 @@ Tổng cộng **16 migration files**, tạo ra **16+ tables** (3 standard Larave
 
 **Nguồn:** database/migrations/2026_03_08_152401_create_posts_table.php
 
-#### `banners` — Quảng cáo banner
-
-| Cột | Kiểu | Ghi chú |
-|---|---|---|
-| position | enum(home_top, home_sidebar, home_between, scammer, blog) | |
-| type | enum(horizontal, square) | |
-| start_date / end_date | date nullable | NULL = không giới hạn ngày |
-| status | boolean | |
-| sort_order | int | |
+#### `banners` — legacy (tính năng quảng cáo đã gỡ, bảng giữ lại, không còn code dùng)
 
 **Nguồn:** database/migrations/2026_03_17_000001_create_banners_table.php
 
@@ -373,7 +362,7 @@ Tổng cộng **16 migration files**, tạo ra **16+ tables** (3 standard Larave
 
 #### `media` — Spatie MediaLibrary (polymorphic)
 
-Bảng polymorphic cho Report, Post, Insurance, Banner, User. Conversions: thumb, optimized.
+Bảng polymorphic cho Report, Post, Insurance, User. Conversions: thumb, optimized.
 
 ---
 
@@ -420,12 +409,12 @@ users
 
 insurances  (standalone, slug namespace shared với posts)
 posts       (standalone, slug namespace shared với insurances)
-banners     (standalone)
+banners     (legacy, không còn dùng)
 banks       (reference, standalone)
 settings    (key-value, standalone)
 search_logs (append-only log)
 
-media (polymorphic → Report, Post, Insurance, Banner, User)
+media (polymorphic → Report, Post, Insurance, User)
 ```
 
 ### Foreign keys tóm tắt
@@ -631,8 +620,7 @@ flowchart TD
 | Comment (ẩn danh, rate limit) | ✅ Done | 5/IP/ngày, edit/delete 15 phút | CommentController.php |
 | Quỹ bảo hiểm / badge uy tín | ✅ Done | Admin tạo thủ công, hiện khi search | Insurance.php |
 | Blog/bài viết | ✅ Done | Admin tạo, view public | Post.php, AdminPostController.php |
-| Banner quảng cáo | ✅ Done | 5 vị trí, time-window | Banner.php, AdminBannerController.php |
-| Admin panel (duyệt, CRUD) | ✅ Done | Reports, comments, users, settings, banners, posts, insurances | Admin/ |
+| Admin panel (duyệt, CRUD) | ✅ Done | Reports, comments, users, settings, posts, insurances | Admin/ |
 | Search analytics (admin) | ✅ Done | Weekly chart, top searches | AdminSearchAnalyticsController.php |
 | Google OAuth (public user) | ✅ Done | Chỉ dùng cho Newfeed | SocialiteController.php |
 | Khu Mua Bán (Newfeed) | ✅ Done | Đăng, filter, report, auto-hide | NewfeedPostController.php |
@@ -768,8 +756,6 @@ Route names:    dot-separated (admin.reports.index, api.newfeed.posts.store)
 layouts/app.blade.php              # Layout chính public pages
 admin/layouts/                     # Layout admin pages
 components/
-  ├── ads-horizontal.blade.php     # <x-ads-horizontal />
-  ├── banner-ads.blade.php         # <x-banner-ads position="home_top" />
   ├── breadcrumb.blade.php         # <x-breadcrumb />
   └── notification.blade.php       # <x-notification />
 partials/
