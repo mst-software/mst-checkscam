@@ -153,24 +153,9 @@ Lưu lại vết mỗi khi người dùng tìm kiếm để phân tích xu hư�
 
 ---
 
-## 8. Bảng `banners` (Banner quảng cáo)
+## 8. Bảng `banners` (legacy)
 
-Lưu trữ thông tin các banner quảng cáo hiển thị trên website.
-
-| Key            | Type        | Nullable | Mô tả                                                                 |
-| :------------- | :---------- | :------- | :-------------------------------------------------------------------- |
-| `id`           | BigInt (PK) | No       |                                                                       |
-| `title`        | String      | No       | Tên nội bộ của banner                                                 |
-| `image_path`   | String      | No       | Đường dẫn ảnh banner (storage hoặc URL)                               |
-| `redirect_url` | String      | Yes      | Link chuyển hướng khi click                                           |
-| `position`     | Enum        | No       | Vị trí: `home_top`, `home_between`, `home_sidebar`, `scammer`, `blog` |
-| `type`         | Enum        | No       | Loại: `horizontal` (ngang), `square` (vuông)                          |
-| `start_date`   | Date        | Yes      | Ngày bắt đầu hiển thị                                                 |
-| `end_date`     | Date        | Yes      | Ngày kết thúc hiển thị                                                |
-| `status`       | Boolean     | No       | `true`: Đang chạy, `false`: Tạm dừng                                  |
-| `sort_order`   | Int         | No       | Thứ tự sắp xếp (càng nhỏ càng ưu tiên)                                |
-| `created_at`   | Timestamp   | Yes      |                                                                       |
-| `updated_at`   | Timestamp   | Yes      |                                                                       |
+Tính năng banner quảng cáo đã được gỡ khỏi website. Bảng và dữ liệu cũ được giữ nguyên, không còn code nào đọc hoặc ghi.
 
 ---
 

@@ -198,11 +198,7 @@ Thiết kế cho chủ web vận hành, không phức tạp:
 
 Thu tiền từ người muốn có badge uy tín. Phí duy trì hàng tháng. Admin xác nhận thủ công.
 
-**2. Quảng cáo Banner**
-
-Cho thuê vị trí banner trên web (Header, Sidebar). Admin set ảnh + link + thời hạn trong panel. Hết hạn tự ẩn.
-
-**3. Phí API (nâng cao, làm sau)**
+**2. Phí API (nâng cao, làm sau)**
 
 Nếu có nhu cầu, bán quyền truy cập API cho bên thứ 3. Nhưng không cần làm trong v1.
 
@@ -222,6 +218,5 @@ Nếu có nhu cầu, bán quyền truy cập API cho bên thứ 3. Nhưng không
 **Làm sau - Nâng cao (tùy chọn):**
 
 - Module quỹ bảo hiểm + badge Trust
-- Quản lý banner quảng cáo trong admin
 - Telegram Bot: auto push bài phốt mới lên Channel
 - Public API cho bên thứ 3

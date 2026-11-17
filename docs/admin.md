@@ -35,7 +35,6 @@ Với góc nhìn đó, đây là toàn bộ Admin Panel cần có:
 
 - Tổng tiền quỹ bảo hiểm đang hoạt động
 - Số thành viên bảo hiểm sắp hết hạn trong 7 ngày tới (để chủ động gia hạn)
-- Banner quảng cáo sắp hết hạn
 
 ### Tại sao quan trọng
 
@@ -194,19 +193,9 @@ Từ bảng `settings`:
 - SEO: Title, Description, Keywords
 - Thông tin liên hệ: Hotline, Zalo, Facebook Fanpage
 - Logo, Favicon
-- Bật/tắt các module (Quỹ bảo hiểm, Banner quảng cáo...)
+- Bật/tắt các module (Quỹ bảo hiểm...)
 
-### 7.2 - Quản lý Banner quảng cáo
-
-Chức năng nhỏ nhưng cần:
-
-- Upload ảnh banner
-- Nhập link redirect
-- Chọn vị trí (Header / Sidebar / Footer)
-- Ngày bắt đầu + ngày kết thúc → tự ẩn khi hết hạn
-- Thống kê click (đơn giản, không cần phức tạp)
-
-### 7.3 - Quản lý Users (Admin only)
+### 7.2 - Quản lý Users (Admin only)
 
 - Danh sách Admin / Moderator
 - Tạo tài khoản mới, phân quyền
@@ -230,42 +219,6 @@ Mỗi hành động quan trọng cần log lại:
 | Thay đổi cấu hình hệ thống   | User, thời gian, key, giá trị cũ → mới            |
 
 Khi có tranh chấp ("tại sao bài tôi bị xóa?", "ai đã sửa thông tin tôi?") → Admin có đầy đủ bằng chứng để trả lời.
-
----
-
-## NHÓM 9 - Quản lý Banner Quảng cáo
-
-### 9.1 - Danh sách banner
-
-Màn hình quản lý tất cả banner quảng cáo trên website với:
-
-- **Bộ lọc** theo vị trí (`home_top`, `home_between`, `home_sidebar`, `scammer`, `blog`) và trạng thái
-- **Bảng hiển thị**: Ảnh preview, tên banner, vị trí, loại (ngang/vuông), thời gian chạy, trạng thái on/off
-- **Toggle trạng thái** trực tiếp từ danh sách (bật/tắt nhanh)
-- **Xóa hàng loạt** và xóa từng banner với modal xác nhận
-
-### 9.2 - Thêm/Sửa banner
-
-Form quản lý bao gồm:
-
-- Tên banner (nội bộ, dùng để quản lý)
-- Upload ảnh banner (hỗ trợ JPEG, PNG, GIF, WebP, tối đa 5MB)
-- Link chuyển hướng (URL khi click vào banner)
-- Vị trí hiển thị (5 vị trí: Trang chủ đầu trang, Trang chủ giữa nội dung, Sidebar, Trang Scammer, Blog)
-- Loại banner: Ngang (950x80px) hoặc Vuông (300x300px)
-- Ngày bắt đầu / kết thúc (tùy chọn, để trống = không giới hạn)
-- Thứ tự sắp xếp
-- Trạng thái kích hoạt
-
-### 9.3 - Logic hiển thị
-
-Banner chỉ hiển thị khi:
-
-1. `status = true`
-2. `start_date` chưa qua hoặc không được set
-3. `end_date` chưa hết hạn hoặc không được set
-
-Sắp xếp theo `sort_order` ASC, sau đó `created_at` DESC.
 
 ---
 
