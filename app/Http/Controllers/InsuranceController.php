@@ -27,8 +27,10 @@ class InsuranceController extends Controller
         SEOTools::setTitle('Quỹ bảo hiểm uy tín - Tra cứu lừa đảo');
         SEOTools::setDescription('Danh sách giao dịch viên đã ký quỹ với Scamproof, kèm trạng thái xác thực, số dư ký quỹ và kênh liên hệ chính thức.');
 
-        $query = Insurance::where('status', 1);
-        // ... rest of index ...
+        // Expired partners keep their profile page but leave the public list; suspended ones stay listed with their badge.
+        $listed = fn () => Insurance::query()->where('status', 1)->notExpired();
+
+        $query = $listed();
         if ($request->has('search') && ! empty($request->search)) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -39,7 +41,7 @@ class InsuranceController extends Controller
 
         $insurances = $query->orderBy('id', 'asc')->get();
 
-        $total_fund = Insurance::where('status', 1)->sum('amount');
+        $total_fund = $listed()->sum('amount');
         $total_members = Insurance::trusted()->count();
 
         return view('insurances.index', compact('insurances', 'total_fund', 'total_members'));

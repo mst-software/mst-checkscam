@@ -95,9 +95,17 @@ class Insurance extends Model implements HasMedia
     {
         return $query->where('status', 1)
             ->whereNull('suspended_at')
-            ->where(function (Builder $query) {
-                $query->whereNull('expired_at')->orWhere('expired_at', '>', now());
-            });
+            ->notExpired();
+    }
+
+    /**
+     * Same rule as ! isExpired(): no expiry date, or one that has not started yet (a partner expiring today is expired).
+     */
+    public function scopeNotExpired(Builder $query): Builder
+    {
+        return $query->where(function (Builder $query) {
+            $query->whereNull('expired_at')->orWhere('expired_at', '>', now());
+        });
     }
 
     public function isSuspended(): bool

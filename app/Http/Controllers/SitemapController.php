@@ -74,7 +74,8 @@ class SitemapController extends Controller
             }
         });
 
-        Insurance::query()->where('status', 1)->select(['id', 'slug', 'updated_at'])->chunkById(500, function ($insurances) use ($sitemap) {
+        // Same rule as the profile's robots tag: only trusted profiles are indexable.
+        Insurance::query()->trusted()->select(['id', 'slug', 'updated_at'])->chunkById(500, function ($insurances) use ($sitemap) {
             foreach ($insurances as $insurance) {
                 $this->addUrl($sitemap, route('insurances.frontend.show', $insurance->slug), $insurance->updated_at, 0.7, Url::CHANGE_FREQUENCY_WEEKLY);
             }
