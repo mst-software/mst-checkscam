@@ -144,7 +144,7 @@ mst-checkscam/
 │       ├── home.blade.php         # Trang chủ + search results (dùng chung)
 │       ├── maintenance.blade.php  # Trang bảo trì
 │       ├── admin/                 # Admin panel views
-│       ├── components/            # Blade components (ads, hero, breadcrumb)
+│       ├── components/            # Blade components (hero, breadcrumb)
 │       ├── insurances/            # Trang bảo hiểm public
 │       ├── layouts/               # app.blade.php (public), admin/layouts/
 │       ├── legal/                 # terms, dispute
