@@ -2,122 +2,86 @@
   'stats' => [],
   'isAction' => true,
   'recentSearches' => collect(),
-  'feedReports' => collect(),
-  'latestApprovedAt' => null,
 ])
 
 @if ($isAction)
-  {{--
-    Home hero: search on the left, live approved warnings on the right (lg+).
-    Below lg it is one column: heading, search, short assurances, the live card, then the shortcuts.
-    Soft red glow comes from tokens so dark mode follows.
-  --}}
-  @php
-    $shortcuts = [
-      ['href' => route('reports'), 'icon' => 'fa-solid fa-flag', 'label' => 'Tố cáo scam', 'featured' => true],
-      ['href' => route('insurances.frontend.index'), 'icon' => 'fa-solid fa-shield-halved', 'label' => 'Bảo hiểm CS', 'featured' => false],
-      ['href' => route('intermediary.verify'), 'icon' => 'fa-solid fa-user-check', 'label' => 'Kiểm tra GDV', 'featured' => false],
-    ];
-  @endphp
-
+  {{-- Soft red glow at the top of the light page; colors come from tokens so dark mode follows. --}}
   <section
     aria-labelledby="hero-title"
-    class="bg-[radial-gradient(60%_60%_at_25%_0%,color-mix(in_oklab,var(--color-accent)_8%,transparent),transparent_70%)]"
+    class="bg-[radial-gradient(70%_55%_at_50%_-10%,color-mix(in_oklab,var(--color-accent)_10%,transparent),transparent_70%)]"
   >
-    <x-ucs.container class="pt-5 pb-8 sm:pt-8 lg:pt-10 lg:pb-12">
-      <div class="grid gap-x-11 gap-y-5 lg:grid-cols-[1.08fr_1fr] lg:grid-rows-[auto_1fr]">
-        <div class="min-w-0 lg:col-start-1 lg:row-start-1">
+    <x-ucs.container class="pt-10 pb-12 text-center md:pt-14 md:pb-16">
+      <div class="mx-auto max-w-5xl">
+        <div>
           <span
-            class="border-line bg-surface text-ink-muted inline-flex items-center gap-2 rounded-full border py-1 pr-3.5 pl-2.5 text-xs font-semibold shadow-xs sm:text-[13px]"
+            class="border-line bg-surface text-ink-muted inline-flex items-center gap-2 rounded-full border py-1.5 pr-4 pl-3 text-[13px] font-semibold shadow-xs"
           >
             <span class="bg-success ring-success/15 size-2 shrink-0 rounded-full ring-4" aria-hidden="true"></span>
             Dữ liệu cộng đồng, được kiểm duyệt
           </span>
-
-          <div>
-            <h1
-              id="hero-title"
-              class="scanner-title text-ink mt-1 text-[clamp(1.25rem,6.4vw,2.875rem)] leading-[1.1] font-black tracking-[-0.025em] whitespace-nowrap uppercase sm:mt-2 lg:max-w-[34rem] lg:whitespace-normal"
-            >
-              Kiểm tra &amp; tố cáo
-              <span
-                class="text-accent relative inline-block whitespace-nowrap after:absolute after:right-0 after:-bottom-1.5 after:left-[2%] after:h-2 after:rounded-full after:bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--color-accent)_25%,transparent),transparent)]"
-              >
-                scam.
-              </span>
-            </h1>
-          </div>
-
-          <p class="text-ink-muted mt-1 hidden text-base leading-relaxed sm:block lg:text-[17px]">
-            Tra cứu SĐT, số tài khoản, Facebook hoặc link trước khi chuyển tiền.
-          </p>
-
-          <x-hero.search-form class="mt-4 sm:mt-6" hints :recent-searches="$recentSearches" />
-
-          {{-- Short assurances on small screens, the full sentences stacked on desktop. --}}
-          <ul
-            aria-label="Cam kết khi tra cứu"
-            class="text-ink-muted mt-3.5 flex flex-wrap gap-x-3 gap-y-1.5 text-xs font-medium sm:gap-x-4 lg:hidden"
-          >
-            @foreach (['Miễn phí', 'Có kiểm duyệt', 'Bảo mật người báo'] as $assurance)
-              <li class="inline-flex items-center gap-1.5">
-                <i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i>
-                {{ $assurance }}
-              </li>
-            @endforeach
-          </ul>
-          <ul
-            aria-label="Cam kết khi tra cứu"
-            class="text-ink-muted mt-5 hidden flex-col gap-2 text-[13.5px] font-medium lg:flex"
-          >
-            @foreach (['Tra cứu miễn phí, không cần đăng ký', 'Mọi tố cáo đều qua kiểm duyệt', 'Không công khai danh tính người báo cáo'] as $assurance)
-              <li class="inline-flex items-center gap-2">
-                <i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i>
-                {{ $assurance }}
-              </li>
-            @endforeach
-          </ul>
         </div>
 
-        <div class="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
-          @include('partials.home.hero-feed', ['feedReports' => $feedReports, 'latestApprovedAt' => $latestApprovedAt])
-        </div>
+        <h1
+          id="hero-title"
+          class="scanner-title text-ink mt-1 text-[clamp(1.1rem,5.2vw,2.75rem)] leading-[1.15] font-black tracking-[-0.02em] whitespace-nowrap uppercase md:mt-2"
+        >
+          Kiểm tra &amp; tố cáo
+          <span
+            class="text-accent relative inline-block whitespace-nowrap after:absolute after:right-0 after:-bottom-1.5 after:left-[2%] after:h-2 after:rounded-full after:bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--color-accent)_25%,transparent),transparent)]"
+          >
+            scam.
+          </span>
+        </h1>
 
-        <nav aria-label="Lối tắt" class="min-w-0 lg:col-start-1 lg:row-start-2">
-          <ul class="flex flex-wrap gap-2.5">
-            @foreach ($shortcuts as $shortcut)
-              <li>
-                <a
-                  href="{{ $shortcut['href'] }}"
-                  @class([
-                    'focus-visible:outline-accent inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-[13.5px] font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2',
-                    'border-accent/30 bg-accent-soft text-accent hover:border-accent/60' => $shortcut['featured'],
-                    'border-line bg-surface text-ink hover:border-line-strong shadow-xs' => ! $shortcut['featured'],
-                  ])
-                >
-                  <i class="{{ $shortcut['icon'] }} text-accent" aria-hidden="true"></i>
-                  {{ $shortcut['label'] }}
-                </a>
-              </li>
-            @endforeach
+        <p class="text-ink-muted mx-auto mt-5 max-w-[40rem] text-base leading-relaxed md:mt-6 md:text-lg">
+          Hệ thống dữ liệu lớn nhất Việt Nam giúp bạn kiểm tra độ tín nhiệm của đối tác thông qua SĐT, số tài khoản hoặc
+          link mạng xã hội.
+        </p>
+
+        <x-hero.search-form class="mx-auto mt-8 max-w-[48.75rem] md:mt-9" hints :recent-searches="$recentSearches" />
+
+        <ul
+          aria-label="Cam kết khi tra cứu"
+          class="text-ink-muted mt-5 flex flex-col items-center gap-x-6 gap-y-2 text-[13px] font-medium sm:flex-row sm:flex-wrap sm:justify-center"
+        >
+          @foreach (['Tra cứu miễn phí, không cần đăng ký', 'Mọi tố cáo đều qua kiểm duyệt', 'Không công khai danh tính người báo cáo'] as $assurance)
+            <li class="inline-flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i>
+              {{ $assurance }}
+            </li>
+          @endforeach
+        </ul>
+
+        <nav aria-label="Lối tắt" class="mt-8">
+          <ul class="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+            <li>
+              <x-hero.action-card :href="route('reports')" icon="fa-solid fa-flag" label="Tố cáo scam" sub="Report" />
+            </li>
+            <li>
+              <x-hero.action-card
+                :href="route('insurances.frontend.index')"
+                icon="fa-solid fa-shield-halved"
+                label="Bảo hiểm CS"
+                sub="Insurance"
+              />
+            </li>
+            <li>
+              <x-hero.action-card
+                :href="route('newfeed.index')"
+                icon="fa-solid fa-store"
+                label="Chợ buôn bán"
+                sub="Trading"
+              />
+            </li>
+            <li>
+              <x-hero.action-card
+                :href="url('/api-checkscam')"
+                icon="fa-solid fa-robot"
+                label="Bot check"
+                sub="Automation"
+              />
+            </li>
           </ul>
-
-          <p class="text-ink-subtle mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px]">
-            <span>Tiện ích khác:</span>
-            <a
-              href="{{ route('newfeed.index') }}"
-              class="text-ink-muted hover:text-accent focus-visible:outline-accent rounded-sm font-semibold underline-offset-2 hover:underline focus-visible:outline-2"
-            >
-              Chợ buôn bán
-            </a>
-            <span aria-hidden="true">·</span>
-            <a
-              href="{{ url('/api-checkscam') }}"
-              class="text-ink-muted hover:text-accent focus-visible:outline-accent rounded-sm font-semibold underline-offset-2 hover:underline focus-visible:outline-2"
-            >
-              Bot check
-            </a>
-          </p>
         </nav>
       </div>
     </x-ucs.container>
