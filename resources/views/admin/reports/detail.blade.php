@@ -35,7 +35,7 @@
                 <label>Loại đối tượng</label>
                 <p class="mb-0">
                   <strong>
-                    {{ $report->type === 'account' ? 'Tài khoản ngân hàng / SĐT' : 'Website / URL' }}
+                    {{ $report->typeLabel() }}
                   </strong>
                 </p>
               </div>
@@ -60,6 +60,22 @@
                 <p class="mb-0"><strong>{{ $report->target_bank ?? '-' }}</strong></p>
               </div>
             </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Kênh liên hệ khác (Zalo / Facebook / TikTok)</label>
+                <p class="mb-0"><strong>{{ $report->target_socials ?: '-' }}</strong></p>
+              </div>
+            </div>
+            @if ($report->type === 'back')
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Tài khoản đã mua (bị back)</label>
+                  <p class="mb-0"><strong>{{ $report->sold_account ?: '-' }}</strong></p>
+                </div>
+              </div>
+            @endif
           </div>
           <div class="row mb-3">
             <div class="col-md-6">
@@ -151,6 +167,24 @@
                 <label>Liên hệ</label>
                 <p class="mb-0">
                   <strong>{{ $report->reporter_contact ?: 'Không cung cấp' }}</strong>
+                </p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Email (nhận kết quả kiểm duyệt)</label>
+                <p class="mb-0">
+                  <strong>{{ $report->reporter_email ?: 'Không cung cấp' }}</strong>
+                </p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Vai trò</label>
+                <p class="mb-0">
+                  <strong>
+                    {{ $report->reporter_role === 'proxy' ? 'Đăng hộ' : ($report->reporter_role === 'victim' ? 'Nạn nhân, chịu trách nhiệm về nội dung' : 'Không cung cấp') }}
+                  </strong>
                 </p>
               </div>
             </div>
@@ -417,7 +451,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <strong class="text-danger">{{ $report->target_id }}</strong>
               <span class="badge" style="background: #e0f0ff; color: #1a6fb5; font-size: 11px">
-                {{ $report->type === 'account' ? 'STK/SĐT' : 'Website' }}
+                {{ $report->typeLabel() }}
               </span>
             </div>
             @if ($report->target_name)
@@ -476,7 +510,7 @@
               <div class="d-flex justify-content-between align-items-center">
                 <strong class="text-danger">{{ $report->target_id }}</strong>
                 <span class="badge" style="background: #e0f0ff; color: #1a6fb5; font-size: 11px">
-                  {{ $report->type === 'account' ? 'STK/SĐT' : 'Website' }}
+                  {{ $report->typeLabel() }}
                 </span>
               </div>
               @if ($report->target_name)
@@ -542,7 +576,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <strong class="text-danger">{{ $report->target_id }}</strong>
               <span class="badge" style="background: #e0f0ff; color: #1a6fb5; font-size: 11px">
-                {{ $report->type === 'account' ? 'STK/SĐT' : 'Website' }}
+                {{ $report->typeLabel() }}
               </span>
             </div>
             @if ($report->target_name)
