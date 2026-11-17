@@ -9,8 +9,8 @@
     const MAX_FILE_SIZE = 5 * 1024 * 1024;
     const MIN_DESCRIPTION = 20;
     const MAX_DESCRIPTION = 5000;
-    // Capacity of the decimal(10,2) column, mirrored from ReportController::MAX_DAMAGE_AMOUNT.
-    const MAX_AMOUNT = 99999999;
+    // Mirrors ReportController::MAX_DAMAGE_AMOUNT (about 100 billion VND).
+    const MAX_AMOUNT = 99999999999;
     const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const DRAFT_KEY = 'report-form-draft-v1';
     const DRAFT_TEXT_FIELDS = [
@@ -130,7 +130,7 @@
         if (!amount) return 'Vui lòng nhập số tiền thiệt hại (nhập 0 nếu chưa mất tiền).';
         if (!/^[\d.,\s]+$/.test(amount)) return 'Số tiền thiệt hại phải là chữ số.';
         if (Number(digits(amount)) > MAX_AMOUNT) {
-          return 'Số tiền tối đa là 99.999.999 VNĐ. Nếu thiệt hại lớn hơn, hãy ghi rõ số tiền trong phần kể lại sự việc.';
+          return 'Số tiền tối đa là 99.999.999.999 VNĐ. Nếu thiệt hại lớn hơn, hãy ghi rõ số tiền trong phần kể lại sự việc.';
         }
         return '';
       },

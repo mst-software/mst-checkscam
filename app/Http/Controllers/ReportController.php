@@ -26,8 +26,8 @@ class ReportController extends Controller
 
     private const RELATED_LIMIT = 5;
 
-    /** Largest whole VND amount the reports.damage_amount decimal(10,2) column can hold. */
-    private const MAX_DAMAGE_AMOUNT = 99_999_999;
+    /** Largest whole VND amount accepted (about 100 billion); the reports.damage_amount decimal(15,2) column holds far more. */
+    private const MAX_DAMAGE_AMOUNT = 99_999_999_999;
 
     public function store(Request $request)
     {
@@ -84,7 +84,7 @@ class ReportController extends Controller
             'damage_amount.required' => 'Vui lòng nhập số tiền thiệt hại (nhập 0 nếu chưa mất tiền).',
             'damage_amount.integer' => 'Số tiền thiệt hại phải là chữ số.',
             'damage_amount.min' => 'Số tiền không được nhỏ hơn 0.',
-            'damage_amount.max' => 'Số tiền tối đa là 99.999.999 VNĐ. Nếu thiệt hại lớn hơn, hãy ghi rõ số tiền trong phần kể lại sự việc.',
+            'damage_amount.max' => 'Số tiền tối đa là '.number_format(self::MAX_DAMAGE_AMOUNT, 0, ',', '.').' VNĐ. Nếu thiệt hại lớn hơn, hãy ghi rõ số tiền trong phần kể lại sự việc.',
             'description.required' => 'Vui lòng kể lại sự việc.',
             'description.min' => 'Vui lòng mô tả sự việc với ít nhất 20 ký tự.',
             'description.max' => 'Phần kể lại sự việc không được dài quá 5000 ký tự.',
