@@ -248,6 +248,16 @@ class DemoContent
             ['name' => 'Gia Bảo', 'content' => 'Trang web của nó giống trang thật đến 90%, chỉ khác tên miền. Cẩn thận!'],
             ['name' => 'Mai Anh', 'content' => 'Mình là người bị lừa thứ 2 trong bài này, đã bổ sung bằng chứng ở bài tố cáo khác.'],
             ['name' => 'Trọng Hiếu', 'content' => 'Acc back kiểu này nhiều lắm, mua acc nhớ đổi hết thông tin liên kết ngay.'],
+            ['name' => 'Khánh Linh', 'content' => 'Mẹ mình suýt bị y chang kịch bản này, may mà gọi hỏi con trước.'],
+            ['name' => null, 'content' => 'Đã tra số này trước khi chuyển cọc, cảm ơn admin duyệt bài nhanh.'],
+            ['name' => 'Văn Toàn', 'content' => 'Tên trong bài khác tên Zalo nó dùng với mình, chắc thuê tài khoản người khác.'],
+            ['name' => 'Hải Yến', 'content' => 'Mình đã gửi thêm ảnh chuyển khoản vào bài tố cáo mới, mọi người tham khảo.'],
+            ['name' => null, 'content' => 'Cùng một nhóm Telegram đó, mình mất 15 triệu, đang làm đơn gửi công an.'],
+            ['name' => 'Bảo Ngọc', 'content' => 'Ai bị cùng đối tượng thì để lại liên hệ, mình gom bằng chứng nộp chung.'],
+            ['name' => 'Thành Đạt', 'content' => 'Nó vừa lập trang mới, ảnh đại diện y hệt trang cũ.'],
+            ['name' => null, 'content' => 'Giá rẻ vậy là biết có vấn đề rồi, cảm ơn bạn cảnh báo.'],
+            ['name' => 'Lan Phương', 'content' => 'Ngân hàng bảo phải có giấy xác nhận trình báo mới phong toả được, bạn làm sớm nhé.'],
+            ['name' => 'Tiến Dũng', 'content' => 'Đối tượng này còn giả làm GDV, mọi người kiểm tra đúng kênh chính thức trên trang Bảo hiểm CS.'],
         ];
     }
 
