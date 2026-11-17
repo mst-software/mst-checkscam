@@ -96,7 +96,7 @@ class HomeController extends Controller
             ->select(['id', 'slug', 'type', 'target_id', 'target_name', 'category', 'scam_type', 'evidence_images', 'approved_at', 'created_at'])
             ->orderByDesc('approved_at')
             ->latest()
-            ->limit(6)
+            ->limit(7)
             ->get();
     }
 

@@ -352,3 +352,13 @@ test('load more comments returns only the masked comment items partial', functio
 
     expect(substr_count($response->getContent(), 'data-comment-item'))->toBe(2);
 });
+
+test('the latest warnings table ends with a see more link to the warnings list', function () {
+    homeApprovedReport();
+
+    $html = (string) $this->get('/')->assertOk()->getContent();
+    $table = (string) str($html)->after('data-latest-reports')->before('Cập nhật lần cuối');
+
+    expect($table)
+        ->toMatch('/<a\s[^>]*href="'.preg_quote(route('warnings.index'), '/').'"[^>]*>\s*Xem thêm/');
+});
