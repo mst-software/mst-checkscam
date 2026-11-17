@@ -64,11 +64,6 @@ class Insurance extends Model implements HasMedia
         return $this->hasMany(InsuranceLedgerEntry::class)->orderBy('id');
     }
 
-    public function claims(): HasMany
-    {
-        return $this->hasMany(InsuranceClaim::class);
-    }
-
     /** Suspension / reinstatement / expiry audit trail, oldest first. */
     public function statusEvents(): HasMany
     {

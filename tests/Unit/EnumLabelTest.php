@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\ChannelType;
-use App\Enums\ClaimStatus;
 use App\Enums\ComplaintReason;
 use App\Enums\ComplaintStatus;
 use App\Enums\InsuranceStatusEventType;
@@ -19,7 +18,6 @@ it('gives every case a vietnamese label', function (string $enum) {
     ComplaintStatus::class,
     ChannelType::class,
     LedgerEntryType::class,
-    ClaimStatus::class,
     InsuranceStatusEventType::class,
     IntermediaryVerificationState::class,
 ]);
@@ -32,23 +30,12 @@ it('keeps the stored values stable', function () {
         ->and(array_column(ComplaintReason::cases(), 'value'))->toBe(['wrong_info', 'not_scam', 'remove_request', 'other'])
         ->and(array_column(ComplaintStatus::cases(), 'value'))->toBe(['pending', 'resolved', 'dismissed'])
         ->and(array_column(ChannelType::cases(), 'value'))->toBe(['phone', 'facebook', 'telegram', 'zalo', 'bank_account', 'website'])
-        ->and(array_column(LedgerEntryType::cases(), 'value'))->toBe(['deposit', 'payout', 'refund', 'adjustment'])
-        ->and(array_column(ClaimStatus::cases(), 'value'))->toBe(['submitted', 'reviewing', 'need_info', 'approved', 'rejected', 'paid']);
+        ->and(array_column(LedgerEntryType::cases(), 'value'))->toBe(['deposit', 'payout', 'refund', 'adjustment']);
 });
 
 it('labels statuses in vietnamese', function () {
     expect(ComplaintStatus::Pending->label())->toBe('Chờ xử lý')
         ->and(ComplaintStatus::Dismissed->label())->toBe('Đã bác bỏ');
-});
-
-it('defines the claim workflow transitions', function () {
-    expect(ClaimStatus::Submitted->allowedTransitions())->toBe([ClaimStatus::Reviewing, ClaimStatus::Rejected])
-        ->and(ClaimStatus::Reviewing->allowedTransitions())->toBe([ClaimStatus::NeedInfo, ClaimStatus::Approved, ClaimStatus::Rejected])
-        ->and(ClaimStatus::NeedInfo->allowedTransitions())->toBe([ClaimStatus::Reviewing, ClaimStatus::Rejected])
-        ->and(ClaimStatus::Approved->allowedTransitions())->toBe([ClaimStatus::Paid])
-        ->and(ClaimStatus::Rejected->isFinal())->toBeTrue()
-        ->and(ClaimStatus::Paid->isFinal())->toBeTrue()
-        ->and(ClaimStatus::Approved->isFinal())->toBeFalse();
 });
 
 it('checks ledger amount signs per entry type', function () {
