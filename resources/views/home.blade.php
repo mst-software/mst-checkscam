@@ -21,7 +21,7 @@
         @include('partials.home.moderation')
 
         <div class="grid gap-8 lg:grid-cols-12">
-          <div class="min-w-0 space-y-8 lg:col-span-8">
+          <div class="flex min-w-0 flex-col gap-8 lg:col-span-8">
             @include(
               'partials.home.latest-reports',
               [

@@ -8,7 +8,7 @@
   $columns = 'md:grid-cols-[minmax(0,1.5fr)_5.5rem_minmax(0,1fr)_6.5rem_6rem]';
 @endphp
 
-<section aria-label="Cảnh báo mới nhất">
+<section aria-label="Cảnh báo mới nhất" class="flex flex-1 flex-col">
   <x-ucs.section-title
     title="Cảnh báo mới nhất"
     subtitle="Chỉ gồm tố cáo đã được kiểm duyệt."
@@ -17,7 +17,8 @@
   />
 
   @if ($latestReports->isNotEmpty())
-    <x-ucs.card :padding="false" class="overflow-hidden">
+    {{-- Plain box instead of x-ucs.card: its inner wrapper would block the rows from stretching to the sidebar height. --}}
+    <div class="border-line bg-surface rounded-card flex flex-1 flex-col overflow-hidden border">
       <div
         class="{{ $columns }} border-line text-ink-subtle bg-surface-muted hidden gap-4 border-b px-5 py-3 text-xs font-semibold tracking-wider uppercase md:grid"
         aria-hidden="true"
@@ -29,17 +30,17 @@
         <span>Duyệt ngày</span>
       </div>
 
-      <ul class="divide-line divide-y" data-latest-reports>
+      <ul class="divide-line flex flex-1 flex-col divide-y" data-latest-reports>
         @foreach ($latestReports as $report)
           @php
             $scamTypeLabel = $report->scam_type?->label() ?? (filled($report->category) ? $report->category : '—');
             $evidenceCount = count($report->evidence_images ?? []);
           @endphp
 
-          <li>
+          <li class="flex-1">
             <a
               href="{{ route('scammer.show', $report->slug) }}"
-              class="{{ $columns }} hover:bg-surface-muted focus-visible:outline-accent grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-4 py-3 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 sm:px-5"
+              class="{{ $columns }} hover:bg-surface-muted focus-visible:outline-accent grid h-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-4 py-3 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 sm:px-5"
             >
               <span class="min-w-0">
                 <span class="text-ink block truncate text-sm font-semibold">
@@ -86,7 +87,7 @@
           </li>
         @endforeach
       </ul>
-    </x-ucs.card>
+    </div>
 
     @if ($latestApprovedAt)
       <p class="text-ink-subtle mt-3 flex items-center gap-2 text-xs" data-freshness>
