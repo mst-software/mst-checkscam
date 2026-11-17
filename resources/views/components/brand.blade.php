@@ -1,6 +1,7 @@
 {{--
-  Brand lockup: shield mark (SVG) + wordmark as real HTML text so it uses the page
-  font and stays crisp at any size. `dark` is for always-dark surfaces such as the footer.
+  Brand logo image (shield + wordmark). The light logo has a white background and the dark one #0b1220
+  (the footer surface); `mix-blend-lighten` hides the small colour gap on the dark header surface.
+  `dark` is for always-dark surfaces such as the footer.
 --}}
 
 @props([
@@ -8,23 +9,29 @@
   'dark' => false,
 ])
 @php
-  $mark = match ($size) {
-    'sm' => 'h-7',
-    'lg' => 'h-12',
-    default => 'h-9',
-  };
-  $word = match ($size) {
-    'sm' => 'text-lg',
-    'lg' => 'text-3xl',
-    default => 'text-2xl',
+  $height = match ($size) {
+    'sm' => 'h-8',
+    'lg' => 'h-14',
+    default => 'h-11 sm:h-13',
   };
 @endphp
 
-<span {{ $attributes->class(['inline-flex items-center gap-2']) }}>
-  <img src="{{ asset('img/logo-mark.svg') }}" alt="" width="64" height="72" class="{{ $mark }} w-auto shrink-0" />
-  {{-- Flex container: whitespace between the two halves is ignored, so formatters cannot insert a gap. --}}
-  <span class="{{ $word }} inline-flex font-extrabold tracking-tight">
-    <span class="{{ $dark ? 'text-white' : 'text-ink' }}">Scam</span>
-    <span class="{{ $dark ? 'text-red-400' : 'text-accent' }}">proof</span>
-  </span>
+<span {{ $attributes->class(['inline-flex items-center']) }}>
+  @unless ($dark)
+    <img
+      src="{{ asset('img/scamproof-logo-tight.png') }}"
+      alt="Scamproof"
+      width="651"
+      height="159"
+      class="{{ $height }} w-auto dark:hidden"
+    />
+  @endunless
+
+  <img
+    src="{{ asset('img/scamproof-logo-dark-tight.png') }}"
+    alt="Scamproof"
+    width="651"
+    height="159"
+    class="{{ $height }} {{ $dark ? '' : 'hidden dark:block' }} w-auto mix-blend-lighten"
+  />
 </span>
