@@ -47,10 +47,6 @@
                       <i class="fas fa-check-circle text-success me-3"></i>
                       <span>Dashboard & Search Analytics cơ bản</span>
                     </li>
-                    <li class="d-flex align-items-center mb-3">
-                      <i class="fas fa-check-circle text-success me-3"></i>
-                      <span>Quản lý Banner quảng cáo đa vị trí</span>
-                    </li>
                     <li class="d-flex align-items-center mb-3 opacity-50">
                       <i class="fas fa-times-circle text-muted me-3"></i>
                       <span>Telegram Hub (Duyệt qua Bot)</span>
