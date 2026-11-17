@@ -31,7 +31,7 @@ function validReportPayload(array $overrides = []): array
 
 it('stores the scam type submitted with a report', function () {
     $this->post(route('report.store'), validReportPayload(['scam_type' => 'investment']))
-        ->assertRedirect(route('home'))
+        ->assertRedirect(route('reports'))
         ->assertSessionHasNoErrors();
 
     expect(Report::sole()->scam_type)->toBe(ScamType::Investment);

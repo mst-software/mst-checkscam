@@ -88,6 +88,7 @@
       rows="5"
       required
       minlength="20"
+      maxlength="5000"
       placeholder="{{ $descriptionPlaceholders[$type] }}"
       data-placeholders="{{ json_encode($descriptionPlaceholders) }}"
       data-field="description"

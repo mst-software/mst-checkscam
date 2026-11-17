@@ -26,6 +26,9 @@ class ReportController extends Controller
 
     private const RELATED_LIMIT = 5;
 
+    /** Largest whole VND amount the reports.damage_amount decimal(10,2) column can hold. */
+    private const MAX_DAMAGE_AMOUNT = 99_999_999;
+
     public function store(Request $request)
     {
         $ip = $request->ip();
@@ -53,16 +56,19 @@ class ReportController extends Controller
             'type' => ['required', Rule::in(Report::TYPES)],
             'target_id' => 'required|string|max:255',
             'target_name' => 'nullable|string|max:255',
-            'target_bank' => 'nullable|string|max:255',
-            'target_socials' => 'nullable|string|max:255',
+            // Fields of other tabs are dropped rather than rejected, so a stale value never blocks the form.
+            'target_bank' => 'exclude_if:type,website|nullable|string|max:255',
+            'target_socials' => 'exclude_if:type,website|nullable|string|max:255',
             'sold_account' => 'exclude_unless:type,back|nullable|string|max:255',
             'category' => 'nullable|string|max:255',
-            'scam_type' => ['nullable', Rule::enum(ScamType::class)],
-            'damage_amount' => 'required|numeric|min:0',
-            'description' => 'required|string|min:20',
+            // Back reports get their scam type below; the other types cannot claim it.
+            'scam_type' => ['exclude_if:type,back', 'nullable', Rule::enum(ScamType::class)->except(ScamType::AccountBack)],
+            // integer (not numeric) so "1e3" is refused; max is the decimal(10,2) column capacity.
+            'damage_amount' => 'required|integer|min:0|max:'.self::MAX_DAMAGE_AMOUNT,
+            'description' => 'required|string|min:20|max:5000',
             'reporter_name' => 'nullable|string|max:255',
             'reporter_contact' => 'required|string|max:255',
-            'reporter_email' => 'required|email|max:255',
+            'reporter_email' => ['required', 'email:rfc', 'regex:/@[^@\s]+\.[^@\s.]+$/', 'max:255'],
             'reporter_role' => ['required', Rule::in(Report::REPORTER_ROLES)],
 
             'evidence_images' => 'required|array|min:1|max:10',
@@ -76,14 +82,17 @@ class ReportController extends Controller
             'sold_account.max' => 'Tài khoản đã mua không được dài quá 255 ký tự.',
             'scam_type.enum' => 'Hình thức lừa đảo không hợp lệ.',
             'damage_amount.required' => 'Vui lòng nhập số tiền thiệt hại (nhập 0 nếu chưa mất tiền).',
-            'damage_amount.numeric' => 'Số tiền thiệt hại phải là chữ số.',
+            'damage_amount.integer' => 'Số tiền thiệt hại phải là chữ số.',
             'damage_amount.min' => 'Số tiền không được nhỏ hơn 0.',
+            'damage_amount.max' => 'Số tiền tối đa là 99.999.999 VNĐ. Nếu thiệt hại lớn hơn, hãy ghi rõ số tiền trong phần kể lại sự việc.',
             'description.required' => 'Vui lòng kể lại sự việc.',
             'description.min' => 'Vui lòng mô tả sự việc với ít nhất 20 ký tự.',
+            'description.max' => 'Phần kể lại sự việc không được dài quá 5000 ký tự.',
             'reporter_contact.required' => 'Vui lòng nhập số Zalo hoặc SĐT để kiểm duyệt viên liên hệ khi cần.',
             'reporter_contact.max' => 'Thông tin liên hệ không được dài quá 255 ký tự.',
             'reporter_email.required' => 'Vui lòng nhập email để nhận kết quả kiểm duyệt.',
             'reporter_email.email' => 'Email không đúng định dạng.',
+            'reporter_email.regex' => 'Email không đúng định dạng, ví dụ: ten@gmail.com',
             'reporter_role.required' => 'Vui lòng chọn vai trò của bạn.',
             'reporter_role.in' => 'Vai trò người báo cáo không hợp lệ.',
             'evidence_images.required' => 'Bắt buộc phải tải lên ít nhất 1 ảnh bằng chứng.',
@@ -132,7 +141,8 @@ class ReportController extends Controller
             return response()->json(['redirect' => route('home')]);
         }
 
-        return redirect()->route('home')
+        // Without JavaScript there is no success dialog; the form page shows the flash instead.
+        return redirect()->route('reports')
             ->with('success', 'Báo cáo đã được gửi và đang chờ kiểm duyệt.');
     }
 

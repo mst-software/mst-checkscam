@@ -141,7 +141,8 @@ describe('page', function () {
         expect(openingTag($html, 'id="reporter_name"'))->not->toMatch('/\srequired/')
             ->and(openingTag($html, 'id="reporter_email"'))->toMatch('/\srequired/')
             ->and(openingTag($html, 'id="reporter_contact"'))->toMatch('/\srequired/')
-            ->and(openingTag($html, 'id="damage_amount"'))->toMatch('/\srequired/');
+            ->and(openingTag($html, 'id="damage_amount"'))->toMatch('/\srequired/')
+            ->and(openingTag($html, 'id="description"'))->toContain('maxlength="5000"');
     });
 });
 
@@ -191,6 +192,30 @@ describe('store', function () {
         expect(Report::sole()->sold_account)->toBeNull();
     });
 
+    it('accepts the largest amount the column can hold', function () {
+        $this->post(route('report.store'), reportFormPayload(['damage_amount' => '99.999.999']))->assertSessionHasNoErrors();
+
+        expect((float) Report::sole()->damage_amount)->toBe(99999999.0);
+    });
+
+    it('drops the bank and channels of a website report', function () {
+        $this->post(route('report.store'), reportFormPayload([
+            'type' => 'website',
+            'target_id' => 'https://shop-lua.vn',
+            'target_socials' => str_repeat('a', 300),
+        ]))->assertSessionHasNoErrors();
+
+        expect(Report::sole())->target_bank->toBeNull()->target_socials->toBeNull();
+    });
+
+    it('confirms a regular post on the form page', function () {
+        $this->followingRedirects()
+            ->post(route('report.store'), reportFormPayload())
+            ->assertOk()
+            ->assertSee('Báo cáo đã được gửi và đang chờ kiểm duyệt.')
+            ->assertSee('action="'.route('report.store').'"', false);
+    });
+
     it('rejects invalid input', function (array $overrides, string $field, string $message) {
         $this->post(route('report.store'), reportFormPayload($overrides), ajaxHeaders())
             ->assertUnprocessable()
@@ -212,6 +237,11 @@ describe('store', function () {
         'missing contact' => [['reporter_contact' => ''], 'reporter_contact', 'Vui lòng nhập số Zalo hoặc SĐT để kiểm duyệt viên liên hệ khi cần.'],
         'missing email' => [['reporter_email' => ''], 'reporter_email', 'Vui lòng nhập email để nhận kết quả kiểm duyệt.'],
         'invalid email' => [['reporter_email' => 'not-an-email'], 'reporter_email', 'Email không đúng định dạng.'],
+        'email without a dot in the domain' => [['reporter_email' => 'nan.nhan@localhost'], 'reporter_email', 'Email không đúng định dạng, ví dụ: ten@gmail.com'],
+        'exponent amount' => [['damage_amount' => '1e3'], 'damage_amount', 'Số tiền thiệt hại phải là chữ số.'],
+        'amount over the column capacity' => [['damage_amount' => '999.999.999.999'], 'damage_amount', 'Số tiền tối đa là 99.999.999 VNĐ. Nếu thiệt hại lớn hơn, hãy ghi rõ số tiền trong phần kể lại sự việc.'],
+        'too long description' => [['description' => str_repeat('a', 5001)], 'description', 'Phần kể lại sự việc không được dài quá 5000 ký tự.'],
+        'back scam type on an account report' => [['scam_type' => 'account_back'], 'scam_type', 'Hình thức lừa đảo không hợp lệ.'],
         'missing role' => [['reporter_role' => ''], 'reporter_role', 'Vui lòng chọn vai trò của bạn.'],
         'unknown role' => [['reporter_role' => 'witness'], 'reporter_role', 'Vai trò người báo cáo không hợp lệ.'],
         'no evidence' => [['evidence_images' => []], 'evidence_images', 'Bắt buộc phải tải lên ít nhất 1 ảnh bằng chứng.'],

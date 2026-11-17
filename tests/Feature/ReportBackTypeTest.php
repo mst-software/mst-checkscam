@@ -46,7 +46,7 @@ function backReportPayload(array $overrides = []): array
 describe('store', function () {
     it('stores a back report with the sold account and the forced scam type', function () {
         $this->post(route('report.store'), backReportPayload(['scam_type' => 'investment']))
-            ->assertRedirect(route('home'))
+            ->assertRedirect(route('reports'))
             ->assertSessionHasNoErrors();
 
         $report = Report::sole();

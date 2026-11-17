@@ -8,6 +8,9 @@
     const MAX_FILES = 10;
     const MAX_FILE_SIZE = 5 * 1024 * 1024;
     const MIN_DESCRIPTION = 20;
+    const MAX_DESCRIPTION = 5000;
+    // Capacity of the decimal(10,2) column, mirrored from ReportController::MAX_DAMAGE_AMOUNT.
+    const MAX_AMOUNT = 99999999;
     const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const DRAFT_KEY = 'report-form-draft-v1';
     const DRAFT_TEXT_FIELDS = [
@@ -128,6 +131,9 @@
         const amount = value('damage_amount');
         if (!amount) return 'Vui lòng nhập số tiền thiệt hại (nhập 0 nếu chưa mất tiền).';
         if (!/^[\d.,\s]+$/.test(amount)) return 'Số tiền thiệt hại phải là chữ số.';
+        if (Number(digits(amount)) > MAX_AMOUNT) {
+          return 'Số tiền tối đa là 99.999.999 VNĐ. Nếu thiệt hại lớn hơn, hãy ghi rõ số tiền trong phần kể lại sự việc.';
+        }
         return '';
       },
       description: function () {
@@ -136,6 +142,7 @@
         if (length < MIN_DESCRIPTION) {
           return 'Vui lòng mô tả sự việc với ít nhất ' + MIN_DESCRIPTION + ' ký tự (hiện có ' + length + ').';
         }
+        if (length > MAX_DESCRIPTION) return 'Phần kể lại sự việc không được dài quá ' + MAX_DESCRIPTION + ' ký tự.';
         return '';
       },
       evidence_images: function () {
@@ -144,7 +151,7 @@
       reporter_email: function () {
         const email = value('reporter_email');
         if (!email) return 'Vui lòng nhập email để nhận kết quả kiểm duyệt.';
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Email không đúng định dạng.';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@.]+$/.test(email)) return 'Email không đúng định dạng, ví dụ: ten@gmail.com';
         return '';
       },
       reporter_contact: function () {
