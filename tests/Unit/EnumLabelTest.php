@@ -25,7 +25,7 @@ it('gives every case a vietnamese label', function (string $enum) {
 it('keeps the stored values stable', function () {
     expect(array_column(ScamType::cases(), 'value'))->toBe([
         'fake_shop', 'investment', 'romance', 'job_offer', 'impersonation',
-        'loan', 'lottery_gift', 'account_takeover', 'other',
+        'loan', 'lottery_gift', 'account_takeover', 'account_back', 'other',
     ])
         ->and(array_column(ComplaintReason::cases(), 'value'))->toBe(['wrong_info', 'not_scam', 'remove_request', 'other'])
         ->and(array_column(ComplaintStatus::cases(), 'value'))->toBe(['pending', 'resolved', 'dismissed'])

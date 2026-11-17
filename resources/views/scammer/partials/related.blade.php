@@ -17,7 +17,7 @@
               <span class="truncate">{{ StringHelper::mask_name($related->target_name) }}</span>
               <span aria-hidden="true">·</span>
               <span>
-                {{ $related->scam_type?->label() ?? ($related->type === 'website' ? 'Website' : 'Tài khoản') }}
+                {{ $related->scam_type?->label() ?? $related->typeLabel() }}
               </span>
               <span aria-hidden="true">·</span>
               <time datetime="{{ $related->created_at->toDateString() }}">

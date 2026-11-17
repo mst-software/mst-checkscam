@@ -115,6 +115,15 @@ test('raw target and reporter details never appear in head or body', function ()
         ->toContain('Người dùng ẩn danh');
 });
 
+test('a script tag in the description cannot break out of the seo json-ld', function () {
+    $report = detailReport(['description' => 'Lừa tiền cọc rồi chặn. </script><script>window.__xss=1</script> hết.']);
+
+    $html = $this->get(route('scammer.show', $report->slug))->assertOk()->getContent();
+
+    expect($html)->not->toMatch('/<\/script>\s*<script>window\.__xss/i')
+        ->and($html)->not->toContain('<script>window.__xss=1');
+});
+
 test('verdict shows the scam type badge, counts and report dates', function () {
     $older = detailReport(['created_at' => now()->subDays(20)]);
     $report = detailReport(['created_at' => now()->subDays(2)]);

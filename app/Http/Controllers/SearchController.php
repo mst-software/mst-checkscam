@@ -98,7 +98,7 @@ class SearchController extends Controller
 
         $stats = [
             'total_reports' => Report::where('status', 'approved')->count(),
-            'total_account' => Report::where('status', 'approved')->where('type', 'account')->count(),
+            'total_account' => Report::where('status', 'approved')->whereIn('type', ['account', 'back'])->count(),
             'total_website' => Report::where('status', 'approved')->where('type', 'website')->count(),
         ];
 

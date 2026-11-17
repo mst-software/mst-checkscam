@@ -1,8 +1,8 @@
 @php
   $checklist = [
-    'Chuẩn bị ảnh bill chuyển khoản, đoạn chat và trang cá nhân của đối tượng.',
+    'Chuẩn bị ảnh bill chuyển tiền và đoạn chat với đối tượng (bắt buộc để được duyệt).',
     'Che số dư, mã OTP và thông tin nhạy cảm của bạn trong ảnh.',
-    'Ghi đúng số tài khoản, SĐT hoặc link mà đối tượng đã dùng.',
+    'Ghi đúng số tài khoản, SĐT hoặc link mà đối tượng / người bán đã dùng.',
     'Mô tả theo trình tự: cách liên hệ, lời hứa hẹn, số tiền, thời điểm.',
   ];
 

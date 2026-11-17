@@ -6,11 +6,13 @@ use App\Enums\ScamType;
 use App\Helpers\FileHelper;
 use App\Http\Controllers\Controller;
 use App\Jobs\NotifyWatchersOfApprovedReport;
+use App\Mail\ReportModeratedMail;
 use App\Models\Insurance;
 use App\Models\Report;
 use App\Services\InsuranceSuspensionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class AdminReportController extends Controller
@@ -96,8 +98,19 @@ class AdminReportController extends Controller
 
         NotifyWatchersOfApprovedReport::dispatch($report);
         $suspended = $suspensions->suspendForApprovedReport($report, auth()->user());
+        $this->notifyReporter($report);
 
         return back()->with('success', 'Báo cáo đã được duyệt thành công.'.$this->suspensionNotice($suspended));
+    }
+
+    /**
+     * Emails the moderation result to the reporter; reports sent before the email field have none.
+     */
+    private function notifyReporter(Report $report): void
+    {
+        if (filled($report->reporter_email) && in_array($report->status, ['approved', 'rejected'], true)) {
+            Mail::to($report->reporter_email)->send(new ReportModeratedMail($report));
+        }
     }
 
     /**
@@ -129,6 +142,7 @@ class AdminReportController extends Controller
             'moderator_id' => auth()->id(),
             'rejection_reason' => $validated['rejection_reason'],
         ]);
+        $this->notifyReporter($report);
 
         return back()->with('success', 'Báo cáo đã bị từ chối.');
     }
@@ -138,7 +152,7 @@ class AdminReportController extends Controller
         $report = Report::findOrFail($id);
 
         $validated = $request->validate([
-            'type' => 'required|in:account,website',
+            'type' => ['required', Rule::in(Report::TYPES)],
             'target_id' => 'required|string|max:255',
             'target_name' => 'nullable|string|max:255',
             'target_bank' => 'nullable|string|max:255',
@@ -170,6 +184,7 @@ class AdminReportController extends Controller
 
         $currentImages = array_values($currentImages);
         $wasApproved = $report->isApproved();
+        $previousStatus = $report->status;
 
         $report->update([
             'type' => $validated['type'],
@@ -193,6 +208,10 @@ class AdminReportController extends Controller
         if (! $wasApproved && $report->isApproved()) {
             NotifyWatchersOfApprovedReport::dispatch($report);
             $suspended = $suspensions->suspendForApprovedReport($report, auth()->user());
+        }
+
+        if ($report->status !== $previousStatus) {
+            $this->notifyReporter($report);
         }
 
         return back()->with('success', 'Đã cập nhật toàn bộ thông tin báo cáo thành công.'.$this->suspensionNotice($suspended));

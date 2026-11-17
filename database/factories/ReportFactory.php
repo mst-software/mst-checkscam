@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ScamType;
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -69,6 +70,8 @@ class ReportFactory extends Factory
             'type' => $target['type'],
             'reporter_name' => $reporterName,
             'reporter_contact' => $this->faker->phoneNumber(),
+            'reporter_email' => $this->faker->safeEmail(),
+            'reporter_role' => $this->faker->randomElement(Report::REPORTER_ROLES),
             'target_id' => $target['target_id'],
             'target_name' => $target['target_name'],
             'target_bank' => $target['target_bank'],
@@ -85,6 +88,21 @@ class ReportFactory extends Factory
             'created_at' => $this->faker->dateTimeBetween('-15 days', 'now'),
             'updated_at' => now(),
         ];
+    }
+
+    /**
+     * The seller took a sold game account back; the buyer reports the seller.
+     */
+    public function back(): static
+    {
+        return $this->state(fn (): array => [
+            'type' => 'back',
+            'target_id' => '0934567890',
+            'target_name' => 'Người Bán Acc',
+            'target_bank' => null,
+            'sold_account' => 'Liên Quân Mobile - nick ThanhLongVIP99',
+            'scam_type' => ScamType::AccountBack,
+        ]);
     }
 
     /**

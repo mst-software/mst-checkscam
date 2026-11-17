@@ -12,6 +12,7 @@ enum ScamType: string
     case Loan = 'loan';
     case LotteryGift = 'lottery_gift';
     case AccountTakeover = 'account_takeover';
+    case AccountBack = 'account_back';
     case Other = 'other';
 
     public function label(): string
@@ -25,6 +26,7 @@ enum ScamType: string
             self::Loan => 'Cho vay, hỗ trợ vay vốn',
             self::LotteryGift => 'Trúng thưởng, nhận quà',
             self::AccountTakeover => 'Chiếm đoạt tài khoản, mã OTP',
+            self::AccountBack => 'Bán tài khoản rồi lấy lại (back acc)',
             self::Other => 'Hình thức khác',
         };
     }

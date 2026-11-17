@@ -62,7 +62,7 @@ class OgImageHelper
             'phone' => 'Số điện thoại',
             'bank' => 'Số tài khoản ngân hàng',
             'facebook' => 'Facebook',
-            default => $report->type === 'website' ? 'Website' : 'Tài khoản',
+            default => $report->typeLabel(),
         };
     }
 

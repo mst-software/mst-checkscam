@@ -46,7 +46,7 @@
               </span>
 
               <span class="justify-self-end md:justify-self-start">
-                <x-ucs.badge>{{ $report->type === 'website' ? 'Website' : 'Tài khoản' }}</x-ucs.badge>
+                <x-ucs.badge>{{ $report->typeLabel() }}</x-ucs.badge>
               </span>
 
               <span

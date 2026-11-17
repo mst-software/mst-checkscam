@@ -14,7 +14,7 @@ class PageController extends Controller
     {
         SeoHelper::setPage(
             'Tố cáo lừa đảo',
-            'Gửi tố cáo tài khoản ngân hàng, số điện thoại, Facebook hoặc website lừa đảo kèm bằng chứng để cảnh báo cộng đồng.',
+            'Tố cáo STK, số điện thoại, Facebook, website lừa đảo hoặc người bán acc bị back, kèm bằng chứng để cảnh báo cộng đồng.',
         );
 
         return view('reports.index');
