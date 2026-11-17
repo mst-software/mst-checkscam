@@ -135,6 +135,24 @@ describe('page', function () {
         );
     });
 
+    it('gives the back tab its own hint for the bank account field', function () {
+        $html = $this->get(route('reports'))->assertOk()->getContent();
+        $hint = (string) str($html)->after('id="hint-target_socials"')->before('</p>');
+
+        expect($hint)->toMatch('/data-show-for="account"\s*>\s*Nhiều kênh thì cách nhau bằng dấu phẩy/')
+            ->toMatch('/data-show-for="back"\s*>\s*Số tài khoản nhận tiền của người bán/');
+    });
+
+    it('keeps the reporter contact details out of the browser draft', function () {
+        $html = $this->get(route('reports'))->assertOk()->getContent();
+        $draftFields = (string) str($html)->after('const DRAFT_TEXT_FIELDS = [')->before(']');
+
+        expect($draftFields)->toContain("'description'")
+            ->not->toContain('reporter_email')
+            ->not->toContain('reporter_contact')
+            ->not->toContain('reporter_name');
+    });
+
     it('marks the reporter name optional and the email and contact required', function () {
         $html = $this->get(route('reports'))->assertOk()->getContent();
 

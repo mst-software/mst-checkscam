@@ -16,8 +16,8 @@
       'back' => ['label' => 'Ngân hàng đã chuyển tiền'],
     ],
     'target_socials' => [
-      'account' => ['label' => 'Kênh liên hệ khác', 'placeholder' => 'Zalo, Facebook, TikTok của đối tượng'],
-      'back' => ['label' => 'STK đã chuyển tiền', 'placeholder' => 'Số tài khoản bạn đã chuyển tiền mua acc'],
+      'account' => ['label' => 'Kênh liên hệ khác', 'placeholder' => 'Zalo, Facebook, TikTok của đối tượng', 'hint' => 'Nhiều kênh thì cách nhau bằng dấu phẩy. Công khai ở dạng đã che bớt.'],
+      'back' => ['label' => 'STK đã chuyển tiền', 'placeholder' => 'Số tài khoản bạn đã chuyển tiền mua acc', 'hint' => 'Số tài khoản nhận tiền của người bán. Công khai ở dạng đã che bớt.'],
     ],
   ];
 
@@ -142,7 +142,9 @@
       class="{{ $control }} h-11"
     />
     <p id="hint-target_socials" class="{{ $hint }}">
-      Nhiều kênh thì cách nhau bằng dấu phẩy. Công khai ở dạng đã che bớt.
+      @foreach ($copy['target_socials'] as $for => $text)
+        <span data-show-for="{{ $for }}">{{ $text['hint'] }}</span>
+      @endforeach
     </p>
     @include('reports.partials.field-error', ['field' => 'target_socials'])
   </div>
