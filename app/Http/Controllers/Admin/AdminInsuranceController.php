@@ -39,7 +39,7 @@ class AdminInsuranceController extends Controller
         $query = Insurance::query()
             ->withExists(['ledgerEntries', 'statusEvents'])
             ->addSelect(['legacy_claims_exists' => $this->legacyClaimsQuery()->whereColumn('insurance_id', 'insurances.id')->selectRaw('1')->limit(1)])
-            ->latest();
+            ->orderBy('gdv_number', $request->query('sort') === 'number_asc' ? 'asc' : 'desc');
 
         if ($request->filled('status')) {
             $query->where('status', $request->integer('status'));
@@ -63,7 +63,11 @@ class AdminInsuranceController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('full_name', 'like', '%'.$request->search.'%');
+            $gdvNumber = StringHelper::parseGdvNumber($request->search);
+            $query->where(function ($query) use ($request, $gdvNumber) {
+                $query->where('full_name', 'like', '%'.$request->search.'%')
+                    ->when($gdvNumber, fn ($query) => $query->orWhere('gdv_number', $gdvNumber));
+            });
         }
 
         $insurances = $query->paginate(15)->withQueryString();

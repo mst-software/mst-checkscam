@@ -49,6 +49,7 @@
               style="width: 64px; height: 64px; object-fit: cover"
             />
             <div class="flex-grow-1">
+              <div class="text-muted small">{{ $insurance->memberTitle() }}</div>
               <h4 class="mb-1">{{ $insurance->full_name }}</h4>
               <span class="badges {{ $standingClass }}">{{ $standingLabel }}</span>
               @if ($insurance->isSuspended())

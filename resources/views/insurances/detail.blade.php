@@ -78,8 +78,8 @@
                 </dd>
               </div>
               <div class="flex items-start justify-between gap-3">
-                <dt class="text-ink-subtle">Mã thành viên</dt>
-                <dd class="text-ink text-right font-mono font-medium">{{ $insurance->memberCode() }}</dd>
+                <dt class="text-ink-subtle">Số thứ tự</dt>
+                <dd class="text-ink text-right font-medium">{{ $insurance->memberCode() }}</dd>
               </div>
               <div class="flex items-start justify-between gap-3">
                 <dt class="text-ink-subtle">Kênh chính thức</dt>

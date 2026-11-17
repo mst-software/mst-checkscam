@@ -1,5 +1,5 @@
 {{--
-  Verification "certificate" at the top of a partner profile: avatar, name, status, member code and key facts.
+  Verification "certificate" at the top of a partner profile: avatar, name, status, GDV number and key facts.
   Expects: $insurance, $checkedAt (Carbon, time of this request).
 --}}
 @php
@@ -76,15 +76,14 @@
           <span
             class="border-line bg-surface-muted text-ink inline-flex items-center gap-1 rounded-full border py-0.5 pr-1 pl-3 text-sm"
           >
-            <span class="text-ink-subtle text-xs">Mã thành viên</span>
-            <span class="font-mono font-semibold tracking-wide" data-member-code>{{ $memberCode }}</span>
+            <span class="font-semibold" data-member-code>{{ $insurance->memberTitle() }}</span>
             <button
               type="button"
               data-copy="{{ $memberCode }}"
               class="text-ink-subtle hover:bg-surface hover:text-ink focus-visible:outline-accent flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               <i class="fa-regular fa-copy text-xs" aria-hidden="true"></i>
-              <span class="sr-only" data-copy-label aria-live="polite">Sao chép mã thành viên</span>
+              <span class="sr-only" data-copy-label aria-live="polite">Sao chép số giao dịch viên</span>
             </button>
           </span>
         </div>

@@ -53,10 +53,18 @@ final readonly class IntermediaryVerification
     public function message(): string
     {
         $name = $this->insurance?->full_name;
+        $code = $this->insurance?->memberCode();
+
+        // Without a channel the partner was found by its GDV number.
+        if ($this->insurance && ! $this->channel) {
+            return $this->isVerified()
+                ? "{$code} là {$name}, đối tác bảo hiểm đang hoạt động trên Scamproof."
+                : "{$code} là {$name} nhưng đối tác hiện {$this->lapsedReasonLabel()}. Đây không phải GDV đang hoạt động của Scamproof.";
+        }
 
         return match ($this->state) {
-            IntermediaryVerificationState::Verified => "Đây là kênh chính thức của GDV {$name}, đối tác bảo hiểm đang hoạt động trên Scamproof.",
-            IntermediaryVerificationState::Lapsed => "Kênh này thuộc GDV {$name} nhưng đối tác hiện {$this->lapsedReasonLabel()}. Đây không phải kênh GDV chính thức đang hoạt động của Scamproof.",
+            IntermediaryVerificationState::Verified => "Đây là kênh chính thức của {$code} {$name}, đối tác bảo hiểm đang hoạt động trên Scamproof.",
+            IntermediaryVerificationState::Lapsed => "Kênh này thuộc {$code} {$name} nhưng đối tác hiện {$this->lapsedReasonLabel()}. Đây không phải kênh GDV chính thức đang hoạt động của Scamproof.",
             IntermediaryVerificationState::NotListed => 'Không phải kênh GDV chính thức của Scamproof.',
         };
     }
@@ -84,7 +92,7 @@ final readonly class IntermediaryVerification
     /**
      * Public partner card data, or null when nothing matched.
      *
-     * @return array{id: int, name: string, slug: ?string, url: ?string, status: string, balance: string, expired_at: ?string, verified_at: ?string}|null
+     * @return array{id: int, number: int, code: string, name: string, slug: ?string, url: ?string, status: string, balance: string, expired_at: ?string, verified_at: ?string}|null
      */
     public function partnerSummary(): ?array
     {
@@ -94,6 +102,8 @@ final readonly class IntermediaryVerification
 
         return [
             'id' => $this->insurance->id,
+            'number' => $this->insurance->gdv_number,
+            'code' => $this->insurance->memberCode(),
             'name' => $this->insurance->full_name,
             'slug' => $this->insurance->slug,
             'url' => $this->insurance->slug ? route('insurances.frontend.show', $this->insurance->slug) : null,

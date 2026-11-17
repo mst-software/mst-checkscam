@@ -5,7 +5,7 @@
 --}}
 @php
   $shareText = 'Hồ sơ giao dịch viên đã xác thực của ' . $insurance->full_name . ' trên Scamproof';
-  $verificationLine = 'Giao dịch viên đã xác thực bởi Scamproof · Mã ' . $insurance->memberCode() . ' · Xem hồ sơ: ' . $profileUrl;
+  $verificationLine = $insurance->memberTitle() . ' đã xác thực bởi Scamproof · Xem hồ sơ: ' . $profileUrl;
   $shareButton = 'border-line bg-surface text-ink hover:bg-surface-muted rounded-control focus-visible:outline-accent inline-flex h-10 cursor-pointer items-center justify-center gap-2 border px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2';
 @endphp
 

@@ -60,6 +60,7 @@
         <div class="flex items-center gap-3">
           @include('insurances.partials.avatar', ['insurance' => $insurance])
           <div class="min-w-0">
+            <p class="text-ink-subtle text-xs font-medium" data-gdv-number>{{ $insurance->memberTitle() }}</p>
             <p class="text-ink truncate text-base font-semibold">{{ $insurance->full_name }}</p>
             <x-ucs.badge variant="success" icon="fa-solid fa-circle-check" class="mt-1">Đã xác thực</x-ucs.badge>
           </div>
@@ -87,8 +88,12 @@
           <div>
             <dt class="text-ink-subtle text-xs">Kênh khớp</dt>
             <dd class="text-ink mt-0.5 flex items-center gap-1.5 font-medium">
-              @include('insurances.partials.channel-icon', ['type' => $channelType, 'class' => 'text-ink-subtle'])
-              {{ $channelType?->label() }}
+              @if ($channelType)
+                @include('insurances.partials.channel-icon', ['type' => $channelType, 'class' => 'text-ink-subtle'])
+                {{ $channelType->label() }}
+              @else
+                Tra theo số giao dịch viên
+              @endif
             </dd>
           </div>
         </dl>
@@ -102,8 +107,10 @@
         </div>
 
         <p class="text-ink-subtle mt-4 text-xs leading-relaxed">
-          Kết quả chỉ xác nhận kênh này thuộc một GDV đã ký quỹ với Scamproof. Hãy giao dịch qua đúng các kênh được liệt
-          kê trên hồ sơ GDV.
+          @if ($result->channel)
+            Kết quả chỉ xác nhận kênh này thuộc một GDV đã ký quỹ với Scamproof.
+          @endif
+          Hãy giao dịch qua đúng các kênh được liệt kê trên hồ sơ GDV.
         </p>
       </div>
     </div>
@@ -128,6 +135,7 @@
         <div class="flex items-center gap-3">
           @include('insurances.partials.avatar', ['insurance' => $insurance])
           <div class="min-w-0">
+            <p class="text-ink-subtle text-xs font-medium" data-gdv-number>{{ $insurance->memberTitle() }}</p>
             <p class="text-ink truncate text-base font-semibold">{{ $insurance->full_name }}</p>
             <x-ucs.badge :variant="$insurance->isSuspended() ? 'danger' : 'neutral'" class="mt-1">
               {{ $insurance->status_label }}

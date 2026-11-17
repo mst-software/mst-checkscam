@@ -42,7 +42,7 @@
               type="search"
               name="search"
               value="{{ request('search') }}"
-              placeholder="Tên hoặc mã thành viên"
+              placeholder="Tên hoặc số GDV, ví dụ: GDV số 5"
               autocomplete="off"
               class="border-line bg-surface text-ink placeholder:text-ink-subtle rounded-control focus-visible:outline-accent h-10 w-full border pr-3 pl-8 text-sm focus-visible:outline-2 focus-visible:outline-offset-1"
             />

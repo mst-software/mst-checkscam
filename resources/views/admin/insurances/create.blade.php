@@ -43,6 +43,22 @@
         <div class="row">
           <div class="col-lg-8 col-sm-12">
             <div class="row">
+              @if (isset($insurance))
+                <div class="col-lg-6 col-sm-6 col-12">
+                  <div class="form-group">
+                    <label>Số thứ tự GDV</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value="{{ $insurance->memberTitle() }}"
+                      readonly
+                      disabled
+                    />
+                    <small class="text-muted">Cấp tự động khi tạo, không thể sửa.</small>
+                  </div>
+                </div>
+              @endif
+
               <div class="col-lg-6 col-sm-6 col-12">
                 <div class="form-group">
                   <label>

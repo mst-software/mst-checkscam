@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ChannelType;
 use App\Helpers\SeoHelper;
+use App\Helpers\StringHelper;
 use App\Models\Insurance;
 use App\Models\InsuranceChannel;
 use App\Services\InsuranceLedgerService;
@@ -33,13 +34,19 @@ class InsuranceController extends Controller
         $query = $listed();
         if ($request->has('search') && ! empty($request->search)) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('slug', 'like', "%{$search}%");
-            });
+            $gdvNumber = StringHelper::parseGdvNumber($search);
+
+            if ($gdvNumber !== null) {
+                $query->where('gdv_number', $gdvNumber);
+            } else {
+                $query->where(function ($q) use ($search) {
+                    $q->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%");
+                });
+            }
         }
 
-        $insurances = $query->orderBy('id', 'asc')->get();
+        $insurances = $query->orderBy('gdv_number')->get();
 
         $total_fund = $listed()->sum('amount');
         $total_members = Insurance::trusted()->count();
@@ -131,11 +138,11 @@ class InsuranceController extends Controller
         $isTrusted = $insurance->isTrusted();
 
         $title = $isTrusted
-            ? "{$name} - Giao dịch viên xác thực | ".SeoHelper::BRAND
-            : "{$name} - Hồ sơ giao dịch viên | ".SeoHelper::BRAND;
+            ? "{$name} - {$insurance->memberTitle()} đã xác thực | ".SeoHelper::BRAND
+            : "{$name} - Hồ sơ giao dịch viên số {$insurance->gdv_number} | ".SeoHelper::BRAND;
 
-        $description = "Hồ sơ giao dịch viên {$name} trên ".SeoHelper::BRAND
-            .". Mã {$insurance->memberCode()} · Trạng thái: ".($isTrusted ? 'Đã xác thực' : $insurance->publicStatusLabel());
+        $description = "Hồ sơ giao dịch viên số {$insurance->gdv_number} {$name} trên ".SeoHelper::BRAND
+            .'. Trạng thái: '.($isTrusted ? 'Đã xác thực' : $insurance->publicStatusLabel());
         if ($insurance->verified_at) {
             $description .= ' · Xác thực từ '.$insurance->verified_at->format('d/m/Y');
         }

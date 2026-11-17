@@ -139,6 +139,15 @@
                   <span class="checkmarks"></span>
                 </label>
               </th>
+              <th>
+                <a
+                  href="{{ request()->fullUrlWithQuery(['sort' => request('sort') === 'number_asc' ? 'number_desc' : 'number_asc', 'page' => null]) }}"
+                  class="text-reset"
+                  data-sort-number
+                >
+                  Số GDV {{ request('sort') === 'number_asc' ? '↑' : '↓' }}
+                </a>
+              </th>
               <th>Thông tin user</th>
               <th>Số dư quỹ</th>
               <th>Ngày tham gia</th>
@@ -156,6 +165,7 @@
                     <span class="checkmarks"></span>
                   </label>
                 </td>
+                <td class="text-nowrap">{{ $insurance->memberCode() }}</td>
                 <td class="productimgname">
                   <a href="javascript:void(0);" class="product-img">
                     <img
@@ -221,7 +231,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="7" class="text-muted py-4 text-center">Chưa có thành viên bảo hiểm nào.</td>
+                <td colspan="8" class="text-muted py-4 text-center">Chưa có thành viên bảo hiểm nào.</td>
               </tr>
             @endforelse
           </tbody>
