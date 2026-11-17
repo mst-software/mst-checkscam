@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -150,6 +151,12 @@ class ReportController extends Controller
         $scamTypeLabel = $report->scam_type?->label();
         $description = $redact($report->description);
 
+        // Each secondary channel (Zalo number, Facebook/TikTok link) is masked on its own.
+        $maskedSocials = $this->socialChannels($report)
+            ->map(fn (string $channel): string => StringHelper::mask_id($channel, 'account'));
+        // A game nick or profile link: masked like a link or a name, never as digits.
+        $maskedSoldAccount = filled($report->sold_account) ? StringHelper::mask_id($report->sold_account, 'website') : null;
+
         $this->setReportSeo($report, $maskedTarget, $maskedName, $scamTypeLabel, $description, $reportsCount);
 
         return view('scammer.index', [
@@ -165,6 +172,8 @@ class ReportController extends Controller
             'relatedReports' => $relatedReports,
             'comments' => $comments,
             'evidenceImages' => $evidenceImages,
+            'maskedSocials' => $maskedSocials,
+            'maskedSoldAccount' => $maskedSoldAccount,
         ]);
     }
 
@@ -200,21 +209,49 @@ class ReportController extends Controller
     }
 
     /**
-     * Replace the raw target id and name inside free text with their masked forms.
+     * Secondary channels from `target_socials`, one entry per comma/semicolon/line separated value.
+     *
+     * @return SupportCollection<int, string>
+     */
+    private function socialChannels(Report $report): SupportCollection
+    {
+        return collect(preg_split('/[,;\n]+/', (string) $report->target_socials))
+            ->map(fn (string $channel): string => trim($channel))
+            ->filter()
+            ->values();
+    }
+
+    /**
+     * Replace the raw target id, secondary channels and name inside free text with their masked forms.
      */
     private function redactTarget(string $text, Report $report): string
     {
         $replacements = [];
-        $targetId = trim((string) $report->target_id);
+        $identifiers = $this->socialChannels($report)
+            ->map(fn (string $channel): array => [$channel, 'account'])
+            ->prepend([trim((string) $report->target_id), $report->type]);
 
-        if (mb_strlen($targetId) >= 4) {
-            $replacements[$targetId] = StringHelper::mask_id($targetId, $report->type);
+        foreach ($identifiers as [$raw, $type]) {
+            if (mb_strlen($raw) < 4) {
+                continue;
+            }
 
-            $digits = preg_replace('/\D/', '', $targetId);
-            if ($report->type !== 'website' && strlen($digits) >= 6) {
-                $replacements[$digits] = StringHelper::mask_id($digits, $report->type);
+            $replacements[$raw] = StringHelper::mask_id($raw, $type);
+
+            // A profile link is often quoted as the bare handle ("nguyen.van.a") in the story.
+            [$queryType, $handle] = StringHelper::detectQueryType($raw);
+            if ($queryType === 'facebook' && mb_strlen($handle) >= 4) {
+                $replacements[$handle] = StringHelper::mask_name($handle);
+            }
+
+            $digits = preg_replace('/\D/', '', $raw);
+            if ($type !== 'website' && strlen($digits) >= 6) {
+                $replacements[$digits] = StringHelper::mask_id($digits, $type);
             }
         }
+
+        // Longest first, so a short digit run never breaks up a longer raw value before it is masked.
+        uksort($replacements, fn ($a, $b): int => mb_strlen((string) $b) <=> mb_strlen((string) $a));
 
         foreach ($replacements as $raw => $masked) {
             $text = str_ireplace((string) $raw, $masked, $text);

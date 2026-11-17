@@ -1,13 +1,26 @@
-{{-- Amount and account details, masked. Expects: $report, $maskedTarget, $maskedName, $scamTypeLabel. --}}
+{{-- Amount and account details, masked. Expects: $report, $maskedTarget, $maskedName, $scamTypeLabel, $maskedSocials, $maskedSoldAccount. --}}
 @php
   $isWebsite = $report->type === 'website';
+  $isBack = $report->type === 'back';
   $rows = [
-    ['label' => $isWebsite ? 'Website / liên kết' : 'Số tài khoản / SĐT', 'value' => $maskedTarget, 'mono' => true],
-    ['label' => $isWebsite ? 'Tên hiển thị' : 'Chủ tài khoản', 'value' => $maskedName, 'mono' => false],
+    [
+      'label' => $isWebsite ? 'Website / liên kết' : ($isBack ? 'SĐT / Zalo / link người bán' : 'Số tài khoản / SĐT'),
+      'value' => $maskedTarget,
+      'mono' => true,
+    ],
+    ['label' => $isWebsite ? 'Tên hiển thị' : ($isBack ? 'Người bán' : 'Chủ tài khoản'), 'value' => $maskedName, 'mono' => false],
   ];
 
   if (! $isWebsite) {
     $rows[] = ['label' => 'Ngân hàng', 'value' => $report->target_bank ?: 'Chưa rõ', 'mono' => false];
+  }
+
+  if (($maskedSocials ?? collect())->isNotEmpty()) {
+    $rows[] = ['label' => 'Kênh liên hệ khác', 'value' => $maskedSocials->join(', '), 'mono' => true];
+  }
+
+  if (filled($maskedSoldAccount ?? null)) {
+    $rows[] = ['label' => 'Tài khoản đã mua', 'value' => $maskedSoldAccount, 'mono' => false];
   }
 
   $rows[] = ['label' => 'Hình thức lừa đảo', 'value' => $scamTypeLabel ?? 'Chưa phân loại', 'mono' => false];
