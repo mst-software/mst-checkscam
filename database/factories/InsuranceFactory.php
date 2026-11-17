@@ -111,6 +111,8 @@ class InsuranceFactory extends Factory
         ];
 
         return [
+            // Set here too because seeders run WithoutModelEvents, which skips the model's creating hook.
+            'gdv_number' => fn () => Insurance::claimNextGdvNumber(),
             'full_name' => $fullName,
             'avatar' => $this->faker->randomElement($avatarUrls),
             'amount' => $this->faker->randomElement([5000000, 10000000, 15000000, 20000000, 50000000, 100000000, 200000000, 500000000]),

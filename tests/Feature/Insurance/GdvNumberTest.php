@@ -96,7 +96,9 @@ test('admins see the number read-only and cannot change it', function () {
 
     $this->actingAs($admin)->get(route('admin.insurances.edit', $partner))
         ->assertOk()
-        ->assertSee('value="Giao dịch viên số 7" readonly disabled', false);
+        ->assertSee('Số thứ tự GDV')
+        ->assertSee('value="Giao dịch viên số 7"', false)
+        ->assertDontSee('name="gdv_number"', false);
 
     $this->actingAs($admin)->get(route('admin.insurances.show', $partner))
         ->assertOk()
