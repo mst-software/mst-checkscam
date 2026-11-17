@@ -12,15 +12,6 @@
   >
     <x-ucs.container class="pt-10 pb-12 text-center md:pt-14 md:pb-16">
       <div class="mx-auto max-w-5xl">
-        <div>
-          <span
-            class="border-line bg-surface text-ink-muted inline-flex items-center gap-2 rounded-full border py-1.5 pr-4 pl-3 text-[13px] font-semibold shadow-xs"
-          >
-            <span class="bg-success ring-success/15 size-2 shrink-0 rounded-full ring-4" aria-hidden="true"></span>
-            Dữ liệu cộng đồng, được kiểm duyệt
-          </span>
-        </div>
-
         <h1
           id="hero-title"
           class="scanner-title text-ink mt-1 text-[clamp(1.1rem,5.2vw,2.75rem)] leading-[1.15] font-black tracking-[-0.02em] whitespace-nowrap uppercase md:mt-2"
